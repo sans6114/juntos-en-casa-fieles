@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  juntos-db:
+    image: postgres:15.3
+    container_name: juntos-db
+    restart: always
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_USER=juntos
+      - POSTGRES_PASSWORD=juntos
+    volumes:
+      - ./juntos-db:/var/lib/postgresql/data
