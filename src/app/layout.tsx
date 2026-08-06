@@ -14,8 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Juntos en Casa · Admin",
-  description: "Portal administrativo de Juntos en Casa",
+  title: {
+    default: "Juntos En Casa",
+    template: "%s · Juntos En Casa",
+  },
+  description:
+    "Conferencia de adolescentes y jóvenes · Iglesia Vida Sobrenatural",
 };
 
 export default function RootLayout({

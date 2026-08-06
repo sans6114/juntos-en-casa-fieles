@@ -1,6 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 .docker-compose.yml
-.env
+
 # dependencies
 /node_modules
 /.pnp
@@ -31,9 +31,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files (opt-in example template)
 .env*
-
+!.env.example
 
 # vercel
 .vercel

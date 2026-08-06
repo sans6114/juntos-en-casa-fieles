@@ -1,5 +1,5 @@
-// page of the external app
+import { HeroPrototype } from "./ui/HeroPrototype";
 
 export default function ExternalPage() {
-  return <div>External Page</div>;
+  return <HeroPrototype />;
 }
