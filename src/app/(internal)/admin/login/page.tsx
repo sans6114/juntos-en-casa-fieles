@@ -29,7 +29,7 @@ export default function AdminLoginPage() {
     startTransition(async () => {
       const response = await loginAdmin(email, password)
       if (response.ok) {
-        router.push("/admin/inscripciones")
+        router.push("/admin")
         router.refresh()
       } else {
         setError(response.message || "Credenciales incorrectas.")

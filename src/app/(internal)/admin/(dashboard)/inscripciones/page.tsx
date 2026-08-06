@@ -9,11 +9,12 @@ import {
   historialInscripciones,
 } from "@/lib/mock-data/inscripciones"
 import { obtenerInscripciones } from "@/actions"
+import { requireAdmin } from "@/lib/auth-guards"
 
 export default async function InscripcionesGeneralPage() {
+  await requireAdmin()
   const data = await obtenerInscripciones()
-  // Adaptamos el helper para usar data real en las métricas, manteniendo el historial como mock para demostración
-  const metrics = getInscripcionesMetrics(data as any)
+  const metrics = getInscripcionesMetrics(data)
 
   return (
     <>

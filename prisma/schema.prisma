@@ -7,6 +7,23 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  ADMIN
+  COLABORADOR
+}
+
+model User {
+  id        String     @id @default(cuid())
+  nombre    String
+  email     String     @unique
+  password  String
+  rol       Role       @default(COLABORADOR)
+  activo    Boolean    @default(true)
+  contactos Contacto[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
 model Congregacion {
   id            String        @id @default(cuid())
   nombre        String
@@ -19,11 +36,28 @@ model Inscripcion {
   id             String        @id @default(cuid())
   nombre         String
   email          String
+  telefono       String?
   edad           Int
   congregacionId String?
   congregacion   Congregacion? @relation(fields: [congregacionId], references: [id])
+  contacto       Contacto?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
   @@index([congregacionId])
+}
+
+model Contacto {
+  id            String      @id @default(cuid())
+  inscripcionId String      @unique
+  inscripcion   Inscripcion @relation(fields: [inscripcionId], references: [id], onDelete: Cascade)
+  usuarioId     String
+  usuario       User        @relation(fields: [usuarioId], references: [id])
+  contactado    Boolean     @default(false)
+  observacion   String?
+  contactadoAt  DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([usuarioId])
 }
