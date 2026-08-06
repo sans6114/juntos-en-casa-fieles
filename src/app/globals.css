@@ -128,3 +128,20 @@
     @apply font-sans;
   }
 }
+
+/* Tokens landing pública — La Casa Encendida (no pisa el tema admin) */
+.jec-landing {
+  --jec-ink: #0b0a0f;
+  --jec-ash: #1c1814;
+  --jec-ember: #ff3b1f;
+  --jec-amber: #ffb347;
+  --jec-smoke: #a89f96;
+  --jec-bone: #f4efe8;
+  background-color: var(--jec-ink);
+  color: var(--jec-bone);
+  font-family: var(--font-jec-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+.jec-landing .jec-display {
+  font-family: var(--font-jec-display), ui-sans-serif, system-ui, sans-serif;
+}
