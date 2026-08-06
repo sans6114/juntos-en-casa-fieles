@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo } from "react"
 import {
   Bar,
   BarChart,
@@ -17,12 +18,15 @@ type CongregationsChartProps = {
 }
 
 export function CongregationsChart({ data, sinCongregacion }: CongregationsChartProps) {
-  const chartData = [
-    ...data.map((item) => ({ congregacion: item.nombre, cantidad: item.total })),
-    ...(sinCongregacion > 0
-      ? [{ congregacion: "Sin congregación", cantidad: sinCongregacion }]
-      : []),
-  ]
+  const chartData = useMemo(() => {
+    return [
+      ...data.map((item) => ({ congregacion: item.nombre, cantidad: item.total })),
+      ...(sinCongregacion > 0
+        ? [{ congregacion: "Sin congregación", cantidad: sinCongregacion }]
+        : []),
+    ]
+  }, [data, sinCongregacion])
+
 
   return (
     <Card className="shadow-sm">

@@ -29,6 +29,18 @@ npm run dev
 
 La app corre en [http://localhost:3000](http://localhost:3000). El panel de admin está en `/admin`.
 
+## Variables de entorno
+
+Es necesario configurar un archivo `.env` en la raíz del proyecto (basado en el archivo `.env.example`). Las variables requeridas son:
+
+| Variable | Descripción | Valor local / por defecto |
+|---|---|---|
+| `DATABASE_URL` | URL de conexión a la base de datos PostgreSQL |
+| `ADMIN_EMAIL` | Correo electrónico del administrador del panel |
+| `ADMIN_PASSWORD` | Contraseña del administrador del panel |
+| `SESSION_SECRET` | Clave utilizada para firmar criptográficamente la cookie del admin (genera automaticamente un hash no escribir nada en el caso de no tener una) 
+
+
 ## Scripts útiles
 
 | Comando | Descripción |

@@ -7,11 +7,13 @@ import { StatCard } from "@/components/admin/stat-card"
 import {
   getInscripcionesMetrics,
   historialInscripciones,
-  inscripciones,
 } from "@/lib/mock-data/inscripciones"
+import { obtenerInscripciones } from "@/actions"
 
-export default function InscripcionesGeneralPage() {
-  const metrics = getInscripcionesMetrics(inscripciones)
+export default async function InscripcionesGeneralPage() {
+  const data = await obtenerInscripciones()
+  // Adaptamos el helper para usar data real en las métricas, manteniendo el historial como mock para demostración
+  const metrics = getInscripcionesMetrics(data as any)
 
   return (
     <>

@@ -7,9 +7,11 @@ export default function AdminDashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const adminEmail = process.env.ADMIN_EMAIL
+
   return (
     <SidebarProvider>
-      <AdminSidebar />
+      <AdminSidebar adminEmail={adminEmail} />
       <SidebarInset>
         <header className="flex h-14 items-center gap-2 border-b px-4 md:hidden">
           <SidebarTrigger />

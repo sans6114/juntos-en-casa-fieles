@@ -1,8 +1,10 @@
 import { AdminHeader } from "@/components/admin/admin-sidebar"
 import { InscripcionesTable } from "@/components/admin/inscripciones-table"
-import { inscripciones } from "@/lib/mock-data/inscripciones"
+import { obtenerInscripciones } from "@/actions"
 
-export default function InscripcionesGrillaPage() {
+export default async function InscripcionesGrillaPage() {
+  const inscripciones = await obtenerInscripciones()
+
   return (
     <>
       <AdminHeader

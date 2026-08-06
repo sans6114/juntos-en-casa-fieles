@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { logoutAdmin } from "@/actions"
 import {
   ClipboardList,
   LayoutDashboard,
@@ -43,7 +44,7 @@ const inscripcionesItems = [
   },
 ]
 
-export function AdminSidebar() {
+export function AdminSidebar({ adminEmail }: { adminEmail?: string }) {
   const pathname = usePathname()
   const { isMobile, setOpenMobile } = useSidebar()
   const isInscripcionesSection = pathname.startsWith("/admin/inscripciones")
@@ -136,19 +137,23 @@ export function AdminSidebar() {
               </Avatar>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">Admin Demo</p>
-                <p className="truncate text-xs text-muted-foreground">admin@juntosencasa.org</p>
+                <p className="truncate text-xs text-muted-foreground">{adminEmail || "admin26@juntosencasa.com"}</p>
               </div>
             </div>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Cerrar sesión"
-              render={<Link href="/admin/login" onClick={closeSidebar} />}
+              onClick={async () => {
+                await logoutAdmin()
+                closeSidebar()
+              }}
             >
               <LogOut />
               <span>Cerrar sesión</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
+
         </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
