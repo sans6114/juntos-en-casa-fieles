@@ -7,11 +7,14 @@ import { StatCard } from "@/components/admin/stat-card"
 import {
   getInscripcionesMetrics,
   historialInscripciones,
-  inscripciones,
 } from "@/lib/mock-data/inscripciones"
+import { obtenerInscripciones } from "@/actions"
+import { requireAdmin } from "@/lib/auth-guards"
 
-export default function InscripcionesGeneralPage() {
-  const metrics = getInscripcionesMetrics(inscripciones)
+export default async function InscripcionesGeneralPage() {
+  await requireAdmin()
+  const data = await obtenerInscripciones()
+  const metrics = getInscripcionesMetrics(data)
 
   return (
     <>

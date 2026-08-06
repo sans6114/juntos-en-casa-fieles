@@ -2,10 +2,12 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { logoutAdmin } from "@/actions"
 import {
   ClipboardList,
   LayoutDashboard,
   LogOut,
+  MessageCircle,
   Table2,
   Users,
   X,
@@ -35,39 +37,71 @@ const inscripcionesItems = [
     title: "Vista general",
     href: "/admin/inscripciones",
     icon: LayoutDashboard,
+    adminOnly: true,
   },
   {
     title: "Grilla",
     href: "/admin/inscripciones/grilla",
     icon: Table2,
+    adminOnly: false,
   },
 ]
 
-export function AdminSidebar() {
+type AdminSidebarProps = {
+  user: {
+    nombre: string
+    email: string
+    rol: "ADMIN" | "COLABORADOR"
+  }
+}
+
+export function AdminSidebar({ user }: AdminSidebarProps) {
   const pathname = usePathname()
   const { isMobile, setOpenMobile } = useSidebar()
+  const isAdmin = user.rol === "ADMIN"
   const isInscripcionesSection = pathname.startsWith("/admin/inscripciones")
+  const initials = user.nombre
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase()
 
   const closeSidebar = () => {
     if (isMobile) setOpenMobile(false)
   }
 
+  const visibleInscripciones = inscripcionesItems.filter(
+    (item) => isAdmin || !item.adminOnly
+  )
+
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="print:hidden">
       <SidebarHeader>
         <div className="flex items-start gap-1">
           <SidebarMenu className="min-w-0 flex-1">
             <SidebarMenuItem>
               <SidebarMenuButton
                 size="lg"
-                render={<Link href="/admin/inscripciones" onClick={closeSidebar} />}
+                render={
+                  <Link
+                    href={
+                      isAdmin
+                        ? "/admin/inscripciones"
+                        : "/admin/inscripciones/grilla"
+                    }
+                    onClick={closeSidebar}
+                  />
+                }
               >
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <ClipboardList className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">Juntos en Casa</span>
-                  <span className="truncate text-xs text-muted-foreground">Portal Admin</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    Portal Admin
+                  </span>
                 </div>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -98,7 +132,7 @@ export function AdminSidebar() {
                   <span>Inscripciones</span>
                 </SidebarMenuButton>
                 <SidebarMenuSub>
-                  {inscripcionesItems.map((item) => (
+                  {visibleInscripciones.map((item) => (
                     <SidebarMenuSubItem key={item.href}>
                       <SidebarMenuSubButton
                         isActive={pathname === item.href}
@@ -112,16 +146,34 @@ export function AdminSidebar() {
                 </SidebarMenuSub>
               </SidebarMenuItem>
 
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={pathname.startsWith("/admin/usuarios")}
-                  tooltip="Usuarios"
-                  render={<Link href="/admin/usuarios" onClick={closeSidebar} />}
-                >
-                  <Users />
-                  <span>Usuarios</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {isAdmin ? (
+                <>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={pathname.startsWith("/admin/contacto")}
+                      tooltip="Contacto"
+                      render={
+                        <Link href="/admin/contacto" onClick={closeSidebar} />
+                      }
+                    >
+                      <MessageCircle />
+                      <span>Contacto</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={pathname.startsWith("/admin/usuarios")}
+                      tooltip="Usuarios"
+                      render={
+                        <Link href="/admin/usuarios" onClick={closeSidebar} />
+                      }
+                    >
+                      <Users />
+                      <span>Usuarios</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </>
+              ) : null}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -132,18 +184,23 @@ export function AdminSidebar() {
           <SidebarMenuItem>
             <div className="flex items-center gap-3 rounded-lg border bg-background p-2 group-data-[collapsible=icon]:hidden">
               <Avatar className="size-8">
-                <AvatarFallback>AD</AvatarFallback>
+                <AvatarFallback>{initials || "AD"}</AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">Admin Demo</p>
-                <p className="truncate text-xs text-muted-foreground">admin@juntosencasa.org</p>
+                <p className="truncate text-sm font-medium">{user.nombre}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {user.email}
+                </p>
               </div>
             </div>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Cerrar sesión"
-              render={<Link href="/admin/login" onClick={closeSidebar} />}
+              onClick={async () => {
+                await logoutAdmin()
+                closeSidebar()
+              }}
             >
               <LogOut />
               <span>Cerrar sesión</span>
@@ -156,11 +213,19 @@ export function AdminSidebar() {
   )
 }
 
-export function AdminHeader({ title, description }: { title: string; description?: string }) {
+export function AdminHeader({
+  title,
+  description,
+}: {
+  title: string
+  description?: string
+}) {
   return (
-    <div className="flex flex-col gap-1 border-b bg-background px-6 py-5">
+    <div className="flex flex-col gap-1 border-b bg-background px-6 py-5 print:hidden">
       <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-      {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+      {description ? (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      ) : null}
     </div>
   )
 }

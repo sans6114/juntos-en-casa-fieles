@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo } from "react"
 import {
   Bar,
   BarChart,
@@ -23,10 +24,13 @@ const labels: Record<AgeRangeKey, string> = {
 }
 
 export function AgeRangesChart({ data }: AgeRangesChartProps) {
-  const chartData = (Object.keys(data) as AgeRangeKey[]).map((key) => ({
-    rango: labels[key],
-    cantidad: data[key],
-  }))
+  const chartData = useMemo(() => {
+    return (Object.keys(data) as AgeRangeKey[]).map((key) => ({
+      rango: labels[key],
+      cantidad: data[key],
+    }))
+  }, [data])
+
 
   return (
     <Card className="shadow-sm">

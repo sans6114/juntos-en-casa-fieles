@@ -129,6 +129,12 @@
   }
 }
 
+@media print {
+  body {
+    background: #fff;
+  }
+}
+
 /* Tokens landing pública — La Casa Encendida (no pisa el tema admin) */
 .jec-landing {
   --jec-ink: #0b0a0f;
