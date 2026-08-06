@@ -12,6 +12,7 @@ export async function crearInscripcion(data: CrearInscripcionDTO) {
       data: {
         nombre: validData.nombre,
         email: validData.email,
+        telefono: validData.telefono,
         edad: validData.edad,
         congregacionId: validData.congregacionId || null,
       },

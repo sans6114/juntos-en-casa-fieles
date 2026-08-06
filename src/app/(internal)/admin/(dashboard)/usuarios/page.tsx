@@ -1,8 +1,12 @@
 import { AdminHeader } from "@/components/admin/admin-sidebar"
 import { UsuariosPanel } from "@/components/admin/usuarios-panel"
-import { usuarios } from "@/lib/mock-data/usuarios"
+import { obtenerUsuarios } from "@/actions"
+import { requireAdmin } from "@/lib/auth-guards"
 
-export default function UsuariosPage() {
+export default async function UsuariosPage() {
+  await requireAdmin()
+  const usuarios = await obtenerUsuarios()
+
   return (
     <>
       <AdminHeader

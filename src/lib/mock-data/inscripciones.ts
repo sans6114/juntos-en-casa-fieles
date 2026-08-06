@@ -4,10 +4,13 @@ export type Inscripcion = {
   id: string
   nombre: string
   email: string
+  telefono?: string | null
   edad: number
   congregacionId: string | null
   congregacionNombre: string | null
   createdAt: string
+  contactado?: boolean
+  contactoUsuarioNombre?: string | null
 }
 
 export const inscripcionesEventoAnterior = 48 as number
