@@ -1,4 +1,4 @@
-import NextAuth from "next-auth"
+import NextAuth, { CredentialsSignin } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
@@ -9,6 +9,10 @@ const credentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 })
+
+class AccountDisabledError extends CredentialsSignin {
+  code = "account_disabled"
+}
 
 export type SessionUser = {
   id: string
@@ -33,10 +37,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { email: parsed.data.email },
         })
 
-        if (!user || !user.activo) return null
+        if (!user) return null
 
         const valid = await bcrypt.compare(parsed.data.password, user.password)
         if (!valid) return null
+
+        if (!user.activo) throw new AccountDisabledError()
 
         return {
           id: user.id,

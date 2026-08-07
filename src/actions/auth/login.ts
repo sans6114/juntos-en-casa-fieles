@@ -13,9 +13,19 @@ export async function loginAdmin(email: string, password: string) {
     return { ok: true as const }
   } catch (error) {
     if (error instanceof AuthError) {
-      return { ok: false as const, message: "Credenciales incorrectas." }
+      const code = (error as { code?: string }).code
+      if (error.type === "CredentialsSignin" && code === "account_disabled") {
+        return {
+          ok: false as const,
+          message: "Tu cuenta está desactivada. Contactá al administrador.",
+        }
+      }
+      return { ok: false as const, message: "Email o contraseña incorrectos." }
     }
     console.error("Error en loginAdmin:", error)
-    return { ok: false as const, message: "Ocurrió un error en el servidor." }
+    return {
+      ok: false as const,
+      message: "Ocurrió un error en el servidor. Intentá de nuevo.",
+    }
   }
 }

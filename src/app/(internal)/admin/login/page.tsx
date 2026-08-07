@@ -4,6 +4,7 @@ import { useState, useTransition } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { KeyRound, Loader2, Mail, Eye, EyeOff } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -16,25 +17,24 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
 
     if (!email || !password) {
-      setError("Por favor completa todos los campos.")
+      toast.error("Completá todos los campos.")
       return
     }
 
     startTransition(async () => {
       const response = await loginAdmin(email, password)
       if (response.ok) {
+        toast.success("Bienvenido/a.")
         router.push("/admin")
         router.refresh()
       } else {
-        setError(response.message || "Credenciales incorrectas.")
+        toast.error(response.message ?? "Email o contraseña incorrectos.")
       }
     })
   }
@@ -67,12 +67,6 @@ export default function AdminLoginPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="animate-in fade-in-50 slide-in-from-top-1 rounded-lg border border-neutral-200 border-l-4 border-l-[var(--jec-admin-accent)] bg-neutral-50 p-3 text-sm font-medium text-neutral-900 duration-200">
-                  {error}
-                </div>
-              )}
-
               <div className="space-y-2">
                 <Label htmlFor="email">Correo electrónico</Label>
                 <div className="relative">
