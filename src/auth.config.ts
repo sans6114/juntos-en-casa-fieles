@@ -52,7 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/admin/login",
   },
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.data = {
           id: user.id,
@@ -60,7 +60,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           nombre: (user as SessionUser).nombre,
           rol: (user as SessionUser).rol,
         } satisfies SessionUser
+        return token
       }
+
+      const data = token.data as SessionUser | undefined
+      if (!data?.id) return token
+
+      const dbUser = await prisma.user.findUnique({
+        where: { id: data.id },
+        select: { id: true, email: true, nombre: true, rol: true, activo: true },
+      })
+
+      if (!dbUser || !dbUser.activo) {
+        delete token.data
+        return token
+      }
+
+      token.data = {
+        id: dbUser.id,
+        email: dbUser.email,
+        nombre: dbUser.nombre,
+        rol: dbUser.rol,
+      } satisfies SessionUser
+
       return token
     },
     session({ session, token }) {

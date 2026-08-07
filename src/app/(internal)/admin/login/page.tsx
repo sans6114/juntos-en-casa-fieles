@@ -1,13 +1,15 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { ClipboardList, KeyRound, Loader2, Mail, Eye, EyeOff } from "lucide-react"
+import { KeyRound, Loader2, Mail, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { loginAdmin } from "@/actions"
+import { jecAssets } from "@/lib/jec-assets"
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -38,27 +40,35 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-12 dark:bg-muted/10">
-      <div className="w-full max-w-md space-y-6">
-        <div className="flex flex-col items-center space-y-2 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
-            <ClipboardList className="h-6 w-6" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight">Juntos en Casa</h1>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white px-4 py-12">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(220,38,38,0.08),_transparent_55%)]"
+      />
+      <div className="relative w-full max-w-md space-y-6">
+        <div className="flex flex-col items-center space-y-3 text-center">
+          <Image
+            src={jecAssets.logos.jecBlackPng}
+            alt="Juntos en Casa"
+            width={180}
+            height={64}
+            className="h-14 w-auto object-contain"
+            priority
+          />
           <p className="text-sm text-muted-foreground">Portal de Administración</p>
         </div>
 
-        <Card className="border-border/50 shadow-lg">
+        <Card className="border-neutral-200 shadow-lg shadow-black/5">
           <CardHeader className="space-y-1">
             <CardTitle className="text-xl">Iniciar sesión</CardTitle>
             <CardDescription>
-              Ingresa tus credenciales para acceder al panel administrativo
+              Ingresá tus credenciales para acceder al panel administrativo
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="rounded-lg bg-destructive/15 p-3 text-sm text-destructive font-medium border border-destructive/20 animate-in fade-in-50 slide-in-from-top-1 duration-200">
+                <div className="animate-in fade-in-50 slide-in-from-top-1 rounded-lg border border-neutral-200 border-l-4 border-l-[var(--jec-admin-accent)] bg-neutral-50 p-3 text-sm font-medium text-neutral-900 duration-200">
                   {error}
                 </div>
               )}
@@ -66,7 +76,7 @@ export default function AdminLoginPage() {
               <div className="space-y-2">
                 <Label htmlFor="email">Correo electrónico</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
@@ -85,7 +95,7 @@ export default function AdminLoginPage() {
                   <Label htmlFor="password">Contraseña</Label>
                 </div>
                 <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <KeyRound className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -99,7 +109,7 @@ export default function AdminLoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                    className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
                     disabled={isPending}
                     tabIndex={-1}
                   >
@@ -112,7 +122,11 @@ export default function AdminLoginPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full relative overflow-hidden group/btn" disabled={isPending}>
+              <Button
+                type="submit"
+                className="group/btn relative w-full overflow-hidden bg-black text-white hover:bg-neutral-900"
+                disabled={isPending}
+              >
                 {isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

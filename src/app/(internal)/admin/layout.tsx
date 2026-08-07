@@ -23,7 +23,7 @@ export default function AdminLayout({
 }) {
   return (
     <div
-      className={`${inter.className} ${inter.variable} min-h-full text-base leading-normal antialiased`}
+      className={`admin-shell ${inter.className} ${inter.variable} min-h-full text-base leading-normal antialiased`}
     >
       {children}
     </div>

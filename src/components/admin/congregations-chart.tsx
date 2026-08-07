@@ -27,39 +27,50 @@ export function CongregationsChart({ data, sinCongregacion }: CongregationsChart
     ]
   }, [data, sinCongregacion])
 
-
   return (
     <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>Inscriptos por congregación</CardTitle>
-        <CardDescription>Cantidad de personas registradas por sede</CardDescription>
+        <CardDescription>Distribución de personas registradas por sede</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-[280px] w-full">
+        <div className="h-[320px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               layout="vertical"
               data={chartData}
-              margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
+              margin={{ top: 8, right: 16, left: 8, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-              <XAxis type="number" allowDecimals={false} tickLine={false} axisLine={false} />
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
+              <XAxis
+                type="number"
+                allowDecimals={false}
+                tickLine={false}
+                axisLine={false}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+              />
               <YAxis
                 type="category"
                 dataKey="congregacion"
-                width={110}
+                width={150}
                 tickLine={false}
                 axisLine={false}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
               />
               <Tooltip
-                cursor={{ fill: "hsl(var(--muted))" }}
+                cursor={{ fill: "color-mix(in oklab, var(--jec-admin-accent) 12%, transparent)" }}
                 contentStyle={{
                   borderRadius: "8px",
-                  border: "1px solid hsl(var(--border))",
-                  background: "hsl(var(--background))",
+                  border: "1px solid var(--border)",
+                  background: "var(--background)",
+                  color: "var(--foreground)",
                 }}
               />
-              <Bar dataKey="cantidad" fill="hsl(var(--chart-1))" radius={[0, 6, 6, 0]} />
+              <Bar
+                dataKey="cantidad"
+                fill="var(--jec-admin-accent)"
+                radius={[0, 6, 6, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
