@@ -1,5 +1,6 @@
 import NextAuth, { CredentialsSignin } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
+import Google from "next-auth/providers/google"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
@@ -52,20 +53,52 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       },
     }),
+    Google({ allowDangerousEmailAccountLinking: false }),
   ],
   session: { strategy: "jwt" },
   pages: {
     signIn: "/admin/login",
+    error: "/admin/login",
   },
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        if (!user.email) return false
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          select: { activo: true },
+        })
+        return Boolean(dbUser?.activo)
+      }
+      return true
+    },
     async jwt({ token, user }) {
       if (user) {
-        token.data = {
-          id: user.id,
-          email: user.email,
-          nombre: (user as SessionUser).nombre,
-          rol: (user as SessionUser).rol,
-        } satisfies SessionUser
+        const candidate = user as Partial<SessionUser>
+        if (candidate.id && candidate.rol) {
+          token.data = {
+            id: candidate.id,
+            email: user.email as string,
+            nombre: candidate.nombre as string,
+            rol: candidate.rol,
+          } satisfies SessionUser
+          return token
+        }
+
+        if (user.email) {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: user.email },
+            select: { id: true, email: true, nombre: true, rol: true, activo: true },
+          })
+          if (dbUser && dbUser.activo) {
+            token.data = {
+              id: dbUser.id,
+              email: dbUser.email,
+              nombre: dbUser.nombre,
+              rol: dbUser.rol,
+            } satisfies SessionUser
+          }
+        }
         return token
       }
 
