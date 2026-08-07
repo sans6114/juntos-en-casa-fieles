@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { KeyRound, Loader2, Mail, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
@@ -87,6 +88,12 @@ export default function AdminLoginPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Contraseña</Label>
+                  <Link
+                    href="/admin/forgot-password"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </Link>
                 </div>
                 <div className="relative">
                   <KeyRound className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

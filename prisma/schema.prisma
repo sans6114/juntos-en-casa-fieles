@@ -13,15 +13,28 @@ enum Role {
 }
 
 model User {
-  id        String     @id @default(cuid())
-  nombre    String
-  email     String     @unique
-  password  String
-  rol       Role       @default(COLABORADOR)
-  activo    Boolean    @default(true)
-  contactos Contacto[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id                  String               @id @default(cuid())
+  nombre              String
+  email               String               @unique
+  password            String
+  rol                 Role                 @default(COLABORADOR)
+  activo              Boolean              @default(true)
+  contactos           Contacto[]
+  passwordResetTokens PasswordResetToken[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 model Congregacion {
