@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { siteConfig } from "@/lib/seo/site";
 
 type TimeLeft = {
@@ -30,19 +30,29 @@ function pad(value: number) {
   return String(value).padStart(2, "0");
 }
 
+function timeLeftKey(targetMs: number) {
+  const { days, hours, minutes, seconds } = getTimeLeft(targetMs);
+  return `${days}:${hours}:${minutes}:${seconds}`;
+}
+
+function parseTimeLeftKey(key: string): TimeLeft {
+  const [days, hours, minutes, seconds] = key.split(":").map(Number);
+  return { days, hours, minutes, seconds };
+}
+
+function subscribe(onStoreChange: () => void) {
+  const id = window.setInterval(onStoreChange, 1000);
+  return () => window.clearInterval(id);
+}
+
 export function HeroCountdown() {
   const targetMs = new Date(siteConfig.eventStartsAt).getTime();
-  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
-
-  useEffect(() => {
-    setTimeLeft(getTimeLeft(targetMs));
-    const id = window.setInterval(() => {
-      setTimeLeft(getTimeLeft(targetMs));
-    }, 1000);
-    return () => window.clearInterval(id);
-  }, [targetMs]);
-
-  const units = timeLeft ?? { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  const snapshot = useSyncExternalStore(
+    subscribe,
+    () => timeLeftKey(targetMs),
+    () => "0:0:0:0"
+  );
+  const units = parseTimeLeftKey(snapshot);
 
   return (
     <div

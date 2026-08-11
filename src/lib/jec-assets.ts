@@ -6,6 +6,7 @@ export const jecAssets = {
     hero: "/jec/background/fondo1.webp",
     secondary: "/jec/background/fondo2.webp",
     tertiary: "/jec/background/fondo3.webp",
+    pisada: "/jec/background/background-pisada.png",
   },
   logos: {
     jecWhiteSvg: "/jec/logos/logoblanco.svg",
@@ -27,5 +28,8 @@ export const jecAssets = {
     orando: "/jec/personaje/fuegoorando.svg",
     festejando: "/jec/personaje/fuegofestejando.png",
     apuntando: "/jec/personaje/fuegoapuntandoizq.png",
+  },
+  hero: {
+    finale: "/jec/hero/hero.png",
   },
 } as const;

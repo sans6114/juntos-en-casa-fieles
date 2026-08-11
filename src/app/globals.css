@@ -138,18 +138,33 @@
 /* Tokens landing pública — La Casa Encendida (no pisa el tema admin) */
 .jec-landing {
   --jec-ink: #0b0a0f;
+  --jec-ink-soft: #15121a;
   --jec-ash: #1c1814;
-  --jec-ember: #ff3b1f;
-  --jec-amber: #ffb347;
+  --jec-ember: #ff5a00;
+  --jec-amber: #c0f700;
   --jec-smoke: #a89f96;
   --jec-bone: #f4efe8;
   background-color: var(--jec-ink);
   color: var(--jec-bone);
-  font-family: var(--font-jec-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-helvetica-neue), ui-sans-serif, system-ui,
+    sans-serif;
 }
 
+/* Titular de impacto (hero): stencil, uso puntual y grande */
 .jec-landing .jec-display {
-  font-family: var(--font-jec-display), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-cayento), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Etiquetas/UI: nav, CTA, eyebrows, títulos de tarjeta, labels de día/hora */
+.jec-landing .jec-label {
+  font-family: var(--font-helvetica-neue), ui-sans-serif, system-ui,
+    sans-serif;
+}
+
+/* Cinta/ticker: sans condensada bold, estilo cinta de señalización */
+.jec-landing .jec-mono {
+  font-family: var(--font-helvetica-neue-condensed), ui-sans-serif, system-ui,
+    sans-serif;
 }
 
 /* Tokens portal admin — blanco / negro + rojo (aislados del sitio público) */

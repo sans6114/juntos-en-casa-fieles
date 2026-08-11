@@ -1,0 +1,1 @@
+export { Ubicacion } from "./Ubicacion"

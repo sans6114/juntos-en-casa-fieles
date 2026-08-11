@@ -16,8 +16,8 @@ export const siteConfig = {
   city: "La Plata, Buenos Aires",
   ogImage: jecAssets.background.hero,
   twitterHandle: undefined as string | undefined,
-  /** Inicio del evento (placeholder 2026; ajustar cuando confirmen fechas). */
-  eventStartsAt: "2026-09-25T19:30:00-03:00",
+  /** Inicio del evento: primer día de 3 (18, 19 y 20 de septiembre 2026). */
+  eventStartsAt: "2026-09-18T19:00:00-03:00",
 } as const;
 
 type PageMetadataInput = {

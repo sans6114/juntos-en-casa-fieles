@@ -1,5 +1,16 @@
-import { HeroPrototype } from "./ui/HeroPrototype";
+import { Hero } from '@/components/external/hero';
 
 export default function ExternalPage() {
-  return <HeroPrototype />;
+  return (
+    <>
+      <Hero />
+      {/*
+      <TickerTape />
+      <Cronograma />
+      <Invitados />
+      <Ubicacion />
+      */}
+ 
+    </>
+  )
 }
