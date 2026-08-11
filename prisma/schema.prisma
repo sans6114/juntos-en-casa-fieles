@@ -19,6 +19,7 @@ model User {
   password            String
   rol                 Role                 @default(COLABORADOR)
   activo              Boolean              @default(true)
+  passwordChangedAt   DateTime             @default(now())
   contactos           Contacto[]
   passwordResetTokens PasswordResetToken[]
   createdAt           DateTime             @default(now())

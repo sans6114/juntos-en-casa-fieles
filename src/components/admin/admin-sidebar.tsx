@@ -34,19 +34,24 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  ADMIN_PATHS,
+  defaultHomeForRole,
+  isAdminRole,
+} from "@/lib/admin-access"
 import { jecAssets } from "@/lib/jec-assets"
 import { cn } from "@/lib/utils"
 
 const inscripcionesItems = [
   {
     title: "Vista general",
-    href: "/admin/inscripciones",
+    href: ADMIN_PATHS.adminHome,
     icon: LayoutDashboard,
     adminOnly: true,
   },
   {
     title: "Grilla",
-    href: "/admin/inscripciones/grilla",
+    href: ADMIN_PATHS.colaboradorHome,
     icon: Table2,
     adminOnly: false,
   },
@@ -61,7 +66,7 @@ type AdminSidebarProps = {
 }
 
 function RoleBadge({ rol }: { rol: "ADMIN" | "COLABORADOR" }) {
-  const isAdmin = rol === "ADMIN"
+  const isAdmin = isAdminRole(rol)
   return (
     <Badge
       variant="secondary"
@@ -80,7 +85,7 @@ function RoleBadge({ rol }: { rol: "ADMIN" | "COLABORADOR" }) {
 export function AdminSidebar({ user }: AdminSidebarProps) {
   const pathname = usePathname()
   const { isMobile, setOpenMobile } = useSidebar()
-  const isAdmin = user.rol === "ADMIN"
+  const isAdmin = isAdminRole(user.rol)
   const isInscripcionesSection = pathname.startsWith("/admin/inscripciones")
   const initials = user.nombre
     .split(" ")
@@ -107,11 +112,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 size="lg"
                 render={
                   <Link
-                    href={
-                      isAdmin
-                        ? "/admin/inscripciones"
-                        : "/admin/inscripciones/grilla"
-                    }
+                    href={defaultHomeForRole(user.rol)}
                     onClick={closeSidebar}
                   />
                 }
@@ -198,10 +199,10 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    isActive={pathname.startsWith("/admin/contacto")}
+                    isActive={pathname.startsWith(ADMIN_PATHS.contacto)}
                     tooltip="Contacto"
                     render={
-                      <Link href="/admin/contacto" onClick={closeSidebar} />
+                      <Link href={ADMIN_PATHS.contacto} onClick={closeSidebar} />
                     }
                   >
                     <MessageCircle />
@@ -210,10 +211,10 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    isActive={pathname.startsWith("/admin/usuarios")}
+                    isActive={pathname.startsWith(ADMIN_PATHS.usuarios)}
                     tooltip="Usuarios"
                     render={
-                      <Link href="/admin/usuarios" onClick={closeSidebar} />
+                      <Link href={ADMIN_PATHS.usuarios} onClick={closeSidebar} />
                     }
                   >
                     <Users />

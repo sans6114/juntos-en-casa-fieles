@@ -6,6 +6,9 @@ import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import type { Role } from "../generated/client"
 
+const SESSION_MAX_AGE = 60 * 60 * 8 // 8 horas
+const SESSION_UPDATE_AGE = 60 * 60 // 1 hora
+
 const credentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
@@ -20,6 +23,50 @@ export type SessionUser = {
   email: string
   nombre: string
   rol: Role
+}
+
+type SessionTokenData = SessionUser & {
+  passwordChangedAt: number
+}
+
+const userSessionSelect = {
+  id: true,
+  email: true,
+  nombre: true,
+  rol: true,
+  activo: true,
+  passwordChangedAt: true,
+} as const
+
+function toSessionTokenData(user: {
+  id: string
+  email: string
+  nombre: string
+  rol: Role
+  passwordChangedAt: Date
+}): SessionTokenData {
+  return {
+    id: user.id,
+    email: user.email,
+    nombre: user.nombre,
+    rol: user.rol,
+    passwordChangedAt: user.passwordChangedAt.getTime(),
+  }
+}
+
+function isSessionInvalidated(
+  tokenPasswordChangedAt: number | undefined,
+  dbPasswordChangedAt: Date,
+  tokenIssuedAt: number | undefined
+) {
+  const dbTime = dbPasswordChangedAt.getTime()
+  if (tokenPasswordChangedAt !== undefined) {
+    return dbTime > tokenPasswordChangedAt
+  }
+  if (tokenIssuedAt !== undefined) {
+    return dbTime > tokenIssuedAt * 1000
+  }
+  return false
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -55,7 +102,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
     Google({ allowDangerousEmailAccountLinking: false }),
   ],
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: SESSION_MAX_AGE,
+    updateAge: SESSION_UPDATE_AGE,
+  },
   pages: {
     signIn: "/admin/login",
     error: "/admin/login",
@@ -63,12 +114,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
-        if (!user.email) return false
+        if (!user.email) {
+          return "/admin/login?error=AccessDenied"
+        }
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email },
           select: { activo: true },
         })
-        return Boolean(dbUser?.activo)
+        if (!dbUser) {
+          return "/admin/login?error=AccessDenied"
+        }
+        if (!dbUser.activo) {
+          return "/admin/login?error=AccessDenied&reason=inactive"
+        }
+        return true
       }
       return true
     },
@@ -76,38 +135,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         const candidate = user as Partial<SessionUser>
         if (candidate.id && candidate.rol) {
-          token.data = {
-            id: candidate.id,
-            email: user.email as string,
-            nombre: candidate.nombre as string,
-            rol: candidate.rol,
-          } satisfies SessionUser
+          const dbUser = await prisma.user.findUnique({
+            where: { id: candidate.id },
+            select: userSessionSelect,
+          })
+          if (!dbUser || !dbUser.activo) {
+            delete token.data
+            return token
+          }
+          token.data = toSessionTokenData(dbUser)
           return token
         }
 
         if (user.email) {
           const dbUser = await prisma.user.findUnique({
             where: { email: user.email },
-            select: { id: true, email: true, nombre: true, rol: true, activo: true },
+            select: userSessionSelect,
           })
           if (dbUser && dbUser.activo) {
-            token.data = {
-              id: dbUser.id,
-              email: dbUser.email,
-              nombre: dbUser.nombre,
-              rol: dbUser.rol,
-            } satisfies SessionUser
+            token.data = toSessionTokenData(dbUser)
           }
         }
         return token
       }
 
-      const data = token.data as SessionUser | undefined
+      const data = token.data as SessionTokenData | undefined
       if (!data?.id) return token
 
       const dbUser = await prisma.user.findUnique({
         where: { id: data.id },
-        select: { id: true, email: true, nombre: true, rol: true, activo: true },
+        select: userSessionSelect,
       })
 
       if (!dbUser || !dbUser.activo) {
@@ -115,18 +172,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return token
       }
 
-      token.data = {
-        id: dbUser.id,
-        email: dbUser.email,
-        nombre: dbUser.nombre,
-        rol: dbUser.rol,
-      } satisfies SessionUser
+      if (isSessionInvalidated(data.passwordChangedAt, dbUser.passwordChangedAt, token.iat)) {
+        delete token.data
+        return token
+      }
+
+      token.data = toSessionTokenData(dbUser)
 
       return token
     },
     session({ session, token }) {
       if (token.data) {
-        const data = token.data as SessionUser
+        const data = token.data as SessionTokenData
         session.user.id = data.id
         session.user.email = data.email
         session.user.nombre = data.nombre

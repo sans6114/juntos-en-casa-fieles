@@ -39,8 +39,9 @@ export function GrowthStatCard({
     >
       <PopoverTrigger
         render={
-          <div
-            className="w-full cursor-pointer text-left"
+          <button
+            type="button"
+            className="w-full cursor-pointer border-0 bg-transparent p-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onMouseEnter={() => {
               if (!isMobile) setOpen(true)
             }}
