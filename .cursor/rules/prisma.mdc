@@ -1,0 +1,28 @@
+---
+description: Prisma ORM and Prisma Postgres guidance
+globs: **/*.{ts,tsx,js,jsx,prisma,json}
+alwaysApply: false
+---
+
+- Prefer current Prisma documentation from https://www.prisma.io/docs and the Prisma LLM feed at https://pris.ly/llms.txt.
+- For Prisma ORM v7 projects, use the `prisma-client` generator with an explicit `output`.
+- Keep database connection URLs in `prisma.config.ts`; do not add `url = env("DATABASE_URL")` to the Prisma schema unless the project is intentionally using older Prisma ORM conventions.
+- Use `prisma.config.ts` with `datasource.url = env("DATABASE_URL")` for Prisma CLI commands.
+- Instantiate Prisma Client with the correct driver adapter for the database, for example `@prisma/adapter-pg` for PostgreSQL.
+- When creating or managing Prisma Postgres databases, prefer the Prisma MCP server tools instead of guessing CLI/API steps.
+- Before changing Prisma setup, inspect `package.json`, `prisma.config.*`, `schema.prisma`, existing generated client imports, and the installed Prisma version.
+- Preserve existing Prisma Accelerate usage unless explicitly asked to migrate it.
+
+## Prisma application best practices
+
+- Validate inputs at API boundaries before calling Prisma Client.
+- Use `select` or scoped `include` to avoid over-fetching data.
+- Use transactions for multi-step writes that must succeed or fail together.
+- Handle known Prisma errors intentionally, especially constraint and validation errors.
+- Prefer integration tests against the same database provider used in production when testing Prisma behavior.
+- Mock Prisma Client only for isolated unit tests where database behavior is not under test.
+- Review generated migrations before applying them to shared or production environments.
+- Avoid exposing database-specific errors directly to end users.
+- Keep Prisma-related database access separate from unrelated business logic when it improves maintainability.
+
+

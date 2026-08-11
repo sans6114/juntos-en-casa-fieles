@@ -25,6 +25,7 @@ async function main() {
       password: hashedPassword,
       rol: "ADMIN",
       activo: true,
+      passwordChangedAt: new Date(),
     },
     create: {
       nombre: "Administrador",

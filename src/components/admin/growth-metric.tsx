@@ -51,8 +51,8 @@ export function GrowthMetric({
             className={cn(
               "inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium",
               isPositive
-                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-                : "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300"
+                ? "bg-neutral-100 text-neutral-800"
+                : "border-l-4 border-l-[var(--jec-admin-accent)] bg-neutral-100 text-neutral-800"
             )}
           >
             <TrendIcon className="size-4" />
