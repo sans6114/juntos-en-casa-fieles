@@ -7,6 +7,8 @@ import { sendPasswordResetEmail } from "@/lib/email/send-password-reset"
 
 const GENERIC_MESSAGE =
   "Si el email está registrado, te enviamos un enlace para restablecer tu contraseña."
+const RETRY_MESSAGE =
+  "No se pudo enviar el correo. Intentá de nuevo más tarde."
 const TOKEN_TTL_MS = 60 * 60 * 1000 // 1 hora
 
 function hashToken(token: string) {
@@ -49,6 +51,6 @@ export async function requestPasswordReset(email: string) {
     return { ok: true as const, message: GENERIC_MESSAGE }
   } catch (error) {
     console.error("Error en requestPasswordReset:", error)
-    return { ok: true as const, message: GENERIC_MESSAGE }
+    return { ok: false as const, message: RETRY_MESSAGE }
   }
 }

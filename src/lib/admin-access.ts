@@ -1,12 +1,23 @@
-import type { Role } from "../../generated/client"
+import type { Role } from '../../generated/client';
 
 export const ADMIN_PATHS = {
   login: "/admin/login",
+  forgotPassword: "/admin/forgot-password",
+  resetPassword: "/admin/reset-password",
   adminHome: "/admin/inscripciones",
   colaboradorHome: "/admin/inscripciones/grilla",
   contacto: "/admin/contacto",
   usuarios: "/admin/usuarios",
-} as const
+};
+
+export function isPublicAdminAuthPath(pathname: string): boolean {
+  const path = pathname.split("?")[0]
+  return (
+    path === ADMIN_PATHS.login ||
+    path === ADMIN_PATHS.forgotPassword ||
+    path === ADMIN_PATHS.resetPassword
+  )
+}
 
 export function isAdminRole(rol: Role): boolean {
   return rol === "ADMIN"
