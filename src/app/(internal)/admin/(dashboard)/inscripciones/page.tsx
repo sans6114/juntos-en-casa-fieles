@@ -1,13 +1,9 @@
-import { Building2, TrendingUp, UserRound, Users } from "lucide-react"
+import { Building2, UserRound, Users } from "lucide-react"
 import { AdminHeader } from "@/components/admin/admin-sidebar"
-import { AgeRangesChart } from "@/components/admin/age-ranges-chart"
 import { CongregationsChart } from "@/components/admin/congregations-chart"
-import { GrowthMetric } from "@/components/admin/growth-metric"
+import { GrowthStatCard } from "@/components/admin/growth-stat-card"
 import { StatCard } from "@/components/admin/stat-card"
-import {
-  getInscripcionesMetrics,
-  historialInscripciones,
-} from "@/lib/mock-data/inscripciones"
+import { getInscripcionesMetrics } from "@/lib/data/inscripciones"
 import { obtenerInscripciones } from "@/actions"
 import { requireAdmin } from "@/lib/auth-guards"
 
@@ -29,6 +25,7 @@ export default async function InscripcionesGeneralPage() {
             value={metrics.total}
             description="Personas registradas en el evento"
             icon={Users}
+            accent="red"
           />
           <StatCard
             title="Edad promedio"
@@ -36,16 +33,10 @@ export default async function InscripcionesGeneralPage() {
             description="Promedio de edad de los inscriptos"
             icon={UserRound}
           />
-          <StatCard
-            title="Crecimiento"
-            value={`${metrics.crecimiento >= 0 ? "+" : ""}${metrics.crecimiento}%`}
-            description={`Comparado con ${metrics.eventoAnterior} del evento anterior`}
-            icon={TrendingUp}
-            trend={{
-              value: metrics.crecimiento,
-              label: "vs evento anterior",
-              positive: metrics.crecimiento >= 0,
-            }}
+          <GrowthStatCard
+            totalActual={metrics.total}
+            totalAnterior={metrics.eventoAnterior}
+            crecimiento={metrics.crecimiento}
           />
           <StatCard
             title="Congregaciones activas"
@@ -55,19 +46,31 @@ export default async function InscripcionesGeneralPage() {
           />
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-2">
-          <AgeRangesChart data={metrics.ageRanges} />
-          <CongregationsChart
-            data={metrics.porCongregacion}
-            sinCongregacion={metrics.sinCongregacion}
+        <div className="grid gap-4 sm:grid-cols-3">
+          <StatCard
+            title="12–18 años"
+            value={metrics.ageRanges["12-18"]}
+            description="Inscriptos en el rango adolescente"
+            icon={Users}
+            accent="red"
+          />
+          <StatCard
+            title="18–28 años"
+            value={metrics.ageRanges["18-28"]}
+            description="Inscriptos en el rango joven"
+            icon={Users}
+          />
+          <StatCard
+            title="+28 años"
+            value={metrics.ageRanges["+28"]}
+            description="Inscriptos mayores de 28"
+            icon={Users}
           />
         </div>
 
-        <GrowthMetric
-          totalActual={metrics.total}
-          totalAnterior={metrics.eventoAnterior}
-          crecimiento={metrics.crecimiento}
-          historial={historialInscripciones}
+        <CongregationsChart
+          data={metrics.porCongregacion}
+          sinCongregacion={metrics.sinCongregacion}
         />
       </div>
     </>

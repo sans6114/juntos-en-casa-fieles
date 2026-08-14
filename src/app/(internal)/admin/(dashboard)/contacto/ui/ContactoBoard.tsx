@@ -56,15 +56,15 @@ export function ContactoBoard({ rows }: { rows: ContactoRow[] }) {
     <div className="contacto-board mx-auto w-full max-w-5xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
       <header className="space-y-4">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--contacto-accent)]">
-          Seguimiento pastoral
+          Seguimiento de inscriptos
         </p>
         <h1 className="font-[family-name:var(--font-contacto-display)] text-4xl font-semibold tracking-tight text-[var(--contacto-ink)] sm:text-5xl">
-          Personas sin iglesia
+          Personas sin congregación
         </h1>
         <p className="max-w-2xl text-lg leading-relaxed text-[var(--contacto-muted)] sm:text-xl">
-          Acá ves a quienes se inscribieron sin congregación. Los colaboradores
-          los contactan desde la grilla; vos controlás el avance y quién habló
-          con cada uno.
+          Acá ves que persona se inscribió sin congregación, esto quiere decir que puede ser una persona nueva en la fé. Los colaboradores
+          tienen la tarea de contactarla desde la grilla; vos controlás el avance y quién habló
+          con ella.
         </p>
       </header>
 

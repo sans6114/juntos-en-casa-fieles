@@ -1,0 +1,70 @@
+# openspec/config.yaml
+schema: spec-driven
+
+context: |
+  Tech stack: Next.js 16.2 (App Router, TS strict), React 19, PostgreSQL,
+  Prisma ORM 7.9 (prisma-client generator, @prisma/adapter-pg), Auth.js
+  (next-auth v5 beta), Tailwind v4, Zod v4, Zustand not yet in deps.
+  Architecture: monolith with (external) and (internal)/admin route groups.
+  Testing: no test runner configured yet.
+  Style: ESLint (eslint-config-next), TypeScript strict, no Prettier config found.
+
+strict_tdd: false
+# No test runner detected in package.json/repo tree (no vitest/jest/playwright/cypress
+# and no test script). strict_tdd defaults to false per the "no test runner" fallback.
+# Strict TDD is unavailable until a runner is introduced.
+
+testing:
+  detected: "2026-08-11"
+  test_runner:
+    available: false
+    command: ""
+    framework: ""
+  layers:
+    unit: false
+    integration: false
+    e2e: false
+  coverage:
+    available: false
+    command: ""
+  quality:
+    linter:
+      available: true
+      command: "npm run lint"
+      tool: "ESLint (eslint-config-next, flat config)"
+    type_checker:
+      available: true
+      command: "npx tsc --noEmit"
+      tool: "TypeScript (strict: true)"
+    formatter:
+      available: false
+      command: ""
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Respect AGENTS.md "Atomic Scope": one change per cycle, never entire pages
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Follow .agents/skills/nextjs-monolith-architecture/SKILL.md layer responsibilities
+    - Follow .cursor/rules/prisma.mdc for schema/client/query conventions
+    - Document architecture decisions with rationale
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    guidelines:
+      - Follow existing code patterns (Server Actions over REST, layout-based auth guards)
+      - Action result shape: { ok: boolean; message?: string; ...data }
+      - Zod validation at action boundaries
+      - Zero Assumptions (AGENTS.md): stop and ask if business logic/design is unspecified
+    tdd: false
+    test_command: ""
+  verify:
+    test_command: ""
+    build_command: "npm run build"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas

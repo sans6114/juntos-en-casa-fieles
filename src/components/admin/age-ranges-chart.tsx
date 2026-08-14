@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { AgeRangeKey } from "@/lib/mock-data/inscripciones"
+import type { AgeRangeKey } from "@/lib/data/inscripciones"
 
 type AgeRangesChartProps = {
   data: Record<AgeRangeKey, number>

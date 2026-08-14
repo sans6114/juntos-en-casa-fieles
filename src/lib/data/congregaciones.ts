@@ -3,8 +3,7 @@ interface Congregacion {
   nombre: string
 }
 
-
-
+/** Referencia de sedes usada por seed / utilidades. Las métricas agrupan desde la DB. */
 export const congregaciones: Congregacion[] = [
   { id: "cg_1", nombre: "Central" },
   { id: "cg_2", nombre: "Norte" },

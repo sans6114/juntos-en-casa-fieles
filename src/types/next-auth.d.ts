@@ -26,6 +26,7 @@ declare module "next-auth/jwt" {
       email: string
       nombre: string
       rol: Role
+      passwordChangedAt?: number
     }
   }
 }
