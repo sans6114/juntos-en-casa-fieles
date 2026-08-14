@@ -16,7 +16,7 @@ export async function sendPasswordResetEmail({
     throw new Error("Falta la variable de entorno EMAIL_FROM")
   }
 
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from,
     to,
     subject: "Restablecé tu contraseña — Juntos en Casa",
@@ -44,4 +44,8 @@ export async function sendPasswordResetEmail({
       </div>
     `,
   })
+
+  if (error) {
+    throw new Error(error.message)
+  }
 }
