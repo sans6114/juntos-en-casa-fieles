@@ -105,7 +105,7 @@ flowchart TD
 | `npx prisma studio` | Explorar la base de datos |
 | `npx prisma db seed` | Poblar admin, congregaciones e inscripciones de prueba |
 
-## Estructura
+## Estructura de carpetas
 
 ```
 src/app/(external)/   → Páginas públicas (landing)
