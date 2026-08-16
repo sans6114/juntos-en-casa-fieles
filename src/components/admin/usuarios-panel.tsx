@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { MoreHorizontal, Plus } from "lucide-react"
+import { MoreHorizontal, Plus, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 import { crearColaborador, toggleUsuarioActivo } from "@/actions"
 import { Badge } from "@/components/ui/badge"
@@ -50,18 +50,28 @@ export function UsuariosPanel({ data }: UsuariosPanelProps) {
   const [nombre, setNombre] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   const resetForm = () => {
     setNombre("")
     setEmail("")
     setPassword("")
+    setConfirmPassword("")
+    setShowPassword(false)
+    setShowConfirmPassword(false)
   }
 
   const handleCreate = (event: React.FormEvent) => {
     event.preventDefault()
+    if (password !== confirmPassword) {
+      toast.error("Las contraseñas no coinciden")
+      return
+    }
     startTransition(async () => {
-      const result = await crearColaborador({ nombre, email, password })
+      const result = await crearColaborador({ nombre, email, password, confirmPassword })
       if (result.ok) {
         toast.success("Colaborador creado")
         resetForm()
@@ -134,16 +144,59 @@ export function UsuariosPanel({ data }: UsuariosPanelProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Contraseña</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  disabled={isPending}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pr-10"
+                    required
+                    disabled={isPending}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                    disabled={isPending}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pr-10"
+                    required
+                    disabled={isPending}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                    disabled={isPending}
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
               <DialogFooter>
                 <Button
