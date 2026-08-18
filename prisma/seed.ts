@@ -2,6 +2,7 @@ import 'dotenv/config'
 import bcrypt from 'bcryptjs'
 import { PrismaClient } from '../generated/client'
 import { PrismaPg } from '@prisma/adapter-pg'
+import congregacionesSeed from './data/congregaciones.json'
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
@@ -37,14 +38,7 @@ async function main() {
   })
   console.log(`✅ Admin upserted: ${adminEmail}`)
 
-  const congregaciones = [
-    { id: "cg_1", nombre: "Central" },
-    { id: "cg_2", nombre: "Norte" },
-    { id: "cg_3", nombre: "Sur" },
-    { id: "cg_4", nombre: "Este" },
-    { id: "cg_5", nombre: "Oeste" },
-    { id: "cg_6", nombre: "Villa Nueva" },
-  ]
+  const congregaciones = congregacionesSeed
 
   for (const cg of congregaciones) {
     await prisma.congregacion.upsert({
