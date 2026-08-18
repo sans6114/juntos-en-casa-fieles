@@ -13,6 +13,12 @@ export const CrearInscripcionSchema = z.object({
 
 export type CrearInscripcionDTO = z.infer<typeof CrearInscripcionSchema>
 
+export type InscripcionActionState = {
+  ok: boolean
+  message?: string
+  fieldErrors?: Partial<Record<keyof CrearInscripcionDTO, string>>
+}
+
 export type InscripcionDTO = {
   id: string
   nombre: string

@@ -49,7 +49,7 @@ model Congregacion {
 model Inscripcion {
   id             String        @id @default(cuid())
   nombre         String
-  email          String
+  email          String        @unique
   telefono       String?
   edad           Int
   congregacionId String?
