@@ -1,9 +1,17 @@
-import Image from "next/image"
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { AdminSidebar, RoleBadge } from "@/components/admin/admin-sidebar"
-import { Separator } from "@/components/ui/separator"
-import { requireSession } from "@/lib/auth-guards"
-import { jecAssets } from "@/lib/jec-assets"
+import Image from 'next/image';
+
+import {
+  AdminSidebar,
+  RoleBadge,
+} from '@/components/admin/admin-sidebar';
+import { Separator } from '@/components/ui/separator';
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
+import { requireSession } from '@/lib/auth-guards';
+import { jecAssets } from '@/lib/jec-assets';
 
 export default async function AdminDashboardLayout({
   children,
@@ -26,7 +34,7 @@ export default async function AdminDashboardLayout({
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-4" />
           <Image
-            src={jecAssets.personaje.llama}
+            src={jecAssets.logos.jecBlackPng}
             alt="Juntos en Casa"
             width={22}
             height={22}

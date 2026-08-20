@@ -4,13 +4,6 @@ export default function ExternalPage() {
   return (
     <>
       <Hero />
-      {/*
-      <TickerTape />
-      <Cronograma />
-      <Invitados />
-      <Ubicacion />
-      */}
- 
     </>
   )
 }

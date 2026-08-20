@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
@@ -21,6 +21,10 @@ export const metadata: Metadata = {
   },
   description:
     "Conferencia de adolescentes y jóvenes · Iglesia Vida Sobrenatural",
+};
+
+export const viewport: Viewport = {
+  colorScheme: "only light",
 };
 
 export default function RootLayout({

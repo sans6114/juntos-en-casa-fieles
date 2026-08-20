@@ -1,21 +1,24 @@
 "use server"
 
-import { z } from "zod"
-import { cookies } from "next/headers"
-import { revalidatePath } from "next/cache"
-import { prisma } from "@/lib/prisma"
-import { Prisma } from "../../../generated/client"
+import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
+import { z } from 'zod';
+
 import {
-  CrearInscripcionSchema,
   type CrearInscripcionDTO,
+  CrearInscripcionSchema,
   type InscripcionActionState,
-} from "@/interfaces/inscripcion"
-import { sendQrEmail } from "@/lib/email/send-qr-email"
+} from '@/interfaces/inscripcion';
+import { sendQrEmail } from '@/lib/email/send-qr-email';
+import { prisma } from '@/lib/prisma';
+
+import { Prisma } from '../../../generated/client';
 
 export async function crearInscripcion(
   _prevState: InscripcionActionState,
   formData: FormData
 ): Promise<InscripcionActionState> {
+  //validar con zod la data del formulario
   const parsed = CrearInscripcionSchema.safeParse(Object.fromEntries(formData))
 
   if (!parsed.success) {

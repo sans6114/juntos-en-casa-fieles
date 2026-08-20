@@ -49,6 +49,7 @@
 }
 
 :root {
+  color-scheme: light only;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -126,6 +127,7 @@
   }
   html {
     @apply font-sans;
+    color-scheme: light only;
   }
 }
 
@@ -137,6 +139,7 @@
 
 /* Tokens landing pública — La Casa Encendida (no pisa el tema admin) */
 .jec-landing {
+  color-scheme: dark only;
   --jec-ink: #0b0a0f;
   --jec-ink-soft: #15121a;
   --jec-ash: #1c1814;
@@ -169,6 +172,7 @@
 
 /* Tokens portal admin — blanco / negro + rojo (aislados del sitio público) */
 .admin-shell {
+  color-scheme: light only;
   --jec-admin-ink: #0a0a0a;
   --jec-admin-bone: #ffffff;
   --jec-admin-accent: #dc2626;

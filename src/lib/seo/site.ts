@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
-import { jecAssets } from "@/lib/jec-assets";
+import type { Metadata } from 'next';
+
+import { jecAssets } from '@/lib/jec-assets';
 
 const fallbackUrl = "http://localhost:3000";
 
@@ -7,12 +8,12 @@ export const siteConfig = {
   name: "Juntos En Casa",
   shortName: "JEC",
   year: 2026,
-  tagline: "Conferencia de adolescentes y jóvenes",
+  tagline: "Conferencia cristiana de adolescentes y jóvenes",
   description:
-    "Únete a nuestra conferencia cristiana de jóvenes y adolescentes: adoración, palabra, talleres y unidad. Iglesia Vida Sobrenatural · La Plata.",
+    "Se parte de nuestra conferencia cristiana de jóvenes y adolescentes: adoración, palabra, unidad y más. Iglesia cristiana Vida Sobrenatural · La Plata.",
   locale: "es_AR",
   url: process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || fallbackUrl,
-  org: "Iglesia Vida Sobrenatural",
+  org: "Iglesia cristiana Vida Sobrenatural",
   city: "La Plata, Buenos Aires",
   ogImage: jecAssets.background.hero,
   twitterHandle: undefined as string | undefined,

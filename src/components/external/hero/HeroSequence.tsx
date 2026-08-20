@@ -6,7 +6,6 @@ import {
 } from 'react';
 
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
 
 import { jecRevealPhrases } from '@/components/external/shared';
@@ -14,7 +13,7 @@ import { jecAssets } from '@/lib/jec-assets';
 import { useGSAP } from '@gsap/react';
 
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(useGSAP, ScrollTrigger);
+  gsap.registerPlugin(useGSAP);
 }
 
 const LOADER_FRAMES = [
@@ -26,14 +25,17 @@ const LOADER_FRAMES = [
 const FRAME_INTERVAL_MS = 420;
 const LOAD_DURATION_S = 7;
 const FADE_DURATION_S = 0.45;
-/** Frases del reveal pineado por GSAP; el hero final vive fuera del pin y se
- * expande con el scroll nativo vía ScrollExpand (ver HeroFinale). */
+/** Frases del reveal, avanzadas por botón en vez de scroll: con scroll (aun
+ * con freno de velocidad) un gesto rápido terminaba saltando frases y el
+ * usuario nunca llegaba a ver el reveal completo. */
 const REVEAL_FRAME_COUNT = jecRevealPhrases.length;
 
 /**
- * Loader fullscreen → frases con fade por scroll (pineado) → hero final con
- * ScrollExpand (scroll nativo). Sin navbar: el hero final trae su propio
- * logo/CTA (ver HeroFinale). Hint de scroll mientras dure el reveal de frases.
+ * Loader fullscreen → frases reveladas una por click en el botón (scroll
+ * bloqueado) → hero final con ScrollExpand (scroll nativo). Sin navbar: el
+ * hero final trae su propio logo/CTA (ver HeroFinale). El scroll queda
+ * bloqueado desde el loader hasta que se revela la última frase; el único
+ * modo de avanzar durante el reveal es el botón.
  */
 export function HeroSequence() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -41,7 +43,7 @@ export function HeroSequence() {
   const fillRef = useRef<HTMLSpanElement>(null);
   const percentRef = useRef<HTMLSpanElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const hintRef = useRef<HTMLDivElement>(null);
+  const hintRef = useRef<HTMLButtonElement>(null);
   const phraseRefs = useRef<Array<HTMLParagraphElement | null>>([]);
   const [frame, setFrame] = useState(0);
   const activeFrameRef = useRef(-1);
@@ -130,45 +132,58 @@ export function HeroSequence() {
           },
           onComplete: () => window.clearInterval(frameId),
         });
+
+        let advancingLock = false;
+        let revealDone = false;
+
+        const finishReveal = () => {
+          if (revealDone) return;
+          revealDone = true;
+          setHintVisible(false);
+          detachRevealListeners();
+          unlockScroll();
+        };
+
+        const advance = () => {
+          if (revealDone || advancingLock) return;
+          const next = activeFrameRef.current + 1;
+          if (next < REVEAL_FRAME_COUNT) {
+            advancingLock = true;
+            showFrame(next);
+            window.setTimeout(() => {
+              advancingLock = false;
+            }, FADE_DURATION_S * 1000);
+          } else {
+            finishReveal();
+          }
+        };
+
+        const onHintActivate = () => advance();
+
+        const attachRevealListeners = () => {
+          hintRef.current?.addEventListener("click", onHintActivate);
+        };
+
+        const detachRevealListeners = () => {
+          hintRef.current?.removeEventListener("click", onHintActivate);
+        };
+
         intro.to(
           loaderRef.current,
           {
             autoAlpha: 0,
             duration: 0.45,
             onComplete: () => {
-              unlockScroll();
               showFrame(0);
               setHintVisible(true);
+              attachRevealListeners();
             },
           },
           "+=0.15"
         );
 
-        const snapStep = 1 / (REVEAL_FRAME_COUNT - 1);
-
-        ScrollTrigger.create({
-          trigger: rootRef.current,
-          start: "top top",
-          end: () => `+=${(REVEAL_FRAME_COUNT - 1) * Math.round(window.innerHeight * 0.55)}`,
-          pin: true,
-          pinSpacing: true,
-          scrub: true,
-          anticipatePin: 1,
-          snap: {
-            snapTo: snapStep,
-            duration: { min: 0.12, max: 0.28 },
-            ease: "power1.inOut",
-          },
-          onUpdate: (self) => {
-            const index = Math.round(self.progress * (REVEAL_FRAME_COUNT - 1));
-            showFrame(index);
-          },
-          onLeave: () => setHintVisible(false),
-          onEnterBack: () => setHintVisible(true),
-        });
-
         if (hintRef.current) {
-          gsap.to(hintRef.current.querySelector("[data-scroll-chevron]"), {
+          gsap.to(hintRef.current.querySelector("[data-next-chevron]"), {
             y: 8,
             duration: 0.7,
             ease: "power1.inOut",
@@ -179,6 +194,7 @@ export function HeroSequence() {
 
         return () => {
           window.clearInterval(frameId);
+          detachRevealListeners();
           unlockScroll();
         };
       });
@@ -256,19 +272,20 @@ export function HeroSequence() {
             </p>
           ))}
 
-          <div
+          <button
             ref={hintRef}
-            className="pointer-events-none absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2 opacity-0"
-            aria-hidden
+            type="button"
+            className="invisible absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2 opacity-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--jec-amber)]"
           >
             <span className="jec-mono text-[0.65rem] font-bold uppercase tracking-[0.28em] text-[var(--jec-bone)]/90">
-              Scrolleá
+              Seguir
             </span>
             <span
-              data-scroll-chevron
+              data-next-chevron
               className="block h-2.5 w-2.5 rotate-45 border-b-2 border-r-2 border-[var(--jec-bone)]"
+              aria-hidden
             />
-          </div>
+          </button>
         </div>
       </div>
   );

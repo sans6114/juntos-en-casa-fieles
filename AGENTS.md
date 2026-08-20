@@ -4,7 +4,7 @@
 
 - **Stack:** Next.js +16 (App Router, TS), PostgreSQL, Prisma ORM.
 - **Database:** Refer strictly to `.cursor/rules/prisma.mdc`.
-- **Next.js Architecture:** Follow the provided Next.js project Skill exactly `.agents/nextjs-monolith-architecture`.
+- **Next.js Architecture:** Follow the provided Next.js project Skill exactly `.claude/skills/nextjs-monolith-architecture`.
 
 ## Workflow & PRs
 

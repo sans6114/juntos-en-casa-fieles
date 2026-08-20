@@ -1,10 +1,14 @@
 "use server"
 
-import { AuthError } from "next-auth"
-import { redirect } from "next/navigation"
-import { z } from "zod"
-import { signIn } from "@/auth.config"
-import { rateLimitByKey, getClientIp } from "@/lib/rate-limit"
+import { AuthError } from 'next-auth';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
+
+import { signIn } from '@/auth.config';
+import {
+  getClientIp,
+  rateLimitByKey,
+} from '@/lib/rate-limit';
 
 export type LoginAdminState = {
   ok: boolean
@@ -13,7 +17,7 @@ export type LoginAdminState = {
 
 const credentialsSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(1),
+  password: z.string().min(4),
 })
 
 export async function loginAdmin(

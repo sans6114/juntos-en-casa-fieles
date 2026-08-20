@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-19T20:06:09Z",
+  "title": "Design System: Juntos En Casa 2026 (Landing pública)",
+  "extensions": {
+    "colorMeta": {
+      "fuego-naranja": {
+        "role": "primary",
+        "displayName": "Fuego Naranja",
+        "canonical": "#ff5a00"
+      },
+      "fuego-verde": {
+        "role": "secondary",
+        "displayName": "Fuego Verde",
+        "canonical": "#c0f700"
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Cayento", "purpose": "Momentos declarativos: frases del hero, titulares grandes." },
+      "label": { "displayName": "Helvetica Neue", "purpose": "Texto de lectura y etiquetas." },
+      "condensed": { "displayName": "Helvetica Neue Condensed", "purpose": "Contextos numéricos y ticker ajustados." }
+    }
+  },
+  "components": [],
+  "narrative": {
+    "overview": "Este archivo documenta deliberadamente poco. La implementación visual actual de (external) (fondo casi negro, formas sin redondeo, cero sombras, ritmo de spacing actual) la produjo un pase de IA anterior que no distinguió identidad de marca real de decisión arbitraria — por eso no se documenta aquí como doctrina. Lo que sigue es solo lo que el equipo confirmó como identidad real de JEC.",
+    "keyCharacteristics": [
+      "Dualidad de fuego en dos colores: naranja y verde.",
+      "Fueguín como mascota/personaje central del evento.",
+      "El ancla como símbolo de marca disponible (sin regla de uso todavía).",
+      "La historia de apertura se cuenta con una secuencia animada de frases (GSAP), no con una imagen estática.",
+      "Tono enérgico y juvenil en motion, copy y ritmo."
+    ],
+    "rules": [
+      { "name": "La Regla de las Dos Brasas", "body": "La paleta de JEC son exactamente dos colores — naranja y verde — y ambos existen porque vienen del fuego. No sumar un tercer acento sin confirmarlo primero como identidad de marca.", "section": "colors" }
+    ],
+    "dos": [
+      "Do usar Cayento para momentos display/titulares, Helvetica Neue para label y texto de lectura, Helvetica Neue Condensed para contextos numéricos/ticker.",
+      "Do construir la paleta desde naranja (#ff5a00) y verde (#c0f700) — los dos colores de marca confirmados.",
+      "Do dar a Fueguín protagonismo como mascota del evento.",
+      "Do mantener el tono enérgico y juvenil — en motion, copy y ritmo, no corporativo ni solemne.",
+      "Do contar momentos clave de apertura con secuencias de frases animadas en vez de una imagen estática sola."
+    ],
+    "donts": [
+      "Don't tratar el fondo oscuro actual, las formas sin redondeo, la ausencia de sombras o el ritmo de spacing actual como doctrina de marca confirmada.",
+      "Don't sumar un tercer color de acento sin confirmarlo primero.",
+      "Don't asumir que el nombre del token CSS --jec-amber describe el color real — hoy contiene el verde de marca confirmado (#c0f700), no ámbar."
+    ]
+  }
+}

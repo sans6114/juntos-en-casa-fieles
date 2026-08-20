@@ -6,13 +6,18 @@ export type InscripcionMetricRow = {
 
 /** Total de inscriptos del evento anterior (dato histórico real). */
 export const inscripcionesEventoAnterior: number = 559
+export enum AgeRangeKeys {
+  adolescentes = "12-18",
+  jovenes = "18-28",
+  masDe28 = "+28",
+}
 
-export type AgeRangeKey = "12-18" | "18-28" | "+28"
 
-export function getAgeRange(edad: number): AgeRangeKey {
-  if (edad >= 12 && edad < 18) return "12-18"
-  if (edad >= 18 && edad <= 28) return "18-28"
-  return "+28"
+export function getAgeRange(edad: number): AgeRangeKeys { 
+  let range: AgeRangeKeys =  AgeRangeKeys.adolescentes;
+  if (edad >= 18 && edad <= 28) range = AgeRangeKeys.jovenes;
+  if (edad > 28) range = AgeRangeKeys.masDe28;
+  return range;
 }
 
 export function getInscripcionesMetrics(data: InscripcionMetricRow[]) {
@@ -26,7 +31,7 @@ export function getInscripcionesMetrics(data: InscripcionMetricRow[]) {
       acc[range] += 1
       return acc
     },
-    { "12-18": 0, "18-28": 0, "+28": 0 } as Record<AgeRangeKey, number>
+    { [AgeRangeKeys.adolescentes]: 0, [AgeRangeKeys.jovenes]: 0, [AgeRangeKeys.masDe28]: 0 } as Record<AgeRangeKeys, number>
   )
 
   const congregacionMap = new Map<
