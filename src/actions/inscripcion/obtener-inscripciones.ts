@@ -5,9 +5,9 @@ import { requireSession } from "@/lib/auth-guards"
 import type { InscripcionDTO } from "@/interfaces/inscripcion"
 
 export async function obtenerInscripciones(): Promise<InscripcionDTO[]> {
-  try {
-    await requireSession()
+  await requireSession()
 
+  try {
     const inscripciones = await prisma.inscripcion.findMany({
       include: {
         congregacion: true,

@@ -112,9 +112,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/admin/login",
   },
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
       if (account?.provider === "google") {
-        if (!user.email) {
+        if (!user.email || profile?.email_verified !== true) {
           return "/admin/login?error=AccessDenied"
         }
         const dbUser = await prisma.user.findUnique({

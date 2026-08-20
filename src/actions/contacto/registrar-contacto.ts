@@ -6,9 +6,9 @@ import { requireSession } from "@/lib/auth-guards"
 import { RegistrarContactoSchema, type RegistrarContactoDTO } from "@/interfaces/contacto"
 
 export async function registrarContacto(data: RegistrarContactoDTO) {
-  try {
-    const user = await requireSession()
+  const user = await requireSession()
 
+  try {
     const parsed = RegistrarContactoSchema.safeParse(data)
     if (!parsed.success) {
       return { ok: false as const, message: "Datos inválidos." }
