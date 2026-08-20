@@ -4,12 +4,19 @@ import crypto from "crypto"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { ResetPasswordSchema, type ResetPasswordDTO } from "@/interfaces/auth"
+import { rateLimitByKey, getClientIp } from "@/lib/rate-limit"
 
 function hashToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex")
 }
 
 export async function resetPassword(data: ResetPasswordDTO) {
+  const ip = await getClientIp()
+  const isAllowed = await rateLimitByKey(`reset-password:${ip}`, 5, 15 * 60 * 1000) // 5 attempts per 15 minutes
+  if (!isAllowed) {
+    return { ok: false, message: "Demasiados intentos. Por favor, esperá unos minutos." }
+  }
+
   const parsed = ResetPasswordSchema.safeParse(data)
   if (!parsed.success) {
     return {
