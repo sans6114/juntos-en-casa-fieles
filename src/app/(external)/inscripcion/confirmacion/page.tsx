@@ -3,6 +3,7 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createPageMetadata } from "@/lib/seo/site"
+import { QRCodeSVG } from "qrcode.react"
 
 export const metadata: Metadata = createPageMetadata({
   title: "Inscripción confirmada",
@@ -13,8 +14,9 @@ export const metadata: Metadata = createPageMetadata({
 export default async function InscripcionConfirmacionPage() {
   const cookieStore = await cookies()
   const inscripcionOk = cookieStore.get("jec_inscripcion_ok")?.value === "1"
+  const inscripcionUuid = cookieStore.get("jec_inscripcion_uuid")?.value
 
-  if (!inscripcionOk) {
+  if (!inscripcionOk || !inscripcionUuid) {
     redirect("/inscripcion")
   }
 
@@ -25,8 +27,18 @@ export default async function InscripcionConfirmacionPage() {
           Inscripción recibida
         </p>
         <h1 className="jec-display text-4xl sm:text-5xl">¡Ya estás dentro!</h1>
+
+        <div className="mx-auto mt-8 mb-8 flex max-w-sm flex-col items-center justify-center rounded-2xl bg-white p-6 shadow-xl">
+          <QRCodeSVG 
+            value={inscripcionUuid} 
+            size={220}
+            level="H"
+            includeMargin={true}
+          />
+        </div>
+
         <p className="text-[var(--jec-smoke)]">
-          Te vamos a enviar un email con tu código QR de inscripción. Guardalo, lo vas a
+          Te enviamos un email con tu código QR de inscripción. Podés sacarle captura a esta pantalla y guardarlo, lo vas a
           necesitar el día del evento.
         </p>
         <Link
