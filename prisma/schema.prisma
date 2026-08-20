@@ -57,6 +57,9 @@ model Inscripcion {
   contacto       Contacto?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  asistenciaDia1 DateTime?
+  asistenciaDia2 DateTime?
+  asistenciaDia3 DateTime?
 
   @@index([congregacionId])
 }

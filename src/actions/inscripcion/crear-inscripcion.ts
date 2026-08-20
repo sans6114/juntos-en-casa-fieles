@@ -10,6 +10,7 @@ import {
   type CrearInscripcionDTO,
   type InscripcionActionState,
 } from "@/interfaces/inscripcion"
+import { sendQrEmail } from "@/lib/email/send-qr-email"
 
 export async function crearInscripcion(
   _prevState: InscripcionActionState,
@@ -28,7 +29,7 @@ export async function crearInscripcion(
   }
 
   try {
-    await prisma.inscripcion.create({
+    const nuevaInscripcion = await prisma.inscripcion.create({
       data: {
         nombre: parsed.data.nombre,
         email: parsed.data.email,
@@ -38,11 +39,26 @@ export async function crearInscripcion(
       },
     })
 
+    // Enviar email con QR
+    await sendQrEmail({
+      to: nuevaInscripcion.email,
+      nombre: nuevaInscripcion.nombre,
+      uuid: nuevaInscripcion.id,
+    })
+
     // Revalidar las rutas del dashboard admin para que los datos nuevos aparezcan al instante
     revalidatePath("/admin/inscripciones", "layout")
 
     const cookieStore = await cookies()
     cookieStore.set("jec_inscripcion_ok", "1", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 600,
+      path: "/inscripcion",
+    })
+
+    cookieStore.set("jec_inscripcion_uuid", nuevaInscripcion.id, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
