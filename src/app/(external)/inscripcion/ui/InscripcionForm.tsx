@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { crearInscripcion } from "@/actions"
 import type { InscripcionActionState } from "@/interfaces/inscripcion"
 import { CongregacionCombobox, type Congregacion } from "./CongregacionCombobox"
+import { CtaButton } from "@/components/external/shared"
 
 type InscripcionFormProps = {
   congregaciones: Congregacion[]
@@ -160,13 +161,9 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="jec-label inline-flex w-full items-center justify-center bg-[var(--jec-ember)] px-8 py-3.5 text-sm font-bold uppercase tracking-[0.14em] text-[var(--jec-bone)] transition-colors hover:bg-[var(--jec-amber)] hover:text-[var(--jec-ink)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--jec-amber)] disabled:cursor-not-allowed disabled:opacity-60 md:text-base"
-      >
+      <CtaButton as="button" type="submit" disabled={isPending} className="w-full">
         {isPending ? "Enviando…" : "Confirmar inscripción"}
-      </button>
+      </CtaButton>
     </form>
   )
 }

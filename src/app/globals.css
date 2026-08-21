@@ -129,6 +129,9 @@
     @apply font-sans;
     color-scheme: light only;
   }
+  .jec-landing :is(h1, h2, h3, h4, h5, h6) {
+    font-weight: 400;
+  }
 }
 
 @media print {
@@ -137,9 +140,12 @@
   }
 }
 
-/* Tokens landing pública — La Casa Encendida (no pisa el tema admin) */
+/* Tokens landing pública — Papel encendido (no pisa el tema admin) */
 .jec-landing {
-  color-scheme: dark only;
+  color-scheme: light only;
+  font-synthesis: none;
+  -webkit-font-synthesis: none;
+
   --jec-ink: #0b0a0f;
   --jec-ink-soft: #15121a;
   --jec-ash: #1c1814;
@@ -147,10 +153,117 @@
   --jec-amber: #c0f700;
   --jec-smoke: #a89f96;
   --jec-bone: #f4efe8;
-  background-color: var(--jec-ink);
-  color: var(--jec-bone);
+
+  /* Defaults de campo: hueso/papel, hasta que una sección declare otro campo */
+  --sup: var(--jec-bone);
+  --dato: var(--jec-ink);
+  --suave: #57504a;
+  --acento: var(--jec-ember);
+  --linea: rgb(11 10 15 / 12%);
+  --regla: var(--jec-ink);
+  --foco: var(--jec-ink);
+  --cta-bg: var(--jec-ink);
+  --cta-fg: var(--jec-bone);
+
+  background-color: var(--sup);
+  color: var(--dato);
   font-family: var(--font-helvetica-neue), ui-sans-serif, system-ui,
     sans-serif;
+}
+
+/* Campo hueso/papel: fondo claro, tinta oscura, brasa naranja */
+.jec-landing .campo-papel {
+  --sup: var(--jec-bone);
+  --dato: var(--jec-ink);
+  --suave: #57504a;
+  --acento: var(--jec-ember);
+  --linea: rgb(11 10 15 / 12%);
+  --regla: var(--jec-ink);
+  --foco: var(--jec-ink);
+  --cta-bg: var(--jec-ink);
+  --cta-fg: var(--jec-bone);
+
+  background-color: var(--sup);
+  color: var(--dato);
+}
+
+/* Campo tinta: fondo oscuro, texto hueso, brasa lima */
+.jec-landing .campo-tinta {
+  --sup: var(--jec-ink);
+  --dato: var(--jec-bone);
+  --suave: var(--jec-smoke);
+  --acento: var(--jec-amber);
+  --linea: rgb(244 239 232 / 12%);
+  --regla: var(--jec-bone);
+  --foco: var(--jec-bone);
+  --cta-bg: var(--jec-bone);
+  --cta-fg: var(--jec-ink);
+
+  background-color: var(--sup);
+  color: var(--dato);
+}
+
+/* Campo fuego: bloque naranja saturado, sin nivel de texto "suave" */
+.jec-landing .campo-fuego {
+  --sup: var(--jec-ember);
+  --dato: var(--jec-ink);
+  --suave: var(--jec-ink);
+  --acento: var(--jec-ink);
+  --linea: rgb(11 10 15 / 20%);
+  --regla: var(--jec-ink);
+  --foco: var(--jec-ink);
+  --cta-bg: var(--jec-ink);
+  --cta-fg: var(--jec-bone);
+
+  background-color: var(--sup);
+  color: var(--dato);
+}
+
+/* Eyebrow: la brasa entra como regla de 28x3px, nunca como color de texto */
+.jec-landing .jec-eyebrow {
+  color: var(--suave);
+}
+
+.jec-landing .jec-eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 28px;
+  height: 3px;
+  vertical-align: middle;
+  margin-inline-end: 0.75rem;
+  background: var(--acento);
+}
+
+/* Disclosure: <details> nativo, chevron en CSS, sin marcador por defecto */
+.jec-landing .jec-disclosure > summary {
+  list-style: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.jec-landing .jec-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.jec-landing .jec-disclosure > summary::after {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--acento);
+  transition: transform 0.2s ease;
+}
+
+.jec-landing .jec-disclosure[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jec-landing .jec-disclosure > summary::after {
+    transition: none;
+  }
 }
 
 /* Titular de impacto (hero): stencil, uso puntual y grande */

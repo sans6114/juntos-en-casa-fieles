@@ -1,4 +1,8 @@
 export { CtaButton } from "./CtaButton"
+export type { CtaButtonProps } from "./CtaButton"
+export { Disclosure } from "./Disclosure"
+export { navItems, socialLinks } from "./navigation"
+export type { NavItem, SocialLink } from "./navigation"
 export { SectionHeading } from "./SectionHeading"
 export { SiteHeader } from "./SiteHeader"
 export { TickerTape } from "./TickerTape"

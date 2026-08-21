@@ -1,5 +1,4 @@
-import { jecAssets } from "@/lib/jec-assets"
-
+// TODO(landing-home-secciones): fotos reales de oradores pendientes; ver src/lib/jec-assets.ts (oradores eliminado, archivos borrados).
 export type Invitado = {
   id: string
   name: string
@@ -11,37 +10,37 @@ export const invitados: Invitado[] = [
   {
     id: "flor-mraida",
     name: "Flor Mraida",
-    imageSrc: jecAssets.oradores.florMraida,
+    imageSrc: "/jec/oradores/flormraida.webp",
     accent: "ember",
   },
   {
     id: "ezequiel-mangonnet",
     name: "Ezequiel Mangonnet",
-    imageSrc: jecAssets.oradores.ezequielMangonnet,
+    imageSrc: "/jec/oradores/ezequielmango.webp",
     accent: "amber",
   },
   {
     id: "josias-garcia",
     name: "Josías García",
-    imageSrc: jecAssets.oradores.josiasGarcia,
+    imageSrc: "/jec/oradores/josias.webp",
     accent: "ember",
   },
   {
     id: "natalia-spetale",
     name: "Natalia Spetale",
-    imageSrc: jecAssets.oradores.nataliaSpetale,
+    imageSrc: "/jec/oradores/nati.webp",
     accent: "amber",
   },
   {
     id: "ezequiel-rossini",
     name: "Ezequiel Rossini",
-    imageSrc: jecAssets.oradores.ezequielRossini,
+    imageSrc: "/jec/oradores/eze.webp",
     accent: "ember",
   },
   {
     id: "juan-pablo-sosa",
     name: "Juan Pablo Sosa",
-    imageSrc: jecAssets.oradores.juanPabloSosa,
+    imageSrc: "/jec/oradores/juan.webp",
     accent: "amber",
   },
 ]

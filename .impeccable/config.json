@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "#fff",
+        "createdAt": "2026-08-21T00:19:37.862Z",
+        "reason": "pre-existing @media print fallback (body background), unrelated to landing-tokens-b field kit; not touched by this change"
+      }
+    ]
+  }
+}

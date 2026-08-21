@@ -216,8 +216,9 @@ export function HeroSequence() {
         aria-live="polite"
       >
         <div className="relative flex flex-col items-center">
+        {/* TODO(landing-home-secciones): Hero fuera de alcance de landing-tokens-b; solo se repara el asset roto (jecWhitePng no existía en disco). */}
         <Image
-          src={jecAssets.logos.jecWhitePng}
+          src={jecAssets.logos.jecWhiteSvg}
           alt=""
           width={90}
           height={90}

@@ -17,7 +17,15 @@ typography:
 
 ## Overview
 
-Este archivo documenta deliberadamente poco. La implementación visual actual de `(external)` (fondo `--jec-ink` casi negro, formas sin redondeo, cero sombras, ritmo de spacing actual) la produjo un pase de IA anterior que no distinguió identidad de marca real de decisión arbitraria — por eso **no** se documenta aquí como doctrina. Lo que sigue es solo lo que el equipo confirmó como identidad real de JEC.
+Este archivo documenta deliberadamente poco. La implementación visual previa de `(external)` (fondo `--jec-ink` casi negro, formas sin redondeo, cero sombras) la produjo un pase de IA anterior que no distinguió identidad de marca real de decisión arbitraria — por eso no quedó documentada como doctrina, y quedó abierta a reemplazo. Esa pregunta ya está resuelta: ver "Dirección visual — Papel encendido (decidida)" más abajo. Lo que sigue en el resto de este archivo es lo que el equipo confirmó como identidad real de JEC — la parte que la dirección visual respeta y no reemplaza.
+
+## Dirección visual — Papel encendido (decidida)
+
+Tres direcciones se construyeron sobre el mismo contenido y se compararon; el equipo eligió **B — "Papel encendido"**: campo hueso (`--jec-bone`) dominante en vez de tinta oscura, tinta negra (`--jec-ink`) como texto y estructura, las dos brasas de marca (naranja/verde) entrando como bloque de color — nunca como color de texto de cuerpo —, radio de 6px, reglas estructurales de 3px en vez de sombras. `color-scheme` pasa de `dark only` a `light only`, alineado con el punto "Do" de modo claro forzado más abajo.
+
+Implementada en el change `landing-tokens-b` vía tres clases de campo (`campo-papel` / `campo-tinta` / `campo-fuego`) que reescriben un mismo set de tokens semánticos (`--sup`, `--dato`, `--suave`, `--linea`, `--acento`, `--regla`, `--foco`, `--cta-bg`, `--cta-fg`), de forma que cualquier primitivo colocado en un campo hereda su contraste correcto sin lógica condicional por componente. Contrastes objetivo verificados: CTA 17.25:1 en los tres campos, foco 17.25:1 sobre claro / 15.54:1 sobre oscuro, eyebrow 6.31:1.
+
+Esto reemplaza — no complementa — el fondo oscuro, las formas sin redondeo y la ausencia de sombras que el "Don't" de abajo marcaba como no confirmados. Esa doctrina anterior queda cerrada.
 
 **Key Characteristics:**
 - Dualidad de fuego en dos colores: naranja y verde.
@@ -54,7 +62,7 @@ Los tamaños, pesos y tracking exactos hoy en el código son estado de implement
 Solo los elementos que el equipo confirmó como identitarios; el resto de los componentes de `(external)` (botones, cards, formulario) no tiene tratamiento visual confirmado como marca y no se documenta acá.
 
 ### Fueguín (mascota)
-Personaje oficial del evento. Assets en `public/jec/personaje/` (poses: llama, orando, festejando, apuntando). Existe además `fueguin-reversion.png` en disco que todavía no está expuesto por `src/lib/jec-assets.ts` — asset disponible, pendiente de cablear.
+Personaje oficial del evento. Assets en `public/jec/personaje/` (poses: llama, orando, festejando, apuntando). `fueguin-reversion.png` **no existe en disco** (verificado: no está bajo `public/` ni trackeado en git) — la referencia anterior a un asset "pendiente de cablear" era incorrecta.
 
 ### Ancla
 Símbolo de marca confirmado. Asset disponible en `public/jec/iconos/`. Sin regla de uso establecida todavía — dónde y cómo aparece se decide en un surface o task futuro, no acá.
@@ -72,6 +80,6 @@ Mecánica de marca confirmada: la apertura del sitio se cuenta con una secuencia
 - **Do** contar momentos clave de apertura con secuencias de frases animadas en vez de una imagen estática sola — es parte de la identidad de JEC.
 
 ### Don't:
-- **Don't** tratar el fondo oscuro actual (`--jec-ink`), las formas sin redondeo, la ausencia de sombras o el ritmo de spacing actual como doctrina de marca confirmada — son decisiones de un pase de IA anterior, siguen abiertas para un futuro `new-work` o `document`.
+- **Don't** reintroducir el fondo oscuro (`--jec-ink` como base), las formas sin redondeo o la ausencia de sombras del pase de IA anterior — esa pregunta ya está resuelta: ver "Dirección visual — Papel encendido (decidida)" más arriba.
 - **Don't** sumar un tercer color de acento sin confirmarlo primero — la paleta es deliberadamente de solo dos colores.
 - **Don't** asumir que el nombre del token CSS `--jec-amber` describe el color real — hoy contiene el verde de marca confirmado (#c0f700), no ámbar.
