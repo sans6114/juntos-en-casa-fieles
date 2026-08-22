@@ -2,17 +2,10 @@ import Image from "next/image"
 import Link from "next/link"
 import { jecAssets } from "@/lib/jec-assets"
 import { cn } from "@/lib/utils"
+import { navItems } from "./navigation"
 
 const navLinkClass =
   "jec-label text-xs font-bold uppercase tracking-[0.18em] text-[var(--jec-bone)] transition-colors hover:text-[var(--jec-amber)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--jec-amber)]"
-
-const NAV_ITEMS = [
-  { href: "/#cronograma", label: "Cronograma", essential: false },
-  { href: "/#invitados", label: "Invitados", essential: false },
-  { href: "/#ubicacion", label: "Ubicación", essential: false },
-  { href: "/contenidos", label: "Contenidos", essential: true },
-  { href: "/#inscripcion", label: "Inscribirme", essential: true },
-] as const
 
 type SiteHeaderProps = {
   className?: string
@@ -37,7 +30,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
       </Link>
 
       <nav aria-label="Secciones" className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 md:gap-x-7">
-        {NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}

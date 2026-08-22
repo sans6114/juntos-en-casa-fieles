@@ -15,7 +15,7 @@ export const siteConfig = {
   url: process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || fallbackUrl,
   org: "Iglesia cristiana Vida Sobrenatural",
   city: "La Plata, Buenos Aires",
-  ogImage: jecAssets.background.hero,
+  ogImage: jecAssets.og.default,
   twitterHandle: undefined as string | undefined,
   /** Inicio del evento: primer día de 3 (18, 19 y 20 de septiembre 2026). */
   eventStartsAt: "2026-09-18T19:00:00-03:00",

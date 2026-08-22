@@ -98,7 +98,7 @@ export function InvitadoCard({ invitado }: InvitadoCardProps) {
       >
         <p
           id={nameId}
-          className="jec-display text-lg font-extrabold tracking-tight text-[var(--jec-bone)] md:text-xl"
+          className="jec-label text-lg font-extrabold tracking-tight text-[var(--jec-bone)] md:text-xl"
         >
           {invitado.name}
         </p>
