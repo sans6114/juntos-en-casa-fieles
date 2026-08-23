@@ -2,6 +2,10 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Docs contain literal token patterns like text-[var(--jec-*)]; Tailwind must
+   not scan them as class candidates or it emits invalid CSS. */
+@source not "../../openspec";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
