@@ -1,9 +1,14 @@
 import { Hero } from '@/components/external/hero';
+import { SiteHeader } from '@/components/external/shared';
 
 export default function ExternalPage() {
   return (
     <>
       <Hero />
+      <SiteHeader
+        logo="dark"
+        className="campo-papel sticky top-0 z-50 min-h-[var(--jec-header-h)] pb-6 md:pb-8"
+      />
     </>
   )
 }

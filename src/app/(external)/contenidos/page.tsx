@@ -12,7 +12,7 @@ export const metadata: Metadata = createPageMetadata({
 export default function ContenidosPage() {
   return (
     <>
-      <SiteHeader className="bg-[var(--jec-ink)] pb-2" />
+      <SiteHeader className="campo-tinta pb-2" />
       <ContenidosGrid />
     </>
   )

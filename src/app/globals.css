@@ -165,10 +165,24 @@
   --cta-bg: var(--jec-ink);
   --cta-fg: var(--jec-bone);
 
+  /* Header sticky de "/": altura declarada una vez, consumida por min-height y scroll-margin */
+  --jec-header-h: 80px;
+
   background-color: var(--sup);
   color: var(--dato);
   font-family: var(--font-helvetica-neue), ui-sans-serif, system-ui,
     sans-serif;
+}
+
+@media (min-width: 768px) {
+  .jec-landing {
+    --jec-header-h: 104px;
+  }
+}
+
+/* Los anclas de "/" aterrizan su título debajo del header fijado */
+.jec-landing .jec-anchor {
+  scroll-margin-top: calc(var(--jec-header-h) + 0.5rem);
 }
 
 /* Campo hueso/papel: fondo claro, tinta oscura, brasa naranja */

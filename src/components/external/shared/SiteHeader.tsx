@@ -5,13 +5,19 @@ import { cn } from "@/lib/utils"
 import { navItems } from "./navigation"
 
 const navLinkClass =
-  "jec-label text-xs font-bold uppercase tracking-[0.18em] text-[var(--jec-bone)] transition-colors hover:text-[var(--jec-amber)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--jec-amber)]"
+  "jec-label text-xs font-bold uppercase tracking-[0.18em] text-[var(--dato)] transition-colors hover:text-[var(--acento)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--foco)]"
+
+const logoSrc = {
+  light: jecAssets.logos.ivsWhite,
+  dark: jecAssets.logos.ivsBlack,
+} as const
 
 type SiteHeaderProps = {
   className?: string
+  logo?: keyof typeof logoSrc
 }
 
-export function SiteHeader({ className }: SiteHeaderProps) {
+export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
   return (
     <header
       className={cn(
@@ -21,7 +27,7 @@ export function SiteHeader({ className }: SiteHeaderProps) {
     >
       <Link href="/" className="inline-flex shrink-0 items-center" aria-label="Inicio">
         <Image
-          src={jecAssets.logos.ivsWhite}
+          src={logoSrc[logo]}
           alt="Iglesia Vida Sobrenatural"
           width={40}
           height={40}
