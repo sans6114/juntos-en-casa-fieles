@@ -33,12 +33,12 @@ Per-slice estimate (all seven land under 250, matching design's Review Budget se
 
 ## Phase 1: Header (D1, D2, D3) — lands first, only slice touching `/contenidos`
 
-- [ ] 1.1 `src/app/globals.css`: inside `.jec-landing`, add `--jec-header-h: 80px;` and a `@media (min-width: 768px)` override to `104px`; add `.jec-landing .jec-anchor { scroll-margin-top: calc(var(--jec-header-h) + 0.5rem); }`
-- [ ] 1.2 `.../shared/SiteHeader.tsx`: add `logo?: keyof typeof logoSrc` prop, `const logoSrc = { light: jecAssets.logos.ivsWhite, dark: jecAssets.logos.ivsBlack } as const`, default `"light"`
-- [ ] 1.3 `.../shared/SiteHeader.tsx`: rewrite `navLinkClass` onto field tokens — `text-[var(--dato)] hover:text-[var(--acento)] focus-visible:outline-[var(--foco)]`
-- [ ] 1.4 `src/app/(external)/page.tsx`: mount `<SiteHeader logo="dark" className="campo-papel sticky top-0 z-50 min-h-[var(--jec-header-h)] pb-6 md:pb-8" />` immediately after `<Hero />` — **`min-h-[var(--jec-header-h)]` is not optional** (D3, matches D6's CTA reserve invariant)
-- [ ] 1.5 `src/app/(external)/contenidos/page.tsx:15`: swap the `bg-[var(--jec-ink)]` literal on `<SiteHeader className="... pb-2" />` for `campo-tinta` — the one forced out-of-scope exception
-- [ ] 1.6 `npx tsc --noEmit && npm run lint`
+- [x] 1.1 `src/app/globals.css`: inside `.jec-landing`, add `--jec-header-h: 80px;` and a `@media (min-width: 768px)` override to `104px`; add `.jec-landing .jec-anchor { scroll-margin-top: calc(var(--jec-header-h) + 0.5rem); }`
+- [x] 1.2 `.../shared/SiteHeader.tsx`: add `logo?: keyof typeof logoSrc` prop, `const logoSrc = { light: jecAssets.logos.ivsWhite, dark: jecAssets.logos.ivsBlack } as const`, default `"light"`
+- [x] 1.3 `.../shared/SiteHeader.tsx`: rewrite `navLinkClass` onto field tokens — `text-[var(--dato)] hover:text-[var(--acento)] focus-visible:outline-[var(--foco)]`
+- [x] 1.4 `src/app/(external)/page.tsx`: mount `<SiteHeader logo="dark" className="campo-papel sticky top-0 z-50 min-h-[var(--jec-header-h)] pb-6 md:pb-8" />` immediately after `<Hero />` — **`min-h-[var(--jec-header-h)]` is not optional** (D3, matches D6's CTA reserve invariant)
+- [x] 1.5 `src/app/(external)/contenidos/page.tsx:15`: swap the `bg-[var(--jec-ink)]` literal on `<SiteHeader className="... pb-2" />` for `campo-tinta` — the one forced out-of-scope exception
+- [x] 1.6 `npx tsc --noEmit && npm run lint`
 - [ ] 1.7 Verify browser: slow-scroll `/` through the 255vh hero track — header not visible anywhere over the hero, scrolls in and pins from the first post-hero section onward, no client component/scroll listener/`IntersectionObserver` added
 - [ ] 1.8 Verify at 320px viewport: only `essential: true` nav links render below `md`; confirm they do **not** wrap onto a second line (D2 — `min-h` is a floor, not a clamp; if it wraps, `--jec-header-h` must go up)
 - [ ] 1.9 Verify browser `/contenidos`: logo, nav colors, hover, and focus ring match today's appearance (regression check for the forced exception)
