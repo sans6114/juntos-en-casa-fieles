@@ -8,8 +8,8 @@ const navLinkClass =
   "jec-label text-xs font-bold uppercase tracking-[0.18em] text-[var(--dato)] transition-colors hover:text-[var(--acento)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--foco)]"
 
 const logoSrc = {
-  light: jecAssets.logos.ivsWhite,
-  dark: jecAssets.logos.ivsBlack,
+  light: jecAssets.logos.wordmarkWhite,
+  dark: jecAssets.logos.wordmarkBlack,
 } as const
 
 type SiteHeaderProps = {
@@ -28,7 +28,7 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
       <Link href="/" className="inline-flex shrink-0 items-center" aria-label="Inicio">
         <Image
           src={logoSrc[logo]}
-          alt="Iglesia Vida Sobrenatural"
+          alt="Juntos en Casa"
           width={40}
           height={40}
           className="h-8 w-auto md:h-10"

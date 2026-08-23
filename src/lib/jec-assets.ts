@@ -10,6 +10,8 @@ export const jecAssets = {
     jecBlackPng: "/jec/logos/logonegro.png",
     ivsWhite: "/jec/logos/logoVSblanco.png",
     ivsBlack: "/jec/logos/logoVSnegro.png",
+    wordmarkWhite: "/jec/recursos/logo-blanco.svg",
+    wordmarkBlack: "/jec/recursos/logo-negro.svg",
   },
   personaje: {
     llama: "/jec/personaje/llama.svg",
