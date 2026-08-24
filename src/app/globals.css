@@ -186,8 +186,9 @@
   }
 }
 
-/* CTA fija de "/" en móvil: altura declarada una vez; el min-h de la barra y la reserva
-   del footer la consumen, así los dos números son el mismo y no pueden divergir. */
+/* Altura mínima de la barra CTA de "/" en móvil. La barra es `sticky bottom-0`
+   dentro del contenedor post-hero, no `fixed`: reserva su propio espacio en flujo
+   al final de la página, así que el footer ya no necesita compensarla. */
 .jec-landing {
   --jec-cta-h: 4.5rem;
 }
