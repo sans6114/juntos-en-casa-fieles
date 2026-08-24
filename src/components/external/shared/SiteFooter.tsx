@@ -26,7 +26,7 @@ export function SiteFooter({ className }: SiteFooterProps) {
         aria-label="Secciones"
         className="flex flex-wrap items-center gap-x-7 gap-y-3"
       >
-        {/* El footer ignora `essential` (es un hint de densidad del header): acá van todos los destinos. */}
+        {/* Every destination, including the CTA entry: the footer is the full index, not a density-trimmed bar. */}
         {navItems.map((item) => (
           <Link key={item.href} href={item.href} className={footerLinkClass}>
             {item.label}
