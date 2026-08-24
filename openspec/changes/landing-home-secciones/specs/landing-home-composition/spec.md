@@ -210,7 +210,25 @@ Ubicacion's map MUST render as inline vector graphics, with no iframe, no map SD
 
 ### Requirement: Persistent mobile CTA to inscription
 
-On mobile viewports, a CTA bar targeting `/inscripcion` MUST remain visible at any scroll position without a client component or scroll listener, and MUST NOT obscure footer content.
+On mobile viewports, a CTA bar targeting `/inscripcion` MUST remain visible at every scroll position **past the hero**, without a client component or scroll listener, and MUST NOT obscure footer content.
+
+The bar MUST NOT be painted over the hero. Two reasons, both structural rather than stylistic: the hero already renders its own `/inscripcion` CTA, so a bar there duplicates the call to action; and the hero track paints on `--jec-ember`, so the bar — which carries `campo-fuego` under "Field classes carry colour" — would sit ember-on-ember with no contrast against it.
+
+Scoping the bar to the post-hero region MUST NOT introduce a client component, a scroll listener or an `IntersectionObserver`; it is a containing-block decision, not a behavioural one.
+
+Once the reader reaches the end of the document the bar MAY come to rest in normal flow below the footer instead of overlaying it — resting there is what guarantees the "does not obscure footer content" clause above.
+
+#### Scenario: CTA bar is absent over the hero
+
+- **GIVEN** a 390px-wide viewport at any scroll position within the hero track
+- **WHEN** the page is inspected
+- **THEN** no CTA bar is painted over the hero, and the hero's own CTA is the only `/inscripcion` call to action on screen
+
+#### Scenario: CTA bar is pinned through the page body
+
+- **GIVEN** a 390px-wide viewport scrolled past the hero and short of the end of the document
+- **WHEN** the page is inspected
+- **THEN** the CTA bar is pinned to the bottom of the viewport
 
 #### Scenario: CTA bar stays visible and clear of the footer
 
