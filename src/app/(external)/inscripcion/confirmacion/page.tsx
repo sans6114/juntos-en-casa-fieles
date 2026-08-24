@@ -3,7 +3,7 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { createPageMetadata } from "@/lib/seo/site"
 import { QRCodeSVG } from "qrcode.react"
-import { CtaButton } from "@/components/external/shared"
+import { CtaButton, SiteHeader } from "@/components/external/shared"
 
 export const metadata: Metadata = createPageMetadata({
   title: "Inscripción confirmada",
@@ -21,28 +21,31 @@ export default async function InscripcionConfirmacionPage() {
   }
 
   return (
-    <section className="relative overflow-x-clip px-4 py-24 text-center">
-      <div className="mx-auto max-w-lg space-y-6">
-        <p className="jec-label text-xs font-bold uppercase tracking-[0.2em] text-[var(--jec-amber)]">
-          Inscripción recibida
-        </p>
-        <h1 className="jec-display text-4xl sm:text-5xl">¡Ya estás dentro!</h1>
+    <>
+      <SiteHeader logo="dark" className="campo-papel pb-6 md:pb-8" />
 
-        <div className="mx-auto mt-8 mb-8 flex max-w-sm flex-col items-center justify-center rounded-2xl bg-white p-6 shadow-xl">
-          <QRCodeSVG 
-            value={inscripcionUuid} 
-            size={220}
-            level="H"
-            includeMargin={true}
-          />
+      <section className="campo-papel px-6 pb-24 pt-10 text-center md:px-10 md:pb-28">
+        <div className="mx-auto max-w-lg">
+          <p className="jec-label jec-eyebrow inline-block text-xs font-bold uppercase tracking-[0.28em]">
+            Inscripción recibida
+          </p>
+          <h1 className="jec-display mt-4 text-4xl leading-[0.95] sm:text-5xl">¡Ya estás dentro!</h1>
+
+          {/* Fondo blanco deliberado: el QR necesita el contraste máximo para escanear. */}
+          <div className="mx-auto my-10 flex max-w-sm flex-col items-center justify-center rounded-[6px] border border-[var(--regla)] bg-white p-6 shadow-[3px_3px_0_0_var(--regla)]">
+            <QRCodeSVG value={inscripcionUuid} size={220} level="H" includeMargin />
+          </div>
+
+          <p className="text-pretty leading-relaxed text-[var(--suave)]">
+            Te enviamos un email con tu código QR de inscripción. Podés sacarle captura a esta
+            pantalla y guardarlo, lo vas a necesitar el día del evento.
+          </p>
+
+          <CtaButton href="/" className="mt-8">
+            Volver al inicio
+          </CtaButton>
         </div>
-
-        <p className="text-[var(--jec-smoke)]">
-          Te enviamos un email con tu código QR de inscripción. Podés sacarle captura a esta pantalla y guardarlo, lo vas a
-          necesitar el día del evento.
-        </p>
-        <CtaButton href="/">Volver al inicio</CtaButton>
-      </div>
-    </section>
+      </section>
+    </>
   )
 }
