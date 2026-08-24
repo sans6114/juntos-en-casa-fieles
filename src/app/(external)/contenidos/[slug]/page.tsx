@@ -15,6 +15,7 @@ import {
   CtaButton,
   PlaceholderTag,
   SectionHeading,
+  SiteFooter,
   SiteHeader,
 } from "@/components/external/shared"
 import { createPageMetadata } from "@/lib/seo/site"
@@ -146,6 +147,8 @@ export default async function ContenidoPage({ params }: ContenidoPageProps) {
           </div>
         </section>
       ) : null}
+
+      <SiteFooter />
     </>
   )
 }
