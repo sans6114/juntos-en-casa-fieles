@@ -57,11 +57,11 @@ Per-slice estimate (all seven land under 250, matching design's Review Budget se
 
 ## Phase 3: Guests (D8)
 
-- [ ] 3.1 `.../invitados/data.ts`: narrow `Invitado` to `{ id: string; name: string }`; drop the six `/jec/oradores/*` paths and per-guest `accent`; remove `// TODO(landing-home-secciones)`
-- [ ] 3.2 `.../invitados/InvitadoCard.tsx`: rewrite as a Server Component — delete `"use client"`, the three `useState`, `useId`, and the reveal mechanic; `<article className="border border-[var(--linea)]">` with `?` glyph (`.jec-display text-7xl md:text-8xl text-[var(--acento)]`, 72–96px, above the 34px floor) and the guest name as caption (`.jec-label`)
-- [ ] 3.3 `.../invitados/Invitados.tsx`: field class → `campo-tinta`; add `jec-anchor` to the section wrapper's className — `id="invitados"` already exists at `Invitados.tsx:9`, do not duplicate it
-- [ ] 3.4 `src/app/(external)/page.tsx`: mount `<Invitados />` after `<Cronograma />`
-- [ ] 3.5 `npx tsc --noEmit && npm run lint` + `rg "/jec/oradores" src` — zero hits; confirm no `useState`/`"use client"` remains in `InvitadoCard.tsx`
+- [x] 3.1 `.../invitados/data.ts`: narrow `Invitado` to `{ id: string; name: string }`; drop the six `/jec/oradores/*` paths and per-guest `accent`; remove `// TODO(landing-home-secciones)`
+- [x] 3.2 `.../invitados/InvitadoCard.tsx`: rewrite as a Server Component — delete `"use client"`, the three `useState`, `useId`, and the reveal mechanic; `<article className="border border-[var(--linea)]">` with `?` glyph (`.jec-display text-7xl md:text-8xl text-[var(--acento)]`, 72–96px, above the 34px floor) and the guest name as caption (`.jec-label`)
+- [x] 3.3 `.../invitados/Invitados.tsx`: field class → `campo-tinta`; add `jec-anchor` to the section wrapper's className — `id="invitados"` already exists at `Invitados.tsx:9`, do not duplicate it
+- [x] 3.4 `src/app/(external)/page.tsx`: mount `<Invitados />` after `<Cronograma />`
+- [x] 3.5 `npx tsc --noEmit && npm run lint` + `rg "/jec/oradores" src` — zero hits; confirm no `useState`/`"use client"` remains in `InvitadoCard.tsx`
 - [ ] 3.6 Verify browser: `/#invitados` heading clears the pinned header at 375px/1280px; cards show no hover/click/focus reveal state; `?` glyph still `.jec-display`
 - [ ] 3.7 Rollback: `git revert` this slice's commit — removes `<Invitados />` mount, restores the prior interactive `InvitadoCard`; Phases 1-2 unaffected
 
