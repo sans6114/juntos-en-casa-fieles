@@ -1,6 +1,7 @@
 import { Hero } from '@/components/external/hero';
 import { Cronograma } from '@/components/external/cronograma';
 import { Invitados } from '@/components/external/invitados';
+import { Ubicacion } from '@/components/external/ubicacion';
 import { SiteHeader } from '@/components/external/shared';
 
 export default function ExternalPage() {
@@ -13,6 +14,7 @@ export default function ExternalPage() {
       />
       <Cronograma />
       <Invitados />
+      <Ubicacion />
     </>
   )
 }
