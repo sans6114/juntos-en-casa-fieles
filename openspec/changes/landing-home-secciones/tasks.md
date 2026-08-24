@@ -39,11 +39,11 @@ Per-slice estimate (all seven land under 250, matching design's Review Budget se
 - [x] 1.4 `src/app/(external)/page.tsx`: mount `<SiteHeader logo="dark" className="campo-papel sticky top-0 z-50 min-h-[var(--jec-header-h)] pb-6 md:pb-8" />` immediately after `<Hero />` — **`min-h-[var(--jec-header-h)]` is not optional** (D3, matches D6's CTA reserve invariant)
 - [x] 1.5 `src/app/(external)/contenidos/page.tsx:15`: swap the `bg-[var(--jec-ink)]` literal on `<SiteHeader className="... pb-2" />` for `campo-tinta` — the one forced out-of-scope exception
 - [x] 1.6 `npx tsc --noEmit && npm run lint`
-- [ ] 1.7 Verify browser: slow-scroll `/` through the 255vh hero track — header not visible anywhere over the hero, scrolls in and pins from the first post-hero section onward, no client component/scroll listener/`IntersectionObserver` added
+- [ ] 1.7 Verify browser: slow-scroll `/` through the 255vh hero track — header not visible anywhere over the hero, scrolls in and pins from the first post-hero section onward. **Verificado en código 2026-08-24**: `SiteHeader` sits after `<Hero />` in `page.tsx` flow with `sticky top-0`, and the file contains no `"use client"`, no scroll listener and no `IntersectionObserver` — that half of the task is proven. **Pendiente de navegador**: only the visual pass over the 255vh track remains
 - [x] 1.8 ~~Verify at 320px viewport: only `essential: true` nav links render below `md`~~ — **superseded**. Hiding three of five links below `md` left `#cronograma`, `#invitados` and `#ubicacion` unreachable on phones. `essential` is gone; every entry now renders at every breakpoint, below `md` inside the `:target` menu panel (commit `8016828`). Nothing can wrap, so the wrap check no longer applies. `--jec-header-h` was measured and raised 80px → 92px (pt-6 24 + 44px touch target + pb-6 24), which D2's "the variable follows the real height" rule required
-- [ ] 1.9 Verify browser `/contenidos`: logo, nav colors, hover, and focus ring match today's appearance (regression check for the forced exception)
-- [ ] 1.10 Verify keyboard tab-through: focus reaching a header nav link while the hero is on screen scrolls the header into view, no `aria-hidden`/`display: none`/negative `tabindex`
-- [ ] 1.11 Rollback: `git revert` this slice's commit(s) — unmounts `SiteHeader` from `/`, reverts `SiteHeader.tsx` prop/token changes and `contenidos/page.tsx:15`; no dependency on later slices
+- [ ] 1.9 Verify browser `/contenidos`: logo, nav colors, hover, and focus ring match today's appearance (regression check for the forced exception). **Pendiente de navegador** — a side-by-side visual diff cannot be produced without a viewport; `campo-tinta` resolves to the same bone/amber the removed literals produced, but that is the claim under test
+- [ ] 1.10 Verify keyboard tab-through: focus reaching a header nav link while the hero is on screen scrolls the header into view. **Verificado en código 2026-08-24**: `SiteHeader.tsx` carries no `aria-hidden` and no negative `tabindex`; the only `display: none` is `.jec-menu-movil` while closed and the desktop nav's `hidden md:flex`, and every entry stays reachable at every breakpoint (the `:target` panel below `md`, the inline nav from `md` up) — the attribute half is proven. **Pendiente de navegador**: the scroll-into-view behaviour on focus
+- [x] 1.11 Rollback boundary recorded: `59d96cb` (header slice) + `542796b` (vector wordmarks) + `8016828` (`:target` mobile menu, which also raised `--jec-header-h` to 92px). Reverting all three unmounts `SiteHeader` from `/` and restores `contenidos/page.tsx:15`; no later slice depends on them
 
 ## Phase 2: Schedule (D4)
 
@@ -52,8 +52,8 @@ Per-slice estimate (all seven land under 250, matching design's Review Budget se
 - [x] 2.3 `.../cronograma/CronogramaDiaCard.tsx`: swap remaining `text-[var(--jec-*)]` literals onto field tokens
 - [x] 2.4 `src/app/(external)/page.tsx`: mount `<Cronograma />` after `<SiteHeader />`
 - [x] 2.5 `npx tsc --noEmit && npm run lint`
-- [ ] 2.6 Verify browser: `/#cronograma` direct nav lands the heading fully below the pinned header at 375px and 1280px; dates read 18/19/20 September 2026 Fri/Sat/Sun
-- [ ] 2.7 Rollback: `git revert` this slice's commit — removes `<Cronograma />` mount and its field-class/date edits; Phase 1 unaffected
+- [ ] 2.6 Verify browser: `/#cronograma` direct nav lands the heading fully below the pinned header at 375px and 1280px. **Verificado en código 2026-08-24**: the date half is settled — `data.ts` reads `Viernes 18`/`Sábado 19`/`Domingo 20`, and `Intl` over `siteConfig.eventStartsAt` (`2026-09-18T19:00:00-03:00`) returns `viernes, 18 de septiembre de 2026`, so the labels agree with the source of truth. `Cronograma.tsx:11` carries `jec-anchor` and `globals.css:197` gives it `scroll-margin-top: calc(var(--jec-header-h) + 0.5rem)`. **Pendiente de navegador**: the two-viewport landing check
+- [x] 2.7 Rollback boundary recorded: `0ad94bf` (mount + field class) + `c6d7665` (`Sábado 13` → `Sábado 19`). Reverting both removes the `<Cronograma />` mount and its date edits; Phase 1 unaffected
 
 ## Phase 3: Guests (D8)
 
@@ -62,8 +62,8 @@ Per-slice estimate (all seven land under 250, matching design's Review Budget se
 - [x] 3.3 `.../invitados/Invitados.tsx`: field class → `campo-tinta`; add `jec-anchor` to the section wrapper's className — `id="invitados"` already exists at `Invitados.tsx:9`, do not duplicate it
 - [x] 3.4 `src/app/(external)/page.tsx`: mount `<Invitados />` after `<Cronograma />`
 - [x] 3.5 `npx tsc --noEmit && npm run lint` + `rg "/jec/oradores" src` — zero hits; confirm no `useState`/`"use client"` remains in `InvitadoCard.tsx`
-- [ ] 3.6 Verify browser: `/#invitados` heading clears the pinned header at 375px/1280px; cards show no hover/click/focus reveal state; `?` glyph still `.jec-display`
-- [ ] 3.7 Rollback: `git revert` this slice's commit — removes `<Invitados />` mount, restores the prior interactive `InvitadoCard`; Phases 1-2 unaffected
+- [ ] 3.6 Verify browser: `/#invitados` heading clears the pinned header at 375px/1280px. **Verificado en código 2026-08-24**: the reveal-state half is proven — `InvitadoCard.tsx` has no `"use client"` and no `useState`, so no hover/click/focus state can exist; its `?` glyph keeps `.jec-display` at `text-7xl md:text-8xl` (72–96px). `Invitados.tsx:11` carries `jec-anchor`. **Pendiente de navegador**: the two-viewport landing check
+- [x] 3.7 Rollback boundary recorded: `8f26f5c` — single commit, removes the `<Invitados />` mount and restores the prior interactive `InvitadoCard`; Phases 1-2 unaffected
 
 ## Phase 4: Location + map (D7, D9 ubicacion)
 
@@ -73,9 +73,9 @@ Per-slice estimate (all seven land under 250, matching design's Review Budget se
 - [x] 4.4 `.../ubicacion/Ubicacion.tsx`: field class → `campo-papel`; add `jec-anchor` to the section className (`id="ubicacion"` already exists at line 13, do not duplicate it); read all four `UbicacionInfo` fields from `data.ts` instead of the inline `STREET_PLACEHOLDER` constant and the locally-built `mapsQuery`/`mapsUrl` (lines 7-8); mount `<MapaSimulado />`; swap line 26's `.jec-display` (`text-xl md:text-2xl`) for `.jec-label`
 - [x] 4.5 `src/app/(external)/page.tsx`: mount `<Ubicacion />` after `<Invitados />`
 - [x] 4.6 `npx tsc --noEmit && npm run lint`
-- [ ] 4.7 Verify browser: `/#ubicacion` heading clears the pinned header at 375px/1280px; Network tab shows zero external map requests; `Ubicacion`'s CTA passes field contrast (not background-on-background); "Cómo llegar" opens the address `data.ts` builds
+- [ ] 4.7 Verify browser: `/#ubicacion` heading clears the pinned header at 375px/1280px. **Verificado en código 2026-08-24**: three of the four checks are settled without a viewport. (a) Zero external map requests — `MapaSimulado.tsx` is inline `<svg>` with no `<image href>` and no external URL; the only outbound URL under `ubicacion/` is `data.ts`'s `mapsUrl`, which is a link target, not a fetch. (b) CTA contrast — on `campo-papel` the button is `--cta-bg: --jec-ink` (`#0b0a0f`) on `--cta-fg: --jec-bone` (`#f4efe8`) = **17,25:1**, a filled button on a bone surface, so it is not background-on-background. (c) "Cómo llegar" resolves to `ubicacionInfo.mapsUrl`, built in `data.ts` from `siteConfig.org` + `siteConfig.city`. **Pendiente de navegador**: the two-viewport landing check
 - [x] 4.8 Verify content: `ubicacion/data.ts`'s `street` placeholder is unambiguously marked in the **rendered text**, not only in a code comment
-- [ ] 4.9 Rollback: `git revert` this slice's commit — removes `<Ubicacion />` mount and deletes `MapaSimulado.tsx`/`data.ts`; Phases 1-3 unaffected
+- [x] 4.9 Rollback boundary recorded: `d40ba92` (mount + `MapaSimulado` + `data.ts`) + `936b500` (the redesign that vectorised the map and dropped the raster pin). Reverting both removes the `<Ubicacion />` mount and the new files; Phases 1-3 unaffected. Note the boundary is two commits, not one, because the redesign landed after the slice
 
 ## Phase 5: FAQ (D9 faq)
 
@@ -84,9 +84,9 @@ Per-slice estimate (all seven land under 250, matching design's Review Budget se
 - [x] 5.3 NEW `.../faq/index.ts`: barrel-export `Faq`
 - [x] 5.4 `src/app/(external)/page.tsx`: mount `<Faq />` after `<Ubicacion />`; confirm `navigation.ts`'s `navItems` gains **no** Faq entry (user decision 2026-08-21 — Faq is reached by scrolling `/` only)
 - [x] 5.5 `npx tsc --noEmit && npm run lint`
-- [ ] 5.6 Verify browser: `Faq` opens and closes with JavaScript disabled (native `<details>/<summary>`); no Faq entry appears in `SiteHeader` or `SiteFooter` nav
+- [x] 5.6 **Verificado en código 2026-08-24** — no viewport needed for either half. `Disclosure.tsx:13-14` renders native `<details>`/`<summary>` and neither it nor `Faq.tsx` carries `"use client"`, so open/close is browser-native and works with JavaScript disabled by construction. `navigation.ts`'s `navItems` holds exactly five entries (Cronograma, Invitados, Ubicación, Contenidos, Inscribirme) and no Faq entry, and both `SiteHeader` and `SiteFooter` map that same array — confirmed in the prerendered `/` HTML, which contains zero `href="/#faq"`
 - [x] 5.7 Verify content: every `faq/data.ts` entry's rendered text is unambiguously marked as placeholder
-- [ ] 5.8 Rollback: `git revert` this slice's commit — removes `<Faq />` mount and deletes the new `faq/` files; Phases 1-4 unaffected
+- [x] 5.8 Rollback boundary recorded: `c4cce41` — single commit, removes the `<Faq />` mount and deletes the new `faq/` files; Phases 1-4 unaffected
 
 ## Phase 6: Footer + sticky CTA (D5, D6)
 
@@ -97,10 +97,10 @@ Per-slice estimate (all seven land under 250, matching design's Review Budget se
 - [x] 6.4 `.../shared/index.ts`: barrel-export `SiteFooter`, `StickyCta`
 - [x] 6.5 `src/app/(external)/page.tsx`: mount `<SiteFooter />` after `<Faq />`, then `<StickyCta />` last — after `SiteFooter`, so it never interrupts the Hero→…→SiteFooter reading order
 - [x] 6.6 `npx tsc --noEmit && npm run lint`
-- [ ] 6.7 Verify browser at 320px: (a) the CTA bar is **not** painted over the hero at any point of the 255vh track — `HeroFinale`'s own CTA is the only one on screen there; (b) it is pinned to the viewport bottom through the page body; (c) scrolled fully to the end it sits **below** the footer in flow, overlapping nothing. The footer reserve is gone, so the old "does the label wrap past the reserve" check no longer applies — but confirm the label still fits one line at 320px
-- [ ] 6.8 Verify browser: `SiteFooter` renders every `navItems` entry, no social-link element (empty `socialLinks`), no Faq entry
-- [ ] 6.9 Verify on a real iOS device (or simulator): `env(safe-area-inset-bottom)` is a no-op today (no `viewportFit: "cover"` in `layout.tsx`), so the bar is not under the home indicator
-- [ ] 6.10 Rollback: `git revert` this slice's commit — removes `<SiteFooter />`/`<StickyCta />` mounts, deletes the two new files, removes `--jec-cta-h`; Phases 1-5 unaffected
+- [ ] 6.7 Verify browser at 320px: (a) the CTA bar is **not** painted over the hero; (b) it is pinned to the viewport bottom through the page body; (c) at the end it sits **below** the footer in flow; (d) the label fits one line at 320px. **Verificado en código 2026-08-24**: the prerendered `/` HTML contains exactly one `campo-fuego sticky` element, and it is the last child of the post-hero wrapper `<div>`, after `<footer>` — so the flow position behind (a) and (c) is structurally as designed. **Pendiente de navegador**: (a)/(b)/(c) as rendered behaviour and (d) the label wrap, all of which need a real 320px viewport
+- [x] 6.8 **Verificado en código 2026-08-24** in the prerendered `/` HTML — no viewport needed. The footer renders all five `navItems` entries (four as links in the "Secciones" column, `Inscribirme` as the `CtaButton` in "Sumate"), zero social `<ul>` elements (`socialLinks` is `[]`, and the render is guarded by `socialLinks.length > 0`), and no Faq entry
+- [x] 6.9 **Verificado en código 2026-08-24** — the premise is confirmed and it settles the check. `src/app/layout.tsx:26-28` exports `viewport` with `colorScheme: "only light"` only: there is no `viewportFit: "cover"`, so the page never extends under the home indicator and `env(safe-area-inset-bottom)` resolves to `0px`. `StickyCta` is additionally `sticky` in flow, not `fixed`. A device pass is worth doing if `viewportFit` is ever added; today there is nothing for it to catch
+- [x] 6.10 Rollback boundary recorded: `51b817d` (footer + CTA bar) + `4105da2` (barrel exports) + `3e41e41` (footer on the other three pages) + `611ab76` (footer → `campo-tinta`, brasa → CTA bar). Reverting all four removes both mounts, deletes the two new files and drops `--jec-cta-h`; Phases 1-5 unaffected. Four commits, not one — the closing redesign landed after the slice
 
 ## Phase 7: CTA target + display type (Hero, HeroFinale, HeroCountdown, navigation.ts)
 
@@ -110,18 +110,47 @@ Per-slice estimate (all seven land under 250, matching design's Review Budget se
 - [x] 7.4 `.../shared/navigation.ts:19`: `"Inscribirme"` entry's `href` from `/#inscripcion` to `/inscripcion`
 - [x] 7.5 `rg "/#inscripcion" src` — zero hits across the full `src/` tree
 - [x] 7.6 `npx tsc --noEmit && npm run lint`
-- [ ] 7.7 Verify browser: header nav, hero finale CTA, and sticky mobile bar all navigate to `/inscripcion`; no `.jec-display` below 34px remains on `/` (covers `HeroCountdown.tsx:70`; `Ubicacion.tsx:26` fixed in Phase 4; `InvitadoCard`'s "?" glyph keeps `.jec-display` per Phase 3)
-- [ ] 7.8 Rollback: `git revert` this slice's commit — restores the `/#inscripcion` references and the `sr-only` placeholder div; Phases 1-6 unaffected (each CTA still resolves somewhere, just to the dead anchor again)
+- [x] 7.7 **Verificado en código 2026-08-24** in the prerendered `/` HTML — no viewport needed. The rendered body holds five `href="/inscripcion"` targets and zero `/#inscripcion`: header desktop nav, header `:target` menu, `HeroFinale` CTA, footer `CtaButton`, `StickyCta`. All are plain `href`s to a route the build emits (`○ /inscripcion`). On `/`, the surviving `.jec-display` uses are `HeroCountdown.tsx:67` (`text-4xl`, 36px), `HeroSequence.tsx:270` (`clamp(2.25rem,9vw,5.5rem)`), `HeroFinale.tsx:197` (`clamp(3rem,15vw,9rem)`) and `InvitadoCard.tsx:10` (`text-7xl md:text-8xl`) — all at or above the 34px floor.
+  - Out of scope but worth recording: `src/app/(external)/inscripcion/ui/InscripcionForm.tsx:75` still sets `.jec-display text-2xl sm:text-3xl` (24px/30px), below the floor. It lives on `/inscripcion`, which this change does not own, so it is left untouched here
+- [x] 7.8 Rollback boundary recorded: `8016828` (CTA repoint, shared with the mobile-menu work) + `936983d` (countdown `.jec-display` → `.jec-label`). Reverting restores the `/#inscripcion` references and the `sr-only` placeholder div; Phases 1-6 unaffected. Note the repoint is not isolated in its own commit — reverting `8016828` also removes the `:target` mobile menu
 
 ## Phase 8: Final verification (Testing Strategy)
 
-- [ ] 8.1 Static: `npx tsc --noEmit`, `npm run lint`, `npm run build`; `rg` for `bg-\[var\(--jec-` and `text-\[var\(--jec-` across `src/components/external` **and** `src/app/(external)` — `InscripcionForm.tsx`, `CongregacionCombobox.tsx` and `ContenidosGrid.tsx` were migrated to field tokens (commits `8546a4e`, `0a3e7ea`) and are no longer excluded. Remaining `--jec-*` literals are deliberate and must stay: the play badge and duration chip in `ContenidoThumb.tsx` (bone-on-ink over a thumbnail, constant across fields), the iframe backdrop in `VideoEmbed.tsx`, and `text-[var(--jec-ink)]` on the combobox's highlighted option (ink reads on both `--acento` values). `hero/` and `ubicacion/` are owned by other slices
-  - `npm run lint` exits non-zero on a clean tree: `src/hooks/use-mobile.ts:14` (error, from commit `eaaff37`) and `src/components/external/hero/ScrollExpand.tsx:257` (warning) both predate this change. Compare against that floor, not against zero
-- [ ] 8.2 Layout: browser slow-scroll through the full 255vh hero track — header invisible over hero, not painted under `HeroFinale` at the 2.55× handoff, pinned for the rest of the page
-- [ ] 8.3 Anchors: `/#cronograma`, `/#invitados`, `/#ubicacion` (direct URL) land the heading fully below the pinned header at 375px and 1280px
-- [ ] 8.4 A11y: keyboard tab-through — header focusable and scrolled into view while the hero is on screen, no `aria-hidden`/`display: none`/negative `tabindex`; `MapaSimulado` not announced by AT
-- [ ] 8.5 Mobile: CTA bar absent over the hero, pinned at every scroll position past it, and clear of footer content at 320px; confirm on a real iOS device per D6's `env()` note
-- [ ] 8.6 Regression: `/contenidos` side-by-side — logo, nav, hover, focus ring match today's appearance
-- [ ] 8.7 Content: read `faq/data.ts` and `ubicacion/data.ts` end to end — every placeholder value visibly marked in its rendered text
-- [ ] 8.8 Confirm final document order in `page.tsx`: Hero, SiteHeader, Cronograma, Invitados, Ubicacion, Faq, SiteFooter, StickyCta — exactly once each, matching Requirement 1. Cronograma→StickyCta now sit inside a post-hero wrapper `<div>` that scopes `StickyCta`'s `sticky bottom-0`; `SiteHeader` stays **outside** it, since moving it in would re-scope its own `sticky top-0` containing block
-- [ ] 8.9 Walk every `proposal.md` Success Criteria checkbox against the shipped state before closing the change
+- [x] 8.1 Static: `npx tsc --noEmit`, `npm run lint`, `npm run build`; `rg` for `bg-\[var\(--jec-` and `text-\[var\(--jec-` across `src/components/external` **and** `src/app/(external)` — `InscripcionForm.tsx`, `CongregacionCombobox.tsx` and `ContenidosGrid.tsx` were migrated to field tokens (commits `8546a4e`, `0a3e7ea`) and are no longer excluded. Remaining `--jec-*` literals are deliberate and must stay: the play badge and duration chip in `ContenidoThumb.tsx` (bone-on-ink over a thumbnail, constant across fields), the iframe backdrop in `VideoEmbed.tsx`, and `text-[var(--jec-ink)]` on the combobox's highlighted option (ink reads on both `--acento` values). `hero/` and `ubicacion/` are owned by other slices
+  - `npm run lint` exits non-zero on a clean tree: `src/hooks/use-mobile.ts:14` (error) and `src/components/external/hero/ScrollExpand.tsx:257` (warning) both predate this change. Compare against that floor, not against zero
+  - **Resultado 2026-08-24** — `npx tsc --noEmit` exits 0. `npm run build` succeeds (20 static pages, `○ /`). `npm run lint` reports 1 error + 3 warnings, **all four pre-existing**: the two already documented above, plus `src/lib/email/send-qr-email.ts:22` (unused `data`, from `f108730`) and `svgo.config.mjs:8` (anonymous default export, from `7b05ee0`) — neither commit belongs to this change, so the real floor is 1 error + 3 warnings, and this change adds nothing to it
+  - **Resultado del scan `--jec-*`** — every literal found is on the documented deliberate list: `ContenidoThumb.tsx:59,68` (play badge + duration chip), `VideoEmbed.tsx:34` (iframe backdrop), `CongregacionCombobox.tsx:144,145` (`--jec-ink` on the highlighted option). `ubicacion/` is clean (zero literals), as are `cronograma/`, `invitados/` and `faq/`
+  - **Hallazgo no documentado en 8.1** — `src/components/external/shared/TickerTape.tsx:39,46,50` still carries `--jec-bone`/`--jec-ink-soft`/`--jec-amber` literals. It is **exported through the `shared` barrel but mounted on no page**, exactly like `HeroCountdown`, so none of it reaches `/` and it blocks nothing here. Left untouched: migrating it is outside this change's scope. Worth a follow-up alongside whichever change first mounts it
+- [ ] 8.2 Layout: browser slow-scroll through the full 255vh hero track — header invisible over hero, not painted under `HeroFinale` at the 2.55× handoff, pinned for the rest of the page. **Pendiente de navegador** — genuinely visual; the structure behind it is proven in 1.7
+- [ ] 8.3 Anchors: `/#cronograma`, `/#invitados`, `/#ubicacion` (direct URL) land the heading fully below the pinned header at 375px and 1280px. **Verificado en código 2026-08-24**: all four sections (`cronograma`, `invitados`, `ubicacion`, `faq`) carry both their `id` and `jec-anchor`, and `globals.css:197-199` gives `.jec-landing .jec-anchor` a `scroll-margin-top` of `calc(var(--jec-header-h) + 0.5rem)` — 92px + 8px below `md`, 104px + 8px from `md` up. **Pendiente de navegador**: that the measured header height still matches at both viewports
+- [ ] 8.4 A11y: keyboard tab-through — header focusable and scrolled into view while the hero is on screen. **Verificado en código 2026-08-24**: `MapaSimulado.tsx:21-23` carries `role="presentation" aria-hidden="true" focusable="false"`, so AT does not announce the figure, and its `<figcaption>` stays readable. `SiteHeader.tsx` has no `aria-hidden` and no negative `tabIndex`. **Pendiente de navegador**: the focus-scrolls-header-into-view behaviour
+- [ ] 8.5 Mobile: CTA bar absent over the hero, pinned at every scroll position past it, and clear of footer content at 320px. **Verificado en código 2026-08-24**: the iOS half is settled in 6.9 — no `viewportFit: "cover"`, so `env(safe-area-inset-bottom)` is `0px` and the page never reaches under the home indicator. **Pendiente de navegador**: the 320px scroll pass (see 6.7)
+- [ ] 8.6 Regression: `/contenidos` side-by-side — logo, nav, hover, focus ring match today's appearance. **Pendiente de navegador** — a before/after visual diff needs a viewport (see 1.9)
+- [x] 8.7 **Verificado en código 2026-08-24** — both files read end to end and checked against the prerendered `/` HTML. `faq/data.ts` holds four entries, every one rendering `Pregunta de ejemplo — reemplazar` / `Respuesta de ejemplo — reemplazar`. `ubicacion/data.ts` models the gap in the type rather than in a string: `street: string | null` is `null`, and `Ubicacion.tsx` renders `PlaceholderTag` for it — the rendered text reads **`Dirección por confirmar`**. `PlaceholderTag.tsx` adds a hatched fill so it reads as unfinished at a glance. No invented-but-plausible content anywhere in either file
+- [x] 8.8 **Verificado en código 2026-08-24** in both `page.tsx` source and the prerendered `/` HTML — each component appears exactly once, in order. Confirm final document order in `page.tsx`: Hero, SiteHeader, Cronograma, Invitados, Ubicacion, Faq, SiteFooter, StickyCta — exactly once each, matching Requirement 1. Cronograma→StickyCta now sit inside a post-hero wrapper `<div>` that scopes `StickyCta`'s `sticky bottom-0`; `SiteHeader` stays **outside** it, since moving it in would re-scope its own `sticky top-0` containing block
+- [x] 8.9 Walked every `proposal.md` Success Criteria checkbox against the shipped state. **12 of 14 confirmed in code**; the two left open are the same visual claims 8.2 and 8.6 cover, and they are now marked in `proposal.md` with the reason:
+  - ✅ `/` renders every section, no unmounted section component remains — the prerendered DOM shows Hero → SiteHeader → Cronograma → Invitados → Ubicacion → Faq → SiteFooter → StickyCta, once each
+  - ✅ `SiteHeader` reads its colours from field tokens, zero `--jec-*` literals in the file
+  - ⏳ Header absent over the hero and pinned after it — the "no client component / scroll listener / `IntersectionObserver`" half is proven; the visual half is 8.2
+  - ✅ Every home anchor carries `scroll-margin-top` via `jec-anchor`
+  - ✅ Zero `/#inscripcion` in `src/`; all five CTAs resolve to `/inscripcion`, a route the build emits
+  - ✅ Zero `bg-[var(--jec-ink)]` literals in the sections this change owns
+  - ✅ `Ubicacion`'s CTA passes contrast — ink on bone, 17,25:1
+  - ✅ Schedule dates agree with `siteConfig.eventStartsAt` (2026-09-18 is a Friday per `Intl`)
+  - ✅ `InvitadoCard` is a Server Component, no `useState`, no `/jec/oradores/*`
+  - ✅ `MapaSimulado` makes no external request — inline `<svg>`, no `<image href>`
+  - ✅ `SiteFooter` renders every `navItem` and nothing for an empty `socialLinks`
+  - ✅ `Faq` and `Ubicacion` render from their `data.ts`, both clearly marked as placeholder
+  - ✅ No `.jec-display` below 34px on `/`
+  - ✅ `tsc`, `lint` (at its pre-existing floor) and `build` all pass
+
+## Verificación pendiente de navegador
+
+Todo lo demostrable sin viewport quedó cerrado arriba. Estas seis comprobaciones necesitan ojos sobre la página y son las únicas que faltan para cerrar el change:
+
+1. **1.7 / 8.2** — scroll lento por los 255vh del hero: el header no aparece sobre el hero y queda fijado desde `Cronograma` en adelante
+2. **1.9 / 8.6** — `/contenidos` lado a lado: logo, nav, hover y anillo de foco iguales a hoy
+3. **1.10 / 8.4** — tab con teclado: al enfocar un enlace del header con el hero en pantalla, el header entra en vista
+4. **2.6 / 3.6 / 4.7 / 8.3** — `/#cronograma`, `/#invitados` y `/#ubicacion` por URL directa a 375px y 1280px: el título aterriza entero debajo del header
+5. **6.7 / 8.5** — a 320px: la barra CTA no se pinta sobre el hero, queda fijada al fondo durante el cuerpo, aterriza debajo del footer al final, y la etiqueta entra en una línea
+6. **6.9** — solo si algún día se agrega `viewportFit: "cover"` a `layout.tsx`; hoy `env(safe-area-inset-bottom)` es `0px` y no hay nada que comprobar en dispositivo
