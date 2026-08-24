@@ -47,10 +47,10 @@ Per-slice estimate (all seven land under 250, matching design's Review Budget se
 
 ## Phase 2: Schedule (D4)
 
-- [ ] 2.1 `.../cronograma/data.ts`: correct day labels to `"Viernes 18"` / `"Sábado 19"` / `"Domingo 20"`; add `// Fuente de verdad: siteConfig.eventStartsAt`
-- [ ] 2.2 `.../cronograma/Cronograma.tsx`: field class → `campo-papel`; add `jec-anchor` to the section wrapper's className — `id="cronograma"` already exists at `Cronograma.tsx:9`, do not duplicate it
-- [ ] 2.3 `.../cronograma/CronogramaDiaCard.tsx`: swap remaining `text-[var(--jec-*)]` literals onto field tokens
-- [ ] 2.4 `src/app/(external)/page.tsx`: mount `<Cronograma />` after `<SiteHeader />`
+- [x] 2.1 `.../cronograma/data.ts`: correct day labels to `"Viernes 18"` / `"Sábado 19"` / `"Domingo 20"`; add `// Fuente de verdad: siteConfig.eventStartsAt`
+- [x] 2.2 `.../cronograma/Cronograma.tsx`: field class → `campo-papel`; add `jec-anchor` to the section wrapper's className — `id="cronograma"` already exists at `Cronograma.tsx:9`, do not duplicate it
+- [x] 2.3 `.../cronograma/CronogramaDiaCard.tsx`: swap remaining `text-[var(--jec-*)]` literals onto field tokens
+- [x] 2.4 `src/app/(external)/page.tsx`: mount `<Cronograma />` after `<SiteHeader />`
 - [ ] 2.5 `npx tsc --noEmit && npm run lint`
 - [ ] 2.6 Verify browser: `/#cronograma` direct nav lands the heading fully below the pinned header at 375px and 1280px; dates read 18/19/20 September 2026 Fri/Sat/Sun
 - [ ] 2.7 Rollback: `git revert` this slice's commit — removes `<Cronograma />` mount and its field-class/date edits; Phase 1 unaffected
