@@ -6,8 +6,10 @@ export {
   ArrowLeftIcon,
   ArrowRightIcon,
   ClockIcon,
+  CloseIcon,
   DownloadIcon,
   ImagesIcon,
+  MenuIcon,
   PlayIcon,
 } from "./icons"
 export { navItems, socialLinks } from "./navigation"

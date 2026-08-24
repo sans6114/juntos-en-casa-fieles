@@ -255,7 +255,7 @@ export function HeroFinale() {
                 </div>
               ))}
             </div>
-            <CtaButton href="/#inscripcion" variant="pill">
+            <CtaButton href="/inscripcion" variant="pill">
               Inscribirme
             </CtaButton>
           </div>

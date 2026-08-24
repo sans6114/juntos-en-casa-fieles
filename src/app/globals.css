@@ -169,8 +169,10 @@
   --cta-bg: var(--jec-ink);
   --cta-fg: var(--jec-bone);
 
-  /* Header sticky de "/": altura declarada una vez, consumida por min-height y scroll-margin */
-  --jec-header-h: 80px;
+  /* Header sticky de "/": altura declarada una vez, consumida por min-height y scroll-margin.
+     92px = pt-6 (24) + hamburguesa 44 (mínimo táctil) + pb-6 (24). Medido, no estimado:
+     min-h es piso y no recorta, así que la variable tiene que seguir a la altura real. */
+  --jec-header-h: 92px;
 
   background-color: var(--sup);
   color: var(--dato);
@@ -250,6 +252,28 @@
   vertical-align: middle;
   margin-inline-end: 0.75rem;
   background: var(--acento);
+}
+
+/* Menú móvil: panel `:target`, cero JavaScript, el header sigue siendo Server Component.
+   Abre con <a href="#menu-movil">. Cierra solo al tocar cualquier enlace, porque el hash
+   pasa a otro destino y el panel deja de ser :target — por eso sus enlaces son <a> planos
+   y no <Link> (pushState no actualiza el target element del documento).
+   El botón de cerrar apunta a #menu-cerrado, un fragmento que no existe: sin destino el
+   navegador no scrollea, así que el panel se cierra sin saltar al tope de la página. */
+.jec-landing .jec-menu-movil {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .jec-landing .jec-menu-movil:target {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
 }
 
 /* Marcador de dato placeholder: trama diagonal + contorno, legible en los tres campos */

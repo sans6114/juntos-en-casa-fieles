@@ -11,9 +11,6 @@ export function Hero() {
       {/* Fuera del overflow-hidden: ScrollExpand depende de position: sticky,
        * que un ancestro con overflow no-visible rompe. */}
       <HeroFinale />
-
-      {/* Ancla placeholder para el CTA; la inscripción llega en una fase siguiente */}
-      <div id="inscripcion" className="sr-only" aria-hidden />
     </>
   );
 }
