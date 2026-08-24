@@ -25,7 +25,7 @@ export const cronogramaDias: CronogramaDia[] = [
   },
   {
     id: "dia-2",
-    dayLabel: "Sábado 13",
+    dayLabel: "Sábado 19",
     title: "Jornada plena",
     items: [
       { time: "09:00", label: "Desayuno compartido" },
