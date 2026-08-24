@@ -8,7 +8,7 @@ export function Invitados() {
     <section
       id="invitados"
       aria-label="Invitados"
-      className="bg-[var(--jec-ink)] px-6 py-20 md:px-10 md:py-28 lg:px-16"
+      className="campo-tinta jec-anchor px-6 py-20 md:px-10 md:py-28 lg:px-16"
     >
       <div className="mx-auto max-w-6xl">
         <SectionHeading
