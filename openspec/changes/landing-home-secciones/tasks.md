@@ -103,11 +103,11 @@ Per-slice estimate (all seven land under 250, matching design's Review Budget se
 
 ## Phase 7: CTA target + display type (Hero, HeroFinale, HeroCountdown, navigation.ts)
 
-- [ ] 7.1 `.../hero/Hero.tsx:16`: delete the `sr-only` `#inscripcion` placeholder div
-- [ ] 7.2 `.../hero/HeroFinale.tsx:258`: repoint the CTA `href` from `/#inscripcion` to `/inscripcion`
+- [x] 7.1 `.../hero/Hero.tsx:16`: delete the `sr-only` `#inscripcion` placeholder div
+- [x] 7.2 `.../hero/HeroFinale.tsx:258`: repoint the CTA `href` from `/#inscripcion` to `/inscripcion`
 - [ ] 7.3 `.../hero/HeroCountdown.tsx:70`: swap `.jec-display` for `.jec-label` (10.4px violation; component is exported but mounted nowhere — fix applies regardless)
-- [ ] 7.4 `.../shared/navigation.ts:19`: `"Inscribirme"` entry's `href` from `/#inscripcion` to `/inscripcion`
-- [ ] 7.5 `rg "/#inscripcion" src` — zero hits across the full `src/` tree
+- [x] 7.4 `.../shared/navigation.ts:19`: `"Inscribirme"` entry's `href` from `/#inscripcion` to `/inscripcion`
+- [x] 7.5 `rg "/#inscripcion" src` — zero hits across the full `src/` tree
 - [ ] 7.6 `npx tsc --noEmit && npm run lint`
 - [ ] 7.7 Verify browser: header nav, hero finale CTA, and sticky mobile bar all navigate to `/inscripcion`; no `.jec-display` below 34px remains on `/` (covers `HeroCountdown.tsx:70`; `Ubicacion.tsx:26` fixed in Phase 4; `InvitadoCard`'s "?" glyph keeps `.jec-display` per Phase 3)
 - [ ] 7.8 Rollback: `git revert` this slice's commit — restores the `/#inscripcion` references and the `sr-only` placeholder div; Phases 1-6 unaffected (each CTA still resolves somewhere, just to the dead anchor again)
