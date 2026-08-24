@@ -11,10 +11,11 @@ export type CronogramaDia = {
 }
 
 /** Mock schedule — placeholder content for landing UI only. */
+// Fuente de verdad: siteConfig.eventStartsAt
 export const cronogramaDias: CronogramaDia[] = [
   {
     id: "dia-1",
-    dayLabel: "Viernes 12",
+    dayLabel: "Viernes 18",
     title: "Apertura",
     items: [
       { time: "18:00", label: "Bienvenida y registro" },
@@ -35,7 +36,7 @@ export const cronogramaDias: CronogramaDia[] = [
   },
   {
     id: "dia-3",
-    dayLabel: "Domingo 14",
+    dayLabel: "Domingo 20",
     title: "Cierre",
     items: [
       { time: "10:00", label: "Celebración final" },

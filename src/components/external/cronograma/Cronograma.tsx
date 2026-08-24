@@ -8,7 +8,7 @@ export function Cronograma() {
     <section
       id="cronograma"
       aria-label="Cronograma"
-      className="bg-[var(--jec-ink)] px-6 py-20 md:px-10 md:py-28 lg:px-16"
+      className="campo-papel jec-anchor px-6 py-20 md:px-10 md:py-28 lg:px-16"
     >
       <div className="mx-auto max-w-6xl">
         <SectionHeading
