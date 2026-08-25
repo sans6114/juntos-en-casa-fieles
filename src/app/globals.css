@@ -186,6 +186,12 @@
   }
 }
 
+/* CTA fija de "/" en móvil: altura declarada una vez; el min-h de la barra y la reserva
+   del footer la consumen, así los dos números son el mismo y no pueden divergir. */
+.jec-landing {
+  --jec-cta-h: 4.5rem;
+}
+
 /* Los anclas de "/" aterrizan su título debajo del header fijado */
 .jec-landing .jec-anchor {
   scroll-margin-top: calc(var(--jec-header-h) + 0.5rem);

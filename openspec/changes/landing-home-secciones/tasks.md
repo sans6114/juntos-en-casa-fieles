@@ -67,36 +67,36 @@ Per-slice estimate (all seven land under 250, matching design's Review Budget se
 
 ## Phase 4: Location + map (D7, D9 ubicacion)
 
-- [ ] 4.1 NEW `.../ubicacion/data.ts`: `export type UbicacionInfo = { venue: string; street: string; city: string; mapsUrl: string }`; `venue`/`city` mirror `siteConfig.org`/`siteConfig.city`; build `mapsUrl` here from those two fields (query `"…Vida Sobrenatural La Plata, Buenos Aires"`); exclude `street` from the query with a comment to add it once a real address lands; `street` value is an explicit, visibly-marked placeholder
-- [ ] 4.2 NEW `.../ubicacion/MapaSimulado.tsx`: inline `<svg>` decorative figure — streets from `--linea`, main axis from `--regla`, `jecAssets.iconos.ancla` as the pin via `<image href=…>`; `role="presentation" aria-hidden="true" focusable="false"`; `<figcaption>` "Ilustración de referencia — no es un mapa a escala."; no `prefers-reduced-motion` guard needed (nothing animates)
-- [ ] 4.3 `.../ubicacion/index.ts`: barrel-export `MapaSimulado` and `data.ts`'s exports
-- [ ] 4.4 `.../ubicacion/Ubicacion.tsx`: field class → `campo-papel`; add `jec-anchor` to the section className (`id="ubicacion"` already exists at line 13, do not duplicate it); read all four `UbicacionInfo` fields from `data.ts` instead of the inline `STREET_PLACEHOLDER` constant and the locally-built `mapsQuery`/`mapsUrl` (lines 7-8); mount `<MapaSimulado />`; swap line 26's `.jec-display` (`text-xl md:text-2xl`) for `.jec-label`
-- [ ] 4.5 `src/app/(external)/page.tsx`: mount `<Ubicacion />` after `<Invitados />`
-- [ ] 4.6 `npx tsc --noEmit && npm run lint`
+- [x] 4.1 NEW `.../ubicacion/data.ts`: `export type UbicacionInfo = { venue: string; street: string; city: string; mapsUrl: string }`; `venue`/`city` mirror `siteConfig.org`/`siteConfig.city`; build `mapsUrl` here from those two fields (query `"…Vida Sobrenatural La Plata, Buenos Aires"`); exclude `street` from the query with a comment to add it once a real address lands; `street` value is an explicit, visibly-marked placeholder
+- [x] 4.2 NEW `.../ubicacion/MapaSimulado.tsx`: inline `<svg>` decorative figure — streets from `--linea`, main axis from `--regla`, `jecAssets.iconos.ancla` as the pin via `<image href=…>`; `role="presentation" aria-hidden="true" focusable="false"`; `<figcaption>` "Ilustración de referencia — no es un mapa a escala."; no `prefers-reduced-motion` guard needed (nothing animates)
+- [x] 4.3 `.../ubicacion/index.ts`: barrel-export `MapaSimulado` and `data.ts`'s exports
+- [x] 4.4 `.../ubicacion/Ubicacion.tsx`: field class → `campo-papel`; add `jec-anchor` to the section className (`id="ubicacion"` already exists at line 13, do not duplicate it); read all four `UbicacionInfo` fields from `data.ts` instead of the inline `STREET_PLACEHOLDER` constant and the locally-built `mapsQuery`/`mapsUrl` (lines 7-8); mount `<MapaSimulado />`; swap line 26's `.jec-display` (`text-xl md:text-2xl`) for `.jec-label`
+- [x] 4.5 `src/app/(external)/page.tsx`: mount `<Ubicacion />` after `<Invitados />`
+- [x] 4.6 `npx tsc --noEmit && npm run lint`
 - [ ] 4.7 Verify browser: `/#ubicacion` heading clears the pinned header at 375px/1280px; Network tab shows zero external map requests; `Ubicacion`'s CTA passes field contrast (not background-on-background); "Cómo llegar" opens the address `data.ts` builds
-- [ ] 4.8 Verify content: `ubicacion/data.ts`'s `street` placeholder is unambiguously marked in the **rendered text**, not only in a code comment
+- [x] 4.8 Verify content: `ubicacion/data.ts`'s `street` placeholder is unambiguously marked in the **rendered text**, not only in a code comment
 - [ ] 4.9 Rollback: `git revert` this slice's commit — removes `<Ubicacion />` mount and deletes `MapaSimulado.tsx`/`data.ts`; Phases 1-3 unaffected
 
 ## Phase 5: FAQ (D9 faq)
 
-- [ ] 5.1 NEW `.../faq/data.ts`: `export type FaqItem = { id: string; question: string; answer: string }`; `export const faqItems: readonly FaqItem[]` with placeholder question/answer pairs, each unambiguously marked (e.g. "Pregunta de ejemplo — reemplazar")
-- [ ] 5.2 NEW `.../faq/Faq.tsx`: Server Component, `campo-papel` on the section surface, `id="faq" className="jec-anchor"`; maps `faqItems` to `<Disclosure summary={item.question} className="[&>summary]:flex [&>summary]:items-center [&>summary]:justify-between border-b border-[var(--linea)]"><p className="text-[var(--suave)]">{item.answer}</p></Disclosure>`
-- [ ] 5.3 NEW `.../faq/index.ts`: barrel-export `Faq`
-- [ ] 5.4 `src/app/(external)/page.tsx`: mount `<Faq />` after `<Ubicacion />`; confirm `navigation.ts`'s `navItems` gains **no** Faq entry (user decision 2026-08-21 — Faq is reached by scrolling `/` only)
-- [ ] 5.5 `npx tsc --noEmit && npm run lint`
+- [x] 5.1 NEW `.../faq/data.ts`: `export type FaqItem = { id: string; question: string; answer: string }`; `export const faqItems: readonly FaqItem[]` with placeholder question/answer pairs, each unambiguously marked (e.g. "Pregunta de ejemplo — reemplazar")
+- [x] 5.2 NEW `.../faq/Faq.tsx`: Server Component, `campo-papel` on the section surface, `id="faq" className="jec-anchor"`; maps `faqItems` to `<Disclosure summary={item.question} className="[&>summary]:flex [&>summary]:items-center [&>summary]:justify-between border-b border-[var(--linea)]"><p className="text-[var(--suave)]">{item.answer}</p></Disclosure>`
+- [x] 5.3 NEW `.../faq/index.ts`: barrel-export `Faq`
+- [x] 5.4 `src/app/(external)/page.tsx`: mount `<Faq />` after `<Ubicacion />`; confirm `navigation.ts`'s `navItems` gains **no** Faq entry (user decision 2026-08-21 — Faq is reached by scrolling `/` only)
+- [x] 5.5 `npx tsc --noEmit && npm run lint`
 - [ ] 5.6 Verify browser: `Faq` opens and closes with JavaScript disabled (native `<details>/<summary>`); no Faq entry appears in `SiteHeader` or `SiteFooter` nav
-- [ ] 5.7 Verify content: every `faq/data.ts` entry's rendered text is unambiguously marked as placeholder
+- [x] 5.7 Verify content: every `faq/data.ts` entry's rendered text is unambiguously marked as placeholder
 - [ ] 5.8 Rollback: `git revert` this slice's commit — removes `<Faq />` mount and deletes the new `faq/` files; Phases 1-4 unaffected
 
 ## Phase 6: Footer + sticky CTA (D5, D6)
 
-- [ ] 6.1 `src/app/globals.css`: inside `.jec-landing`, add `--jec-cta-h: 4.5rem;`
-- [ ] 6.2 NEW `.../shared/SiteFooter.tsx`: `campo-fuego` surface; renders every `navItems` entry (the `essential` flag no longer exists — see 1.8 — so no filtering is needed; `NavItem` now carries `cta?: boolean`, set only on "Inscribirme"); renders nothing for `socialLinks` while empty; structural nav + generic legal/copyright line only, no invented tagline; `pb-[calc(var(--jec-cta-h)+env(safe-area-inset-bottom,0px))] md:pb-…` reserve
+- [x] 6.1 `src/app/globals.css`: inside `.jec-landing`, add `--jec-cta-h: 4.5rem;`
+- [x] 6.2 NEW `.../shared/SiteFooter.tsx`: `campo-fuego` surface; renders every `navItems` entry (the `essential` flag no longer exists — see 1.8 — so no filtering is needed; `NavItem` now carries `cta?: boolean`, set only on "Inscribirme"); renders nothing for `socialLinks` while empty; structural nav + generic legal/copyright line only, no invented tagline; `pb-[calc(var(--jec-cta-h)+env(safe-area-inset-bottom,0px))] md:pb-…` reserve
 - [ ] 6.2b Mount `SiteFooter` on `/contenidos`, `/contenidos/[slug]` and `/inscripcion` too. Those pages were redesigned ahead of this slice (commits `8546a4e`, `ce991c4`, `0a3e7ea`) and deliberately end on their closing section, because duplicating a footer before this slice existed would have guaranteed a conflict
-- [ ] 6.3 NEW `.../shared/StickyCta.tsx`: `fixed inset-x-0 bottom-0 z-40 md:hidden`, `campo-tinta`, `border-t-[3px] border-[var(--regla)]`, **`min-h-[var(--jec-cta-h)]`** (not optional — D6: makes the footer reserve honest, mirrors the header's `min-h` invariant), one `CtaButton` targeting `/inscripcion`
-- [ ] 6.4 `.../shared/index.ts`: barrel-export `SiteFooter`, `StickyCta`
-- [ ] 6.5 `src/app/(external)/page.tsx`: mount `<SiteFooter />` after `<Faq />`, then `<StickyCta />` last — after `SiteFooter`, so it never interrupts the Hero→…→SiteFooter reading order
-- [ ] 6.6 `npx tsc --noEmit && npm run lint`
+- [x] 6.3 NEW `.../shared/StickyCta.tsx`: `fixed inset-x-0 bottom-0 z-40 md:hidden`, `campo-tinta`, `border-t-[3px] border-[var(--regla)]`, **`min-h-[var(--jec-cta-h)]`** (not optional — D6: makes the footer reserve honest, mirrors the header's `min-h` invariant), one `CtaButton` targeting `/inscripcion`
+- [x] 6.4 `.../shared/index.ts`: barrel-export `SiteFooter`, `StickyCta`
+- [x] 6.5 `src/app/(external)/page.tsx`: mount `<SiteFooter />` after `<Faq />`, then `<StickyCta />` last — after `SiteFooter`, so it never interrupts the Hero→…→SiteFooter reading order
+- [x] 6.6 `npx tsc --noEmit && npm run lint`
 - [ ] 6.7 Verify browser at 320px scrolled to the footer: sticky CTA bar is visible and does not overlap footer content (reserve + `min-h` match; if the label wraps at 320px the bar grows past the reserve — check this explicitly, it is load-bearing not cosmetic)
 - [ ] 6.8 Verify browser: `SiteFooter` renders every `navItems` entry, no social-link element (empty `socialLinks`), no Faq entry
 - [ ] 6.9 Verify on a real iOS device (or simulator): `env(safe-area-inset-bottom)` is a no-op today (no `viewportFit: "cover"` in `layout.tsx`), so the bar is not under the home indicator

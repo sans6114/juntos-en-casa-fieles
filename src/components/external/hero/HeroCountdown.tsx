@@ -67,7 +67,7 @@ export function HeroCountdown() {
             <span className="jec-display text-4xl font-extrabold leading-none tracking-tight text-[var(--jec-bone)] tabular-nums sm:text-5xl md:text-7xl lg:text-8xl">
               {pad(units[key])}
             </span>
-            <span className="jec-display mt-2 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[var(--jec-smoke)] sm:text-xs md:mt-3 md:text-sm">
+            <span className="jec-label mt-2 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[var(--jec-smoke)] sm:text-xs md:mt-3 md:text-sm">
               {labels[key]}
             </span>
           </div>

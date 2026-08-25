@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { obtenerCongregaciones } from "@/actions"
-import { SiteHeader } from "@/components/external/shared"
+import { SiteFooter, SiteHeader } from "@/components/external/shared"
 import { createPageMetadata } from "@/lib/seo/site"
 
 import { InscripcionAside } from "./ui/InscripcionAside"
@@ -38,6 +38,8 @@ export default async function InscripcionPage() {
           </div>
         </div>
       </section>
+
+      <SiteFooter />
     </>
   )
 }

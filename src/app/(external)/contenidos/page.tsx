@@ -6,7 +6,7 @@ import {
   type ContenidoKind,
 } from "@/components/external/contenidos"
 import { Galeria } from "@/components/external/galeria"
-import { CtaButton, SiteHeader } from "@/components/external/shared"
+import { CtaButton, SiteFooter, SiteHeader } from "@/components/external/shared"
 import { createPageMetadata } from "@/lib/seo/site"
 
 export const metadata: Metadata = createPageMetadata({
@@ -50,6 +50,8 @@ export default async function ContenidosPage({ searchParams }: ContenidosPagePro
           </CtaButton>
         </div>
       </section>
+
+      <SiteFooter />
     </>
   )
 }

@@ -3,7 +3,7 @@ import { Cronograma } from '@/components/external/cronograma';
 import { Invitados } from '@/components/external/invitados';
 import { Ubicacion } from '@/components/external/ubicacion';
 import { Faq } from '@/components/external/faq';
-import { SiteHeader } from '@/components/external/shared';
+import { SiteFooter, SiteHeader, StickyCta } from '@/components/external/shared';
 
 export default function ExternalPage() {
   return (
@@ -17,6 +17,8 @@ export default function ExternalPage() {
       <Invitados />
       <Ubicacion />
       <Faq />
+      <SiteFooter />
+      <StickyCta />
     </>
   )
 }
