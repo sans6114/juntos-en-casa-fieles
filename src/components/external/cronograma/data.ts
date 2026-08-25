@@ -10,7 +10,11 @@ export type CronogramaDia = {
   items: CronogramaItem[]
 }
 
-/** Mock schedule — placeholder content for landing UI only. */
+/**
+ * Placeholder schedule. `Cronograma` renders a `PlaceholderTag` above the grid so the
+ * provisional state is visible to the visitor, not only to whoever reads this file.
+ * Drop the tag in `Cronograma.tsx` once these times are confirmed.
+ */
 // Fuente de verdad: siteConfig.eventStartsAt
 export const cronogramaDias: CronogramaDia[] = [
   {
