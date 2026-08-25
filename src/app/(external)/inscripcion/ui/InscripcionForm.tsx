@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { crearInscripcion } from "@/actions"
 import type { InscripcionActionState } from "@/interfaces/inscripcion"
 import { CongregacionCombobox, type Congregacion } from "./CongregacionCombobox"
-import { CtaButton } from "@/components/external/shared"
+import { AlertIcon, CtaButton } from "@/components/external/shared"
 
 type InscripcionFormProps = {
   congregaciones: Congregacion[]
@@ -32,7 +32,7 @@ const emptySubmitted: SubmittedValues = {
 }
 
 const inputClassName =
-  "w-full border border-[var(--jec-smoke)] bg-[var(--jec-ink)] px-4 py-3 text-[var(--jec-bone)] placeholder:text-[var(--jec-smoke)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--jec-amber)] aria-invalid:border-[var(--jec-ember)]"
+  "min-h-12 w-full rounded-[6px] border border-[var(--regla)] bg-transparent px-4 py-3 text-base text-[var(--dato)] placeholder:text-[var(--suave)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--foco)] aria-invalid:border-2 aria-invalid:border-[var(--acento)]"
 
 export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
   const router = useRouter()
@@ -69,13 +69,13 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
   if (optimisticState.ok) {
     return (
       <div role="status" className="space-y-3 py-6 text-center">
-        <p className="jec-label text-xs font-bold uppercase tracking-[0.2em] text-[var(--jec-amber)]">
+        <p className="jec-label jec-eyebrow text-xs font-bold uppercase tracking-[0.2em]">
           Registro enviado
         </p>
         <p className="jec-display text-2xl sm:text-3xl">
           ¡Gracias, {submitted.nombre || "futuro asistente"}!
         </p>
-        <p className="text-[var(--jec-smoke)]">
+        <p className="text-[var(--suave)]">
           Estamos confirmando tu inscripción con {submitted.email || "tu email"}…
         </p>
       </div>
@@ -87,7 +87,7 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
       {state.message ? (
         <p
           role="alert"
-          className="jec-label border-l-4 border-[var(--jec-ember)] bg-[var(--jec-ink)] px-4 py-3 text-sm text-[var(--jec-bone)]"
+          className="jec-label rounded-[6px] border-l-[3px] border-[var(--acento)] bg-[color-mix(in_srgb,var(--acento)_10%,transparent)] px-4 py-3 text-sm text-[var(--dato)]"
         >
           {state.message}
         </p>
@@ -149,10 +149,10 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
       <div className="space-y-2">
         <label
           htmlFor="congregacion-input"
-          className="jec-label block text-xs font-bold uppercase tracking-[0.14em] text-[var(--jec-smoke)]"
+          className="jec-label block text-xs font-bold uppercase tracking-[0.14em] text-[var(--suave)]"
         >
           Congregación{" "}
-          <span className="normal-case font-normal text-[var(--jec-smoke)]">(opcional)</span>
+          <span className="font-normal normal-case tracking-normal">(opcional)</span>
         </label>
         <CongregacionCombobox
           congregaciones={congregaciones}
@@ -180,13 +180,17 @@ function Field({ label, htmlFor, error, children }: FieldProps) {
     <div className="space-y-2">
       <label
         htmlFor={htmlFor}
-        className="jec-label block text-xs font-bold uppercase tracking-[0.14em] text-[var(--jec-smoke)]"
+        className="jec-label block text-xs font-bold uppercase tracking-[0.14em] text-[var(--suave)]"
       >
         {label}
       </label>
       {children}
       {error ? (
-        <p id={`${htmlFor}-error`} className="text-sm text-[var(--jec-ember)]">
+        <p
+          id={`${htmlFor}-error`}
+          className="flex items-center gap-1.5 text-sm text-[var(--acento)]"
+        >
+          <AlertIcon size={16} className="shrink-0" />
           {error}
         </p>
       ) : null}

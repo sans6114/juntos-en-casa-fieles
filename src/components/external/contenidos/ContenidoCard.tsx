@@ -1,26 +1,56 @@
-import type { ContenidoItem } from "./data"
+import Link from "next/link"
+import { ArrowRightIcon, DownloadIcon, PlaceholderTag } from "@/components/external/shared"
 
-const KIND_LABEL: Record<ContenidoItem["kind"], string> = {
-  podcast: "Podcast",
-  evento: "Evento",
-}
+import { ContenidoThumb } from "./ContenidoThumb"
+import type { ContenidoItem } from "./data"
 
 type ContenidoCardProps = {
   item: ContenidoItem
 }
 
 export function ContenidoCard({ item }: ContenidoCardProps) {
+  const isRecurso = item.kind === "recurso"
+
   return (
-    <article className="flex h-full flex-col bg-[var(--jec-ink-soft)] p-6 md:p-8">
-      <p className="jec-label text-xs font-bold uppercase tracking-[0.28em] text-[var(--jec-amber)]">
-        {KIND_LABEL[item.kind]}
-      </p>
-      <h3 className="jec-label mt-3 text-2xl font-extrabold tracking-tight text-[var(--jec-bone)] md:text-3xl">
-        {item.title}
-      </h3>
-      <p className="mt-6 border-t border-[var(--jec-bone)]/10 pt-6 text-sm leading-relaxed text-[var(--jec-smoke)] md:text-base">
-        {item.description}
-      </p>
+    <article className="h-full">
+      <Link
+        href={`/contenidos/${item.slug}`}
+        className="flex h-full flex-col overflow-hidden rounded-[6px] border border-[var(--linea)] transition-transform hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_var(--regla)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--foco)] motion-reduce:transform-none"
+      >
+        <ContenidoThumb item={item} />
+
+        <div className="flex flex-grow flex-col gap-3 p-6">
+          <p className="jec-label text-xs font-bold uppercase tracking-[0.28em] text-[var(--acento)]">
+            {item.session ?? (item.kind === "podcast" ? "Podcast" : "Descargable")}
+          </p>
+
+          <h3 className="jec-label text-2xl font-extrabold leading-tight tracking-tight">
+            {item.title}
+          </h3>
+
+          <p className="text-sm leading-relaxed text-[var(--suave)]">{item.description}</p>
+
+          <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--linea)] pt-4">
+            {item.speaker ? (
+              <span className="jec-mono text-[13px] uppercase tracking-[0.14em] text-[var(--suave)]">
+                {item.speaker}
+              </span>
+            ) : item.kind === "predica" ? (
+              <PlaceholderTag>Orador a confirmar</PlaceholderTag>
+            ) : (
+              <span className="jec-mono text-[13px] uppercase tracking-[0.14em] text-[var(--suave)]">
+                {isRecurso ? "Descargar pack" : "Ver episodio"}
+              </span>
+            )}
+
+            {isRecurso ? (
+              <DownloadIcon className="shrink-0 text-[var(--acento)]" />
+            ) : (
+              <ArrowRightIcon className="shrink-0 text-[var(--acento)]" />
+            )}
+          </div>
+        </div>
+      </Link>
     </article>
   )
 }

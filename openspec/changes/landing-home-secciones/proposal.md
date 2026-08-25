@@ -142,17 +142,17 @@ No test runner exists (`openspec/config.yaml` `testing.test_runner.available: fa
 
 ## Success Criteria
 
-- [ ] `/` renders SiteHeader, Hero, Cronograma, Invitados, Ubicacion, Faq, SiteFooter — no unmounted section component remains in `components/external`
-- [ ] `SiteHeader` reads its colours from field tokens, not `--jec-*` literals, and renders legibly on both the paper field (`/`) and `campo-tinta` (`/contenidos`)
-- [ ] On `/`, the header is absent for the full height of the hero and pinned from the next section onward, with no client component, scroll listener or `IntersectionObserver` added
-- [ ] Every home anchor target carries `scroll-margin-top`; no section heading lands under the pinned header
-- [ ] Zero `/#inscripcion` references remain in `src/`; every CTA resolves to a live route
-- [ ] Zero `bg-[var(--jec-ink)]` literals remain in the sections this change owns; each sets its surface via a `campo-*` class
-- [ ] `Ubicacion`'s CTA passes contrast on its field
-- [ ] Schedule dates agree with `siteConfig.eventStartsAt`
-- [ ] `InvitadoCard` is a Server Component with no `useState` and no `/jec/oradores/*` path
-- [ ] `MapaSimulado` renders with no external network request
-- [ ] `SiteFooter` renders every `navItem` and nothing for an empty `socialLinks`
-- [ ] `Faq` renders from `faq/data.ts`; `Ubicacion` address renders from `ubicacion/data.ts`; both files hold clearly-marked placeholder copy, no invented-but-plausible content
-- [ ] No `.jec-display` below 34px remains on `/` — covers `HeroCountdown.tsx:70` and `Ubicacion.tsx:26`. `InvitadoCard`'s large "?" glyph keeps `.jec-display` per landing-tokens-b D9
-- [ ] `npx tsc --noEmit`, `npm run lint` and `npm run build` pass
+- [x] `/` renders SiteHeader, Hero, Cronograma, Invitados, Ubicacion, Faq, SiteFooter — no unmounted section component remains in `components/external`
+- [x] `SiteHeader` reads its colours from field tokens, not `--jec-*` literals, and renders legibly on both the paper field (`/`) and `campo-tinta` (`/contenidos`)
+- [~] On `/`, the header is absent for the full height of the hero and pinned from the next section onward, with no client component, scroll listener or `IntersectionObserver` added — the second half is confirmed in code (`SiteHeader.tsx` has no `"use client"`, no scroll listener, no `IntersectionObserver`); the visual half is the one browser check still open, tracked as tasks 1.7 / 8.2
+- [x] Every home anchor target carries `scroll-margin-top`; no section heading lands under the pinned header
+- [x] Zero `/#inscripcion` references remain in `src/`; every CTA resolves to a live route
+- [x] Zero `bg-[var(--jec-ink)]` literals remain in the sections this change owns; each sets its surface via a `campo-*` class
+- [x] `Ubicacion`'s CTA passes contrast on its field
+- [x] Schedule dates agree with `siteConfig.eventStartsAt`
+- [x] `InvitadoCard` is a Server Component with no `useState` and no `/jec/oradores/*` path
+- [x] `MapaSimulado` renders with no external network request
+- [x] `SiteFooter` renders every `navItem` and nothing for an empty `socialLinks`
+- [x] `Faq` renders from `faq/data.ts`; `Ubicacion` address renders from `ubicacion/data.ts`; both files hold clearly-marked placeholder copy, no invented-but-plausible content
+- [x] No `.jec-display` below 34px remains on `/` — covers `HeroCountdown.tsx:70` and `Ubicacion.tsx:26`. `InvitadoCard`'s large "?" glyph keeps `.jec-display` per landing-tokens-b D9
+- [x] `npx tsc --noEmit`, `npm run lint` and `npm run build` pass

@@ -127,7 +127,7 @@ function useScrollExpandLock(containerRef: React.RefObject<HTMLDivElement | null
  * revela, ya en pantalla completa, el wordmark "Fieles" con la cinta de
  * señalización animada, la cuenta regresiva y el CTA de inscripción.
  */
-export function HeroFinale() {
+export function HeroFinale({ onReplay }: { onReplay?: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   useScrollExpandLock(containerRef);
 
@@ -255,9 +255,23 @@ export function HeroFinale() {
                 </div>
               ))}
             </div>
-            <CtaButton href="/#inscripcion" variant="pill">
+            <CtaButton href="/inscripcion" variant="pill">
               Inscribirme
             </CtaButton>
+
+            {/* Vive en el overlay de ScrollExpand, que recién se hace visible
+              * cuando el frame termina de abrirse (opacity con
+              * smoothstep(0.68, 1, p)). Ahí sí se entiende qué animación
+              * repite: la que el visitante acaba de terminar de ver. */}
+            {onReplay ? (
+              <button
+                type="button"
+                onClick={onReplay}
+                className="jec-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-[var(--jec-bone)]/60 underline underline-offset-4 transition-colors hover:text-[var(--jec-bone)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--jec-amber)] sm:text-xs"
+              >
+                Ver animación
+              </button>
+            ) : null}
           </div>
         </div>
       </ScrollExpand>

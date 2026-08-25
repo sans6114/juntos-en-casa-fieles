@@ -2,6 +2,10 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Docs contain literal token patterns like text-[var(--jec-*)]; Tailwind must
+   not scan them as class candidates or it emits invalid CSS. */
+@source not "../../openspec";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -165,10 +169,33 @@
   --cta-bg: var(--jec-ink);
   --cta-fg: var(--jec-bone);
 
+  /* Header sticky de "/": altura declarada una vez, consumida por min-height y scroll-margin.
+     92px = pt-6 (24) + hamburguesa 44 (mínimo táctil) + pb-6 (24). Medido, no estimado:
+     min-h es piso y no recorta, así que la variable tiene que seguir a la altura real. */
+  --jec-header-h: 92px;
+
   background-color: var(--sup);
   color: var(--dato);
   font-family: var(--font-helvetica-neue), ui-sans-serif, system-ui,
     sans-serif;
+}
+
+@media (min-width: 768px) {
+  .jec-landing {
+    --jec-header-h: 104px;
+  }
+}
+
+/* Altura mínima de la barra CTA de "/" en móvil. La barra es `sticky bottom-0`
+   dentro del contenedor post-hero, no `fixed`: reserva su propio espacio en flujo
+   al final de la página, así que el footer ya no necesita compensarla. */
+.jec-landing {
+  --jec-cta-h: 4.5rem;
+}
+
+/* Los anclas de "/" aterrizan su título debajo del header fijado */
+.jec-landing .jec-anchor {
+  scroll-margin-top: calc(var(--jec-header-h) + 0.5rem);
 }
 
 /* Campo hueso/papel: fondo claro, tinta oscura, brasa naranja */
@@ -232,6 +259,38 @@
   vertical-align: middle;
   margin-inline-end: 0.75rem;
   background: var(--acento);
+}
+
+/* Menú móvil: panel `:target`, cero JavaScript, el header sigue siendo Server Component.
+   Abre con <a href="#menu-movil">. Cierra solo al tocar cualquier enlace, porque el hash
+   pasa a otro destino y el panel deja de ser :target — por eso sus enlaces son <a> planos
+   y no <Link> (pushState no actualiza el target element del documento).
+   El botón de cerrar apunta a #menu-cerrado, un fragmento que no existe: sin destino el
+   navegador no scrollea, así que el panel se cierra sin saltar al tope de la página. */
+.jec-landing .jec-menu-movil {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .jec-landing .jec-menu-movil:target {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Marcador de dato placeholder: trama diagonal + contorno, legible en los tres campos */
+.jec-landing .jec-placeholder {
+  background: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--acento) 18%, transparent) 0 6px,
+    transparent 6px 12px
+  );
+  box-shadow: inset 0 0 0 1px var(--acento);
 }
 
 /* Disclosure: <details> nativo, chevron en CSS, sin marcador por defecto */

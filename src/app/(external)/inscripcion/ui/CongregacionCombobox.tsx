@@ -115,7 +115,7 @@ export function CongregacionCombobox({
         onBlur={() => setIsOpen(false)}
         onKeyDown={handleKeyDown}
         placeholder="Buscá tu congregación"
-        className="w-full border border-[var(--jec-smoke)] bg-[var(--jec-ink)] px-4 py-3 text-[var(--jec-bone)] placeholder:text-[var(--jec-smoke)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--jec-amber)]"
+        className="min-h-12 w-full rounded-[6px] border border-[var(--regla)] bg-transparent px-4 py-3 text-base text-[var(--dato)] placeholder:text-[var(--suave)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--foco)]"
       />
       <input type="hidden" name="congregacionId" value={selectedId} />
 
@@ -124,10 +124,10 @@ export function CongregacionCombobox({
           id={listboxId}
           role="listbox"
           aria-label="Congregaciones sugeridas"
-          className="absolute z-30 mt-1 max-h-56 w-full overflow-y-auto border border-[var(--jec-smoke)] bg-[var(--jec-ink-soft)] text-sm"
+          className="absolute z-30 mt-1 max-h-56 w-full overflow-y-auto rounded-[6px] border border-[var(--regla)] bg-[var(--sup)] text-sm shadow-[3px_3px_0_0_var(--regla)]"
         >
           {results.length === 0 ? (
-            <li role="presentation" className="px-4 py-3 text-[var(--jec-smoke)]">
+            <li role="presentation" className="px-4 py-3 text-[var(--suave)]">
               No encontramos coincidencias. Podés dejarlo así e inscribirte igual.
             </li>
           ) : (
@@ -141,8 +141,8 @@ export function CongregacionCombobox({
                 onClick={() => selectCongregacion(congregacion)}
                 className={
                   index === activeIndex
-                    ? "cursor-pointer bg-[var(--jec-ember)] px-4 py-3 text-[var(--jec-ink)]"
-                    : "cursor-pointer px-4 py-3 text-[var(--jec-bone)] hover:bg-[var(--jec-ember)] hover:text-[var(--jec-ink)]"
+                    ? "cursor-pointer bg-[var(--acento)] px-4 py-3 text-[var(--jec-ink)]"
+                    : "cursor-pointer px-4 py-3 text-[var(--dato)] hover:bg-[var(--acento)] hover:text-[var(--jec-ink)]"
                 }
               >
                 {congregacion.nombre}

@@ -1,8 +1,9 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import { obtenerCongregaciones } from "@/actions"
-import { jecAssets } from "@/lib/jec-assets"
+import { SiteFooter, SiteHeader } from "@/components/external/shared"
 import { createPageMetadata } from "@/lib/seo/site"
+
+import { InscripcionAside } from "./ui/InscripcionAside"
 import { InscripcionForm } from "./ui/InscripcionForm"
 
 export const metadata: Metadata = createPageMetadata({
@@ -14,32 +15,31 @@ export default async function InscripcionPage() {
   const congregaciones = await obtenerCongregaciones()
 
   return (
-    <section className="relative overflow-x-clip px-4 py-16 sm:py-24">
-      <div className="relative z-10 mx-auto max-w-xl">
-        <header className="mb-10 space-y-3 text-center sm:text-left">
-          <p className="jec-label text-xs font-bold uppercase tracking-[0.2em] text-[var(--jec-amber)]">
-            Fieles 2026
-          </p>
-          <h1 className="jec-display text-4xl sm:text-5xl">Sumate a la conferencia</h1>
-          <p className="text-[var(--jec-smoke)]">
-            Completá tus datos para reservar tu lugar. Te vamos a enviar un email con tu código
-            QR de inscripción.
-          </p>
-        </header>
+    <>
+      <SiteHeader logo="dark" className="campo-papel pb-6 md:pb-8" />
 
-        <div className="relative border border-[var(--jec-smoke)] bg-[var(--jec-ink-soft)] p-6 sm:p-10">
-          <InscripcionForm congregaciones={congregaciones} />
+      <section className="campo-papel px-6 pb-24 pt-6 md:px-10 md:pb-28 lg:px-16">
+        <div className="mx-auto grid max-w-6xl items-start gap-12 lg:grid-cols-[minmax(0,1fr)_552px] lg:gap-16">
+          <InscripcionAside />
 
-          <Image
-            src={jecAssets.personaje.apuntando}
-            alt=""
-            aria-hidden="true"
-            width={375}
-            height={500}
-            className="pointer-events-none absolute z-20 -top-10 right-2 aspect-[3/4] w-20 select-none object-contain sm:top-auto sm:-right-10 sm:-bottom-12 sm:w-[clamp(8rem,20vw,18rem)]"
-          />
+          <div className="min-w-0 rounded-[6px] border border-[var(--linea)] border-t-[3px] border-t-[var(--regla)] p-6 sm:p-10">
+            <h2 className="jec-label text-2xl font-extrabold tracking-tight">Tus datos</h2>
+            <p className="mt-2 text-[15px] text-[var(--suave)]">
+              Todos los campos son obligatorios salvo los marcados.
+            </p>
+
+            <div className="mt-8">
+              <InscripcionForm congregaciones={congregaciones} />
+            </div>
+
+            <p className="mt-6 text-center text-[13px] leading-relaxed text-[var(--suave)]">
+              Usamos tus datos solo para organizar la conferencia y contactarte.
+            </p>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <SiteFooter />
+    </>
   )
 }
