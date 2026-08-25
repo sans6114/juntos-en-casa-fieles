@@ -3,7 +3,7 @@ import { Disclosure, SectionHeading } from "@/components/external/shared"
 import { faqItems } from "./data"
 
 const disclosureClass =
-  "[&>summary]:flex [&>summary]:items-center [&>summary]:justify-between border-b border-[var(--linea)]"
+  "border-b border-[var(--linea)] [&>summary]:flex [&>summary]:items-center [&>summary]:justify-between [&>summary]:gap-6 [&>summary]:py-5 [&>summary]:text-base [&>summary]:font-semibold [&>summary]:text-[var(--dato)] md:[&>summary]:py-6 md:[&>summary]:text-lg"
 
 export function Faq() {
   return (
@@ -19,10 +19,12 @@ export function Faq() {
           className="mb-12 md:mb-16"
         />
 
-        <div className="flex max-w-xl flex-col">
+        <div className="flex max-w-3xl flex-col border-t border-[var(--linea)]">
           {faqItems.map((item) => (
             <Disclosure key={item.id} summary={item.question} className={disclosureClass}>
-              <p className="text-[var(--suave)]">{item.answer}</p>
+              <p className="pb-5 pr-8 leading-relaxed text-[var(--suave)] md:pb-6">
+                {item.answer}
+              </p>
             </Disclosure>
           ))}
         </div>
