@@ -23,15 +23,20 @@ const LOADER_FRAMES = [
 ];
 
 const FRAME_INTERVAL_MS = 420;
-const LOAD_DURATION_S = 7;
+const LOAD_DURATION_S = 4.5;
 const FADE_DURATION_S = 0.45;
-/** Momento (en segundos desde que arranca el loader) en que aparece "Saltar
- * animación". No arranca visible porque la secuencia es la primera impresión
- * de la landing y no queremos invitar a saltearla en el segundo cero; tampoco
- * espera a que termine el loader, porque hacer esperar los 7s completos a
- * quien vuelve deja intacta casi toda la fricción que el botón viene a
- * resolver. */
-const SKIP_VISIBLE_AT_S = 3;
+/** POSICION ABSOLUTA en la timeline `intro`, NO una duracion ni un offset: es el
+ * segundo, contado desde que arranca el loader, en que aparece "Saltar
+ * animacion". Leerlo como "N segundos despues de X" es como se rompe.
+ *
+ * INVARIANTE: SKIP_VISIBLE_AT_S < LOAD_DURATION_S. Si el skip apareciera despues
+ * de que la barra llega a 100%, ya no habria nada que saltear.
+ *
+ * No arranca visible porque la secuencia es la primera impresion de la landing y
+ * no queremos invitar a saltearla en el segundo cero; tampoco espera a que
+ * termine el loader, porque hacer esperar la carga entera a quien vuelve deja
+ * intacta casi toda la friccion que el boton viene a resolver. */
+const SKIP_VISIBLE_AT_S = 1.2;
 /** Frases del reveal, avanzadas por botón en vez de scroll: con scroll (aun
  * con freno de velocidad) un gesto rápido terminaba saltando frases y el
  * usuario nunca llegaba a ver el reveal completo. */
@@ -221,7 +226,9 @@ export function HeroSequence({ onSkip }: { onSkip: () => void }) {
           loaderRef.current,
           {
             autoAlpha: 0,
-            duration: 0.45,
+            /* Era un literal 0.45 duplicado: cambiar FADE_DURATION_S esperando que
+             * este fade respondiera no hacia nada, y el bug se buscaba en otro lado. */
+            duration: FADE_DURATION_S,
             onComplete: () => {
               showFrame(0);
               setHintVisible(true);
