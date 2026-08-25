@@ -30,7 +30,9 @@ export async function obtenerInscripciones(): Promise<InscripcionDTO[]> {
       telefono: ins.telefono,
       edad: ins.edad,
       congregacionId: ins.congregacionId,
-      congregacionNombre: ins.congregacion?.nombre || null,
+      // Sin FK cae al texto libre, para que una congregacion escrita a mano no
+      // aparezca como "Sin congregacion" cuando el visitante si la declaro.
+      congregacionNombre: ins.congregacion?.nombre || ins.congregacionTexto || null,
       createdAt: ins.createdAt.toISOString(),
       contactado: ins.contacto?.contactado ?? false,
       contactoUsuarioNombre: ins.contacto?.usuario.nombre ?? null,

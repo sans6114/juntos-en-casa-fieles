@@ -32,6 +32,11 @@ export async function crearInscripcion(
     return { ok: false, message: "Revisá los datos ingresados.", fieldErrors }
   }
 
+  // Excluyentes a proposito: si eligio de la lista manda la FK, si la escribio a
+  // mano se guarda el texto crudo, y si no puso nada quedan las dos en null.
+  const congregacionId = parsed.data.congregacionId || null
+  const congregacionTexto = congregacionId ? null : parsed.data.congregacionQuery?.trim() || null
+
   try {
     const nuevaInscripcion = await prisma.inscripcion.create({
       data: {
@@ -39,7 +44,8 @@ export async function crearInscripcion(
         email: parsed.data.email,
         telefono: parsed.data.telefono,
         edad: parsed.data.edad,
-        congregacionId: parsed.data.congregacionId || null,
+        congregacionId,
+        congregacionTexto,
       },
     })
 
