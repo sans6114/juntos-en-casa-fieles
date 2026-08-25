@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useEffect, useOptimistic, useState, type ReactNode } from "react"
+import { useActionState, useEffect, useState, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import { crearInscripcion } from "@/actions"
 import type { InscripcionActionState } from "@/interfaces/inscripcion"
@@ -39,10 +39,6 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
   const [submitted, setSubmitted] = useState<SubmittedValues>(emptySubmitted)
 
   const [state, formAction, isPending] = useActionState(submitInscripcion, initialState)
-  const [optimisticState, setOptimisticState] = useOptimistic(
-    state,
-    (_prev: InscripcionActionState, next: InscripcionActionState) => next
-  )
 
   async function submitInscripcion(
     prevState: InscripcionActionState,
@@ -56,7 +52,9 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
       congregacionId: String(formData.get("congregacionId") ?? ""),
       congregacionQuery: String(formData.get("congregacionQuery") ?? ""),
     })
-    setOptimisticState({ ok: true })
+    // Sin estado optimista a propósito: el éxito se anuncia SOLO cuando la action
+    // lo confirma. Anunciarlo antes hacía que un email duplicado viera "¡Gracias!"
+    // y se lo retiraran un instante después. `isPending` ya cubre la espera.
     return crearInscripcion(prevState, formData)
   }
 
@@ -66,7 +64,7 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
     }
   }, [state, router])
 
-  if (optimisticState.ok) {
+  if (state.ok) {
     return (
       <div role="status" className="space-y-3 py-6 text-center">
         <p className="jec-label jec-eyebrow text-xs font-bold uppercase tracking-[0.2em]">
