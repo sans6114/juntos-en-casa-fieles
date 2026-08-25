@@ -225,12 +225,15 @@ export function HeroFinale({ onReplay }: { onReplay?: () => void }) {
           </div>
 
           <div className="flex flex-col items-center gap-6 sm:gap-8">
-            <div
-              className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3"
-              role="timer"
-              aria-live="polite"
-              aria-label="Cuenta regresiva al inicio del evento"
-            >
+            {/* Estatico y sin region live: los digitos se refrescan cada 1000ms,
+              * asi que `role="timer" aria-live="polite"` hacia que el lector
+              * reanunciara la cuenta para siempre. El dato util es cuando
+              * empieza, no cuantos segundos faltan. */}
+            <p className="sr-only">
+              Faltan {units.days} dias para el inicio: 18, 19 y 20 de septiembre de 2026.
+            </p>
+
+            <div aria-hidden className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3">
               {(Object.keys(labels) as Array<keyof typeof labels>).map((key, index) => (
                 <div key={key} className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3">
                   <div
