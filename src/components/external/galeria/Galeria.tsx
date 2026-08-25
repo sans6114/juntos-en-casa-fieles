@@ -56,9 +56,8 @@ export function Galeria() {
           <p className="mt-6 flex flex-wrap items-center gap-3">
             <PlaceholderTag>Sin fotos reales todavía</PlaceholderTag>
             <span className="text-sm text-[var(--suave)]">
-              {pendientes} de {galeriaFotos.length} tiles esperan la foto real. Subilas a{" "}
-              <code className="font-mono text-[13px]">public/jec/galeria/</code> y completá{" "}
-              <code className="font-mono text-[13px]">galeria/data.ts</code>.
+              Todavía estamos eligiendo las fotos de la edición pasada. Volvé en unos días y la
+              galería va a estar completa.
             </span>
           </p>
         ) : null}

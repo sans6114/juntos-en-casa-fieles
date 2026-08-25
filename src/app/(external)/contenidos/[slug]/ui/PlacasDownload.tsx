@@ -35,9 +35,8 @@ export function PlacasDownload({ item }: PlacasDownloadProps) {
         <div className="mt-5 flex flex-col items-start gap-2">
           <PlaceholderTag>Placas en preparación</PlaceholderTag>
           <span className="text-[13px] leading-relaxed text-[var(--suave)]">
-            Cuando el pack esté armado, completá <code className="font-mono">placasUrl</code> en{" "}
-            <code className="font-mono">contenidos/data.ts</code> y el botón de descarga aparece
-            solo.
+            Todavía estamos armando las placas de esta charla. Cuando estén listas, el botón de
+            descarga aparece acá.
           </span>
         </div>
       )}
