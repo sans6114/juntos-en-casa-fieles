@@ -47,3 +47,6 @@ next-env.d.ts
 
 # datos locales de postgres (volumen docker)
 /juntos-db/
+
+# openspec: handoff prompts, no artefactos del change
+openspec/changes/**/apply-prompt.md
