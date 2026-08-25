@@ -149,9 +149,18 @@ export function HeroFinale({ onReplay }: { onReplay?: () => void }) {
             <div className="relative -mx-2 mt-1">
               <p aria-hidden className="jec-display select-none text-[clamp(3rem,15vw,9rem)] uppercase leading-[0.86] tracking-tight text-[var(--jec-bone)]">
                 Fieles
-                <span aria-hidden className="ml-2 inline-block align-middle text-[0.5em]">
-                  🔥
-                </span>
+                {/* Antes era el emoji 🔥, que ademas de no ser el activo de marca
+                  * se dibuja distinto en cada sistema. `llama.svg` es el mismo
+                  * fuego del personaje de JEC. Alto en `em` para que escale con
+                  * el clamp del wordmark. */}
+                <Image
+                  src={jecAssets.personaje.llama}
+                  alt=""
+                  aria-hidden
+                  width={728}
+                  height={1080}
+                  className="ml-3 inline-block h-[0.62em] w-auto align-middle"
+                />
               </p>
 
               <div
@@ -175,6 +184,20 @@ export function HeroFinale({ onReplay }: { onReplay?: () => void }) {
             <span className="jec-label mt-4 inline-block w-fit bg-[var(--jec-amber)] px-3 py-1 text-xs font-black uppercase tracking-[0.1em] text-[var(--jec-ink)] sm:px-4 sm:py-1.5 sm:text-sm md:text-base">
               Permaneciendo en su amor
             </span>
+
+            {/* Que es y cuanto sale, en una linea. Antes lo unico concreto arriba
+              * del pliegue eran las tres fechas: que la entrada sea gratis vivia
+              * enterrado en el FAQ, siendo el dato mas persuasivo que hay.
+              *
+              * `jec-label`, nunca `jec-display`: la build personal-use de Cayento
+              * mapea los diez digitos al mismo glifo de marca de agua.
+              * `--jec-bone` y no `--suave` como el resto del bloque: esto va sobre
+              * la foto con scrim, donde bone es el nivel legible; `--suave` da
+              * 2.53:1 y no llega ni sobre brasa pelada. */}
+            <p className="jec-label mt-4 max-w-md text-sm font-bold leading-snug text-[var(--jec-bone)] sm:text-base md:text-lg">
+              Tres días para adolescentes y jóvenes en La Plata — entrada libre y gratuita con
+              inscripción previa.
+            </p>
           </div>
 
           <div className="flex flex-col items-center gap-6 sm:gap-8">
