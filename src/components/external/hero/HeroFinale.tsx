@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  useEffect,
   useRef,
   useSyncExternalStore,
 } from 'react';
@@ -45,9 +44,6 @@ const tapePhrases = [
 /** Debe coincidir con el `scrollDistance` pasado a `ScrollExpand`: define el
  * tramo (en alturas de viewport) durante el cual la imagen se expande. */
 const SCROLL_DISTANCE = 1.2;
-/** Máximo avance de scroll (px) permitido por evento mientras la expansión
- * está en curso, para que no se pueda "saltear" la animación de un tirón. */
-const MAX_SCROLL_STEP_PX = 48;
 
 function getTimeLeft(targetMs: number): TimeLeft {
   const diff = Math.max(0, targetMs - Date.now());
@@ -79,57 +75,12 @@ function subscribe(onStoreChange: () => void) {
 }
 
 /**
- * Frena la velocidad de scroll nativo mientras el frame de `ScrollExpand` se
- * está expandiendo (progreso 0→1), para que un scroll rápido no "salte" la
- * animación y haga desaparecer el hero antes de tiempo.
- */
-function useScrollExpandLock(containerRef: React.RefObject<HTMLDivElement | null>) {
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let lastY = window.scrollY;
-    let correcting = false;
-
-    const getZone = () => {
-      const top = container.getBoundingClientRect().top + window.scrollY;
-      return { start: top, end: top + window.innerHeight * SCROLL_DISTANCE };
-    };
-
-    const onScroll = () => {
-      if (correcting) {
-        correcting = false;
-        lastY = window.scrollY;
-        return;
-      }
-
-      const y = window.scrollY;
-      const { start, end } = getZone();
-      const insideOpeningZone = y > start && y < end;
-      const advancingTooFast = y - lastY > MAX_SCROLL_STEP_PX;
-
-      if (insideOpeningZone && advancingTooFast) {
-        correcting = true;
-        window.scrollTo(0, lastY + MAX_SCROLL_STEP_PX);
-      }
-
-      lastY = window.scrollY;
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [containerRef]);
-}
-
-/**
  * Hero final: frame de fondo que se expande con el scroll (ScrollExpand) y
  * revela, ya en pantalla completa, el wordmark "Fieles" con la cinta de
  * señalización animada, la cuenta regresiva y el CTA de inscripción.
  */
 export function HeroFinale({ onReplay }: { onReplay?: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  useScrollExpandLock(containerRef);
 
   const targetMs = new Date(siteConfig.eventStartsAt).getTime();
   const snapshot = useSyncExternalStore(
