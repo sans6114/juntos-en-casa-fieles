@@ -22,10 +22,6 @@ export const jecAssets = {
   hero: {
     finale: "/jec/hero/hero.png",
   },
-  iconos: {
-    ancla: "/jec/iconos/ancla.png",
-    pisada: "/jec/iconos/pisada.png",
-  },
   recursos: {
     huellas: "/jec/recursos/huellas.svg",
     backgroundColores: "/jec/recursos/background-colores.svg",
