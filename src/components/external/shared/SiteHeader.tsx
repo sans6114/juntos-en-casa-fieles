@@ -6,7 +6,7 @@ import { CloseIcon, MenuIcon } from "./icons"
 import { navItems } from "./navigation"
 
 const navLinkClass =
-  "jec-label text-xs font-bold uppercase tracking-[0.18em] text-[var(--dato)] transition-colors hover:text-[var(--acento)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--foco)]"
+  "jec-label text-xs font-bold uppercase tracking-[0.18em] text-[var(--dato)] transition-colors hover:text-[var(--acento-texto)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--foco)]"
 
 const logoSrc = {
   light: jecAssets.logos.wordmarkWhite,
@@ -58,7 +58,7 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
       <a
         href="#menu-movil"
         aria-label="Abrir menú"
-        className="-mr-2 inline-flex size-11 items-center justify-center text-[var(--dato)] transition-colors hover:text-[var(--acento)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--foco)] md:hidden"
+        className="-mr-2 inline-flex size-11 items-center justify-center text-[var(--dato)] transition-colors hover:text-[var(--acento-texto)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--foco)] md:hidden"
       >
         <MenuIcon size={24} />
       </a>
