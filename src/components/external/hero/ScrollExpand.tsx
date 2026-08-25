@@ -30,6 +30,10 @@ export interface ScrollExpandProps {
   mediaType?: "image" | "video";
   poster?: string;
   alt?: string;
+  /** Ancho y alto INTRINSECOS del media. Sin ellos el navegador no puede reservar
+   *  la caja antes de decodificar y el hero produce CLS. */
+  mediaWidth?: number;
+  mediaHeight?: number;
   title?: string;
   scrollHint?: string;
   startWidth?: number;
@@ -54,6 +58,8 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
   mediaType = "image",
   poster = "",
   alt = "",
+  mediaWidth,
+  mediaHeight,
   title = "",
   scrollHint = "",
   startWidth = 42,
@@ -267,7 +273,20 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
         playsInline
       />
     ) : (
-      <img ref={mediaRef} className="scroll-expand__media" src={src} alt={alt} draggable={false} />
+      /* `fetchPriority="high"`: es el LCP de la home y compite con el resto de la
+         cascada. `width`/`height` reservan la caja antes de decodificar. No pasa
+         por `next/image` porque el CSS lo escala y recorta por frame de scroll. */
+      <img
+        ref={mediaRef}
+        className="scroll-expand__media"
+        src={src}
+        alt={alt}
+        width={mediaWidth}
+        height={mediaHeight}
+        fetchPriority="high"
+        decoding="async"
+        draggable={false}
+      />
     );
 
   return (

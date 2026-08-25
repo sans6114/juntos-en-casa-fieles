@@ -165,6 +165,8 @@ export function HeroFinale({ onReplay }: { onReplay?: () => void }) {
       <ScrollExpand
         src={jecAssets.background.pisada}
         alt="Fieles — conferencia de adolescentes y jóvenes 2026"
+        mediaWidth={1920}
+        mediaHeight={1081}
         scrollDistance={SCROLL_DISTANCE}
         useWindowScroll
       >
