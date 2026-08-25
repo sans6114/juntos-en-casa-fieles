@@ -81,6 +81,9 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const scrimRef = useRef<HTMLDivElement | null>(null);
   const hintRef = useRef<HTMLDivElement | null>(null);
+  /* Espejo del estado `inert` del overlay. Se escribe SOLO cuando cambia: tocar
+   * el atributo en cada frame de scroll thrashea el DOM sin motivo. */
+  const overlayInertRef = useRef(true);
 
   const propsRef = useRef<Required<Pick<ScrollExpandProps, ConfigKey>>>(
     {} as Required<Pick<ScrollExpandProps, ConfigKey>>
@@ -148,6 +151,16 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
       const inn = smoothstep(0.68, 1, p);
       overlayRef.current.style.opacity = `${inn}`;
       overlayRef.current.style.transform = `translate3d(0, ${18 * (1 - inn)}px, 0)`;
+
+      /* Mientras es invisible el overlay seguia siendo tabulable y clickeable: su
+       * CTA y el boton de repetir recibian foco durante el 68% inicial del scroll.
+       * `inert` los saca del orden de tabulacion, del arbol de accesibilidad y de
+       * los eventos de puntero de una sola vez. */
+      const inert = inn === 0;
+      if (inert !== overlayInertRef.current) {
+        overlayInertRef.current = inert;
+        overlayRef.current.toggleAttribute("inert", inert);
+      }
     }
   }, []);
 
@@ -270,7 +283,9 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
             {media}
             <div ref={scrimRef} className="scroll-expand__scrim" />
             {children ? (
-              <div ref={overlayRef} className="scroll-expand__overlay">
+              // Arranca inerte porque arranca en opacity 0; `applyProgress` lo
+              // libera al cruzar el 68% del reveal.
+              <div ref={overlayRef} className="scroll-expand__overlay" inert>
                 {children}
               </div>
             ) : null}

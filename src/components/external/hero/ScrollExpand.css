@@ -69,6 +69,14 @@
   will-change: opacity, transform;
 }
 
+/* Respaldo para navegadores sin soporte de `inert`. El JS alterna el atributo en
+   el flip del 68% del reveal; mientras esta puesto, el overlay es invisible y no
+   debe recibir clics ni foco. */
+.scroll-expand__overlay[inert] {
+  pointer-events: none;
+  visibility: hidden;
+}
+
 .scroll-expand__title {
   position: absolute;
   inset: 0;
