@@ -4,6 +4,10 @@ export const jecAssets = {
   favicon: "/jec/favicon.svg",
   background: {
     pisada: "/jec/background/background.webp",
+    /** Mismo fondo en tres anchos. El de 1920 es `pisada`; los otros dos existen
+     *  para que un telefono no baje 314 KB pudiendo bajar 119. */
+    pisadaSrcSet:
+      "/jec/background/background-960.webp 960w, /jec/background/background-1280.webp 1280w, /jec/background/background.webp 1920w",
   },
   logos: {
     jecWhiteSvg: "/jec/logos/logoblanco.svg",

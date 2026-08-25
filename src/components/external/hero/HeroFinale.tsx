@@ -118,6 +118,8 @@ export function HeroFinale({ onReplay }: { onReplay?: () => void }) {
         alt="Fieles — conferencia de adolescentes y jóvenes 2026"
         mediaWidth={1920}
         mediaHeight={1081}
+        mediaSrcSet={jecAssets.background.pisadaSrcSet}
+        mediaSizes="100vw"
         scrollDistance={SCROLL_DISTANCE}
         useWindowScroll
       >

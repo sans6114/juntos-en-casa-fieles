@@ -34,6 +34,10 @@ export interface ScrollExpandProps {
    *  la caja antes de decodificar y el hero produce CLS. */
   mediaWidth?: number;
   mediaHeight?: number;
+  /** `srcset`/`sizes` del media. El frame se pinta a ancho completo, asi que un
+   *  telefono no tiene por que bajar el archivo de 1920px. */
+  mediaSrcSet?: string;
+  mediaSizes?: string;
   title?: string;
   scrollHint?: string;
   startWidth?: number;
@@ -60,6 +64,8 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
   alt = "",
   mediaWidth,
   mediaHeight,
+  mediaSrcSet,
+  mediaSizes,
   title = "",
   scrollHint = "",
   startWidth = 42,
@@ -280,6 +286,8 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
         ref={mediaRef}
         className="scroll-expand__media"
         src={src}
+        srcSet={mediaSrcSet}
+        sizes={mediaSizes}
         alt={alt}
         width={mediaWidth}
         height={mediaHeight}
