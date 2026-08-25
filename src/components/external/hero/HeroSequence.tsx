@@ -54,6 +54,7 @@ export function HeroSequence({ onSkip }: { onSkip: () => void }) {
   const loaderRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<HTMLSpanElement>(null);
   const percentRef = useRef<HTMLSpanElement>(null);
+  const progressRef = useRef<HTMLSpanElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLButtonElement>(null);
   const skipRef = useRef<HTMLButtonElement>(null);
@@ -162,6 +163,12 @@ export function HeroSequence({ onSkip }: { onSkip: () => void }) {
             if (percentRef.current) {
               percentRef.current.textContent = `${pct}%`;
             }
+            /* `aria-valuenow` en el progressbar en vez de texto en una region
+             * live: el lector lo consulta cuando el usuario pregunta, no lo
+             * grita en cada frame. */
+            if (progressRef.current) {
+              progressRef.current.setAttribute("aria-valuenow", String(pct));
+            }
           },
           onComplete: () => window.clearInterval(frameId),
         });
@@ -264,7 +271,6 @@ export function HeroSequence({ onSkip }: { onSkip: () => void }) {
           ref={loaderRef}
         className="fixed inset-0 z-[100] flex touch-none flex-col items-center justify-center overscroll-none bg-[var(--jec-ember)] px-6"
         aria-busy="true"
-        aria-live="polite"
       >
         <div className="relative flex flex-col items-center">
         {/* TODO(landing-home-secciones): Hero fuera de alcance de landing-tokens-b; solo se repara el asset roto (jecWhitePng no existía en disco). */}
@@ -286,10 +292,12 @@ export function HeroSequence({ onSkip }: { onSkip: () => void }) {
         />
           <div className="mt-10 flex w-full max-w-xs flex-col items-center gap-3 md:max-w-sm">
             <span
+              ref={progressRef}
               className="block h-4 w-full overflow-hidden rounded-full border-2 border-[var(--jec-bone)]"
               role="progressbar"
               aria-valuemin={0}
               aria-valuemax={100}
+              aria-valuenow={0}
               aria-label="Cargando"
             >
               <span
@@ -300,6 +308,7 @@ export function HeroSequence({ onSkip }: { onSkip: () => void }) {
             </span>
             <span
               ref={percentRef}
+              aria-hidden="true"
               className="jec-mono text-sm font-bold tabular-nums text-[var(--jec-bone)]"
             >
               0%
