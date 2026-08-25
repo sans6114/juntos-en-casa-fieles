@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
+import { after } from 'next/server';
 import { z } from 'zod';
 
 import {
@@ -42,12 +43,16 @@ export async function crearInscripcion(
       },
     })
 
-    // Enviar email con QR
-    await sendQrEmail({
-      to: nuevaInscripcion.email,
-      nombre: nuevaInscripcion.nombre,
-      uuid: nuevaInscripcion.id,
-    })
+    // El email con el QR sale DESPUES de la respuesta. `sendQrEmail` se traga sus
+    // propios errores y nunca lanza, asi que esperarlo no garantizaba nada: solo
+    // dejaba al visitante mirando el boton "Enviando…" mientras Resend respondia.
+    after(() =>
+      sendQrEmail({
+        to: nuevaInscripcion.email,
+        nombre: nuevaInscripcion.nombre,
+        uuid: nuevaInscripcion.id,
+      })
+    )
 
     // Revalidar las rutas del dashboard admin para que los datos nuevos aparezcan al instante
     revalidatePath("/admin/inscripciones", "layout")
