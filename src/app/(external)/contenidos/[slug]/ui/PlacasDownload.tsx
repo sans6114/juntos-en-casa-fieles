@@ -16,7 +16,7 @@ export function PlacasDownload({ item }: PlacasDownloadProps) {
   return (
     <div className="campo-tinta rounded-[6px] p-7">
       <div className="flex items-center gap-3">
-        <ImagesIcon size={24} strokeWidth={1.8} className="shrink-0 text-[var(--acento)]" />
+        <ImagesIcon size={24} strokeWidth={1.8} className="shrink-0 text-[var(--acento-texto)]" />
         <h2 className="jec-label text-xl font-extrabold tracking-tight">Placas para compartir</h2>
       </div>
 

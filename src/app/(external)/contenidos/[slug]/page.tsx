@@ -72,7 +72,7 @@ export default async function ContenidoPage({ params }: ContenidoPageProps) {
             </h1>
 
             <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <span className="jec-label text-xs font-bold uppercase tracking-[0.28em] text-[var(--acento)]">
+              <span className="jec-label text-xs font-bold uppercase tracking-[0.28em] text-[var(--acento-texto)]">
                 {item.session ? `${kindLabel(item.kind)} · ${item.session}` : kindLabel(item.kind)}
               </span>
 

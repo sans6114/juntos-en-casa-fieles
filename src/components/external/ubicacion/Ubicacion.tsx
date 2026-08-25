@@ -22,7 +22,7 @@ export function Ubicacion() {
               El label de acento separa al venue del <h2> de SectionHeading, que comparte
               familia, peso y tracking. Es el mismo recurso que `dayLabel` en CronogramaDiaCard.
             */}
-            <p className="jec-label text-xs font-bold uppercase tracking-[0.28em] text-[var(--acento)]">
+            <p className="jec-label text-xs font-bold uppercase tracking-[0.28em] text-[var(--acento-texto)]">
               El lugar
             </p>
 
