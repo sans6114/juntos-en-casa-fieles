@@ -1,7 +1,7 @@
 export type NavItem = {
   href: string
   label: string
-  /** Primary action. Rendered as a CTA in the mobile menu instead of a plain link. */
+  /** Primary action. Rendered as a CTA instead of a plain link, at every breakpoint. */
   cta?: boolean
 }
 

@@ -8,6 +8,13 @@ import { navItems } from "./navigation"
 const navLinkClass =
   "jec-label text-xs font-bold uppercase tracking-[0.18em] text-[var(--dato)] transition-colors hover:text-[var(--acento-texto)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--foco)]"
 
+/** Mismo tratamiento que la entrada `cta` del panel mobile, en escala de header:
+ *  bloque relleno con los tokens de CTA del campo. El nav de desktop mapeaba
+ *  TODAS las entradas por `navLinkClass` y nunca leia `item.cta`, asi que la
+ *  unica accion de la pagina se veia igual que un link de seccion. */
+const navCtaClass =
+  "jec-label inline-flex min-h-11 items-center rounded-[6px] bg-[var(--cta-bg)] px-5 text-xs font-bold uppercase tracking-[0.14em] text-[var(--cta-fg)] transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--foco)]"
+
 const logoSrc = {
   light: jecAssets.logos.wordmarkWhite,
   dark: jecAssets.logos.wordmarkBlack,
@@ -49,7 +56,11 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
         className="hidden items-center justify-end gap-x-5 gap-y-2 md:flex md:flex-wrap md:gap-x-7"
       >
         {navItems.map((item) => (
-          <Link key={item.href} href={item.href} className={navLinkClass}>
+          <Link
+            key={item.href}
+            href={item.href}
+            className={item.cta ? navCtaClass : navLinkClass}
+          >
             {item.label}
           </Link>
         ))}
