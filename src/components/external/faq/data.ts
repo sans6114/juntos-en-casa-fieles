@@ -1,8 +1,20 @@
+import { ubicacionInfo } from "@/components/external/ubicacion/data"
+
 export type FaqItem = {
   id: string
   question: string
   answer: string
 }
+
+/**
+ * La respuesta de "¿Dónde es?" se compone desde `ubicacionInfo`, la misma fuente
+ * que alimenta la sección Ubicación. Antes esta dirección estaba escrita a mano
+ * acá y decía una cosa mientras Ubicación decía otra; leyéndola vuelve imposible
+ * que las dos se contradigan.
+ */
+const dondeEs = ubicacionInfo.street
+  ? `En el templo de la ${ubicacionInfo.venue}: ${ubicacionInfo.street}. ${ubicacionInfo.city}.`
+  : `En el templo de la ${ubicacionInfo.venue}, en ${ubicacionInfo.city}. La dirección exacta está por confirmar.`
 
 export const faqItems: readonly FaqItem[] = [
   {
@@ -20,8 +32,7 @@ export const faqItems: readonly FaqItem[] = [
   {
     id: "3",
     question: "¿Dónde es?",
-    answer:
-      "En el templo de Vida Sobrenatural: Calle 23, 1665 entre 66 y 67 (La Plata, Bs As). Zona Parque Castelli",
+    answer: dondeEs,
   },
   {
     id: "4",
