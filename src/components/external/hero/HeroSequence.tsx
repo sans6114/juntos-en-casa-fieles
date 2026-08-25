@@ -25,6 +25,13 @@ const LOADER_FRAMES = [
 const FRAME_INTERVAL_MS = 420;
 const LOAD_DURATION_S = 7;
 const FADE_DURATION_S = 0.45;
+/** Momento (en segundos desde que arranca el loader) en que aparece "Saltar
+ * animación". No arranca visible porque la secuencia es la primera impresión
+ * de la landing y no queremos invitar a saltearla en el segundo cero; tampoco
+ * espera a que termine el loader, porque hacer esperar los 7s completos a
+ * quien vuelve deja intacta casi toda la fricción que el botón viene a
+ * resolver. */
+const SKIP_VISIBLE_AT_S = 3;
 /** Frases del reveal, avanzadas por botón en vez de scroll: con scroll (aun
  * con freno de velocidad) un gesto rápido terminaba saltando frases y el
  * usuario nunca llegaba a ver el reveal completo. */
@@ -36,20 +43,40 @@ const REVEAL_FRAME_COUNT = jecRevealPhrases.length;
  * hero final trae su propio logo/CTA (ver HeroFinale). El scroll queda
  * bloqueado desde el loader hasta que se revela la última frase; el único
  * modo de avanzar durante el reveal es el botón.
+ *
+ * A los SKIP_VISIBLE_AT_S aparece además "Saltar animación", que llama a
+ * `onSkip` para que el padre desmonte la secuencia completa (ver Hero) y el
+ * visitante caiga en HeroFinale, con el scroll ya liberado por el cleanup. Al
+ * revelarse la última frase ese botón se va: ya no hay nada que saltear.
  */
-export function HeroSequence() {
+export function HeroSequence({ onSkip }: { onSkip: () => void }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<HTMLSpanElement>(null);
   const percentRef = useRef<HTMLSpanElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLButtonElement>(null);
+  const skipRef = useRef<HTMLButtonElement>(null);
   const phraseRefs = useRef<Array<HTMLParagraphElement | null>>([]);
   const [frame, setFrame] = useState(0);
   const activeFrameRef = useRef(-1);
 
   useGSAP(
     () => {
+      /* Llegar con hash (`/#cronograma` desde el navbar de otra página) es
+       * pedir una sección concreta, no la intro. Si la secuencia arrancara
+       * igual, bloquearía el scroll encima del ancla recién saltada y dejaría
+       * al visitante sin salida hasta que apareciera el botón de saltar.
+       *
+       * Va antes de `gsap.matchMedia()` a propósito: así no se crea la
+       * timeline ni se toca el overflow, y no hay nada que limpiar. `useGSAP`
+       * corre como layout effect, así que el padre desmonta esto antes del
+       * primer paint y no se ve ni un frame del loader. */
+      if (window.location.hash) {
+        onSkip();
+        return;
+      }
+
       const mm = gsap.matchMedia();
 
       const showFrame = (index: number) => {
@@ -87,6 +114,12 @@ export function HeroSequence() {
       });
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
+        /* La secuencia ocupa el primer viewport y traba el scroll donde esté,
+         * así que arrancar en otra posición la deja fuera de pantalla. Pasa al
+         * repetirla desde HeroFinale (el visitante está scrolleado abajo) y al
+         * recargar con el scroll restaurado por el navegador. */
+        window.scrollTo(0, 0);
+
         const previousOverflow = document.documentElement.style.overflow;
         const previousBodyOverflow = document.body.style.overflow;
         document.documentElement.style.overflow = "hidden";
@@ -140,6 +173,15 @@ export function HeroSequence() {
           if (revealDone) return;
           revealDone = true;
           setHintVisible(false);
+          /* La animación ya terminó: "Saltar" no tiene nada que saltear. Quien
+           * quiera repetirla lo hace desde el overlay de HeroFinale. */
+          if (skipRef.current) {
+            gsap.to(skipRef.current, {
+              autoAlpha: 0,
+              duration: 0.3,
+              overwrite: "auto",
+            });
+          }
           detachRevealListeners();
           unlockScroll();
         };
@@ -180,6 +222,15 @@ export function HeroSequence() {
             },
           },
           "+=0.15"
+        );
+
+        /* Va después del fade del loader a propósito: el "+=0.15" de arriba se
+         * resuelve contra el final de la timeline al momento de insertarlo, así
+         * que agregar antes un tween en posición absoluta lo correría. */
+        intro.to(
+          skipRef.current,
+          { autoAlpha: 1, duration: 0.4, ease: "power2.out" },
+          SKIP_VISIBLE_AT_S
         );
 
         if (hintRef.current) {
@@ -257,6 +308,22 @@ export function HeroSequence() {
         </div>
         </div>
 
+        {/* `absolute` y no `fixed`: durante la secuencia el scroll está trabado
+          * en 0, así que se ve igual arriba a la derecha, pero al soltarse el
+          * scroll se va con el hero en vez de quedar flotando sobre el resto de
+          * la landing. z-[110] lo deja por encima del loader (z-100).
+          * Arranca oculto y la timeline `intro` lo revela a los
+          * SKIP_VISIBLE_AT_S; hasta entonces `visibility: hidden` lo mantiene
+          * fuera del orden de tabulación y del árbol de accesibilidad. */}
+        <button
+          ref={skipRef}
+          type="button"
+          onClick={onSkip}
+          className="jec-mono invisible absolute right-4 top-4 z-[110] rounded-full border-2 border-[var(--jec-bone)]/40 px-4 py-2 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-[var(--jec-bone)]/80 opacity-0 transition-colors hover:border-[var(--jec-bone)] hover:text-[var(--jec-bone)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--jec-amber)] sm:right-6 sm:top-6 sm:text-xs"
+        >
+          Saltar animación
+        </button>
+
         <div
           ref={stageRef}
           className="relative z-10 flex min-h-dvh w-full items-center justify-center overflow-hidden text-center"
@@ -287,6 +354,7 @@ export function HeroSequence() {
               aria-hidden
             />
           </button>
+
         </div>
       </div>
   );
