@@ -80,6 +80,6 @@ export async function crearInscripcion(
     }
 
     console.error("Error creando inscripción:", error)
-    return { ok: false, message: "No se pudo procesar la inscripción. Verifica los datos enviados." }
+    return { ok: false, message: "No se pudo procesar la inscripción. Verificá los datos enviados." }
   }
 }
