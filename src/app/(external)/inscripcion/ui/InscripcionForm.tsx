@@ -32,7 +32,7 @@ const emptySubmitted: SubmittedValues = {
 }
 
 const inputClassName =
-  "min-h-12 w-full rounded-[6px] border border-[var(--regla)] bg-transparent px-4 py-3 text-base text-[var(--dato)] placeholder:text-[var(--suave)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--foco)] aria-invalid:border-2 aria-invalid:border-[var(--acento)]"
+  "min-h-12 w-full rounded-[6px] border border-[var(--regla)] bg-transparent px-4 py-3 text-base text-[var(--dato)] placeholder:text-[var(--suave)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--foco)] aria-invalid:border-2 aria-invalid:border-[var(--acento-texto)]"
 
 export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
   const router = useRouter()
@@ -107,7 +107,7 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
           ref={alertRef}
           role="alert"
           tabIndex={-1}
-          className="jec-label rounded-[6px] border-l-[3px] border-[var(--acento)] bg-[color-mix(in_srgb,var(--acento)_10%,transparent)] px-4 py-3 text-sm text-[var(--dato)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--foco)]"
+          className="jec-label rounded-[6px] border-l-[3px] border-[var(--acento-texto)] bg-[color-mix(in_srgb,var(--acento)_10%,transparent)] px-4 py-3 text-sm text-[var(--dato)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--foco)]"
         >
           {state.message}
         </p>
@@ -208,7 +208,7 @@ function Field({ label, htmlFor, error, children }: FieldProps) {
       {error ? (
         <p
           id={`${htmlFor}-error`}
-          className="flex items-center gap-1.5 text-sm text-[var(--acento)]"
+          className="flex items-center gap-1.5 text-sm text-[var(--acento-texto)]"
         >
           <AlertIcon size={16} className="shrink-0" />
           {error}
