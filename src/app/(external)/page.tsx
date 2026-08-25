@@ -20,10 +20,16 @@ export default function ExternalPage() {
         Va última, después de SiteFooter, para no interrumpir el orden de lectura.
       */}
       <div>
-        <Cronograma />
-        <Invitados />
-        <Ubicacion />
-        <Faq />
+        {/*
+          `SiteFooter` y `StickyCta` quedan FUERA del <main> pero DENTRO del div:
+          el div no se puede sacar, es el bloque contenedor de `StickyCta`.
+        */}
+        <main id="contenido" tabIndex={-1}>
+          <Cronograma />
+          <Invitados />
+          <Ubicacion />
+          <Faq />
+        </main>
         <SiteFooter />
         <StickyCta />
       </div>
