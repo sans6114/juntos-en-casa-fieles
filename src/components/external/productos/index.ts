@@ -1,0 +1,7 @@
+export { DondeConseguir } from "./DondeConseguir"
+export { ProductoCard } from "./ProductoCard"
+export { ProductoPieza } from "./ProductoPieza"
+export { ProductosGrid } from "./ProductosGrid"
+export { ProductosIntro } from "./ProductosIntro"
+export { findProducto, productos, relatedProductos } from "./data"
+export type { ProductoItem, ProductoKind, ProductoVariante } from "./data"

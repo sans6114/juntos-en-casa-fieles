@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   MessageCircle,
+  ScanLine,
   Shield,
   Table2,
   Users,
@@ -225,6 +226,26 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
             </SidebarGroupContent>
           </SidebarGroup>
         ) : null}
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Evento</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={pathname.startsWith("/admin/escanear-qr")}
+                  tooltip="Escanear QR"
+                  render={
+                    <Link href="/admin/escanear-qr" onClick={closeSidebar} />
+                  }
+                >
+                  <ScanLine />
+                  <span>Escanear QR</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>
