@@ -1,260 +1,216 @@
 "use client";
 
+import type { CSSProperties } from "react";
+
+import Image from "next/image";
+
+import { CtaButton, jecTaglines } from "@/components/external/shared";
+import { jecAssets } from "@/lib/jec-assets";
+import { siteConfig } from "@/lib/seo/site";
+
+import ScrollExpand from "./ScrollExpand";
+import "./HeroFinale.css";
 import {
-  useRef,
-  useSyncExternalStore,
-} from 'react';
-
-import Image from 'next/image';
-import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
-
-import { CtaButton } from '@/components/external/shared';
-import { jecAssets } from '@/lib/jec-assets';
-import { siteConfig } from '@/lib/seo/site';
-
-import ScrollExpand from './ScrollExpand';
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(useGSAP);
-}
-
-type TimeLeft = {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-};
-
-const labels = {
-  days: "Días",
-  hours: "Horas",
-  minutes: "Min",
-  seconds: "Seg",
-} as const;
-
-/** Frases del tema 2026, repetidas en la cinta de señalización sobre "Fieles". */
-const tapePhrases = [
-  "Anclados en la roca",
-  "Permaneciendo en la palabra",
-  "Viviendo en libertad",
-  "Caminando en la verdad",
-] as const;
+  countdownLabels,
+  countdownUnits,
+  padUnit,
+  useCountdown,
+  type TimeLeft,
+} from "./useCountdown";
 
 /** Debe coincidir con el `scrollDistance` pasado a `ScrollExpand`: define el
  * tramo (en alturas de viewport) durante el cual la imagen se expande. */
 const SCROLL_DISTANCE = 1.2;
 
-function getTimeLeft(targetMs: number): TimeLeft {
-  const diff = Math.max(0, targetMs - Date.now());
-  return {
-    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((diff / (1000 * 60)) % 60),
-    seconds: Math.floor((diff / 1000) % 60),
-  };
-}
+/** Dimensiones intrínsecas de `hero.background`. Sin ellas el navegador no
+ * puede reservar la caja antes de decodificar y el hero produce CLS. */
+const BACKGROUND_WIDTH = 1920;
+const BACKGROUND_HEIGHT = 1081;
 
-function pad(value: number) {
-  return String(value).padStart(2, "0");
-}
+const EVENT_DATE = "18.19.20 SEPT";
+/** `siteConfig.city` es "La Plata, Buenos Aires"; en el hero entra la ciudad
+ * sola, que es lo que contesta "¿dónde es?" sin gastar una línea entera. */
+const EVENT_CITY = siteConfig.city.split(",")[0];
 
-function timeLeftKey(targetMs: number) {
-  const { days, hours, minutes, seconds } = getTimeLeft(targetMs);
-  return `${days}:${hours}:${minutes}:${seconds}`;
-}
+/* El CTA de la pieza es lima con texto negro, al revés del default del botón
+ * (tinta sobre hueso). Se resuelve por los custom properties que el propio
+ * `CtaButton` expone, en vez de pelearle especificidad con clases. `--foco`
+ * viaja con ellos: el default es tinta, que sobre la foto del frame queda
+ * invisible. */
+const CTA_COLORS = {
+  "--cta-bg": "var(--jec-amber)",
+  "--cta-fg": "var(--jec-ink)",
+  "--foco": "var(--jec-bone)",
+} as CSSProperties;
 
-function parseTimeLeftKey(key: string): TimeLeft {
-  const [days, hours, minutes, seconds] = key.split(":").map(Number);
-  return { days, hours, minutes, seconds };
-}
-
-function subscribe(onStoreChange: () => void) {
-  const id = window.setInterval(onStoreChange, 1000);
-  return () => window.clearInterval(id);
+/**
+ * Chips del countdown. Las etiquetas van en hueso y no en lima: dentro del hero
+ * el lima quedó reservado al CTA, que es lo único que el visitante tiene que
+ * accionar.
+ */
+function Countdown({ units }: { units: TimeLeft }) {
+  return (
+    <div
+      className="grid grid-cols-4 gap-2 sm:gap-2.5"
+      role="timer"
+      aria-live="polite"
+      aria-label="Cuenta regresiva al inicio del evento"
+    >
+      {countdownUnits.map((key) => (
+        <div
+          key={key}
+          className="flex flex-col items-center justify-center rounded-[6px] bg-[var(--jec-ink)] px-3 py-2.5 sm:px-5 sm:py-3"
+        >
+          <span
+            /* `jec-mono` (Helvetica Neue Condensed) y nunca `jec-display`: la
+             * build personal-use de Cayento mapea los diez dígitos al mismo
+             * glifo de marca de agua. De paso es la analogía correcta de la
+             * Oswald de la pieza, que también es una condensada. */
+            className="jec-mono text-[2rem] font-black leading-none tabular-nums text-[var(--jec-bone)] sm:text-[2.5rem]"
+          >
+            {padUnit(units[key])}
+          </span>
+          <span className="jec-mono mt-1 text-[0.625rem] font-bold uppercase tracking-[0.16em] text-[var(--jec-bone)]/60 sm:text-[0.6875rem]">
+            {countdownLabels[key]}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 /**
- * Hero final: frame de fondo que se expande con el scroll (ScrollExpand) y
- * revela, ya en pantalla completa, el wordmark "Fieles" con la cinta de
- * señalización animada, la cuenta regresiva y el CTA de inscripción.
+ * Una sola composición por capas para todos los anchos: desktop recibe más aire
+ * y tipografía más grande, no un diseño distinto. Reemplaza a la pieza aplanada
+ * de desktop, que al tener aspecto fijo se letterboxeaba en cualquier viewport
+ * bajo y además repetía en ráster la fecha y las cuatro frases que el DOM ya
+ * imprimía debajo.
  */
-export function HeroFinale({ onReplay }: { onReplay?: () => void }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const targetMs = new Date(siteConfig.eventStartsAt).getTime();
-  const snapshot = useSyncExternalStore(
-    subscribe,
-    () => timeLeftKey(targetMs),
-    () => "0:0:0:0"
-  );
-  const units = parseTimeLeftKey(snapshot);
-
-  const tapeRef = useRef<HTMLDivElement>(null);
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        const tween = gsap.to(tapeRef.current, {
-          xPercent: -50,
-          duration: 22,
-          ease: "none",
-          repeat: -1,
-        });
-        return () => tween.kill();
-      });
-      return () => mm.revert();
-    },
-    { scope: tapeRef }
-  );
-  const tapeItems = [...tapePhrases, ...tapePhrases];
-
+function HeroComposition({ units }: { units: TimeLeft }) {
   return (
-    <div ref={containerRef} className="bg-[var(--jec-ember)]">
-      <h1 className="sr-only">Juntos en casa - Fieles 2026 — 18, 19 y 20 de septiembre</h1>
-
-      <ScrollExpand
-        src={jecAssets.background.pisada}
-        alt="Fieles — conferencia de adolescentes y jóvenes 2026"
-        mediaWidth={1920}
-        mediaHeight={1081}
-        mediaSrcSet={jecAssets.background.pisadaSrcSet}
-        mediaSizes="100vw"
-        scrollDistance={SCROLL_DISTANCE}
-        useWindowScroll
-      >
-        <div className="relative flex h-full w-full flex-col justify-between overflow-hidden px-6 py-8 sm:px-10 sm:py-10 md:px-14 md:py-12">
+    <div className="hero-finale__stage relative flex h-full w-full flex-col">
+      <div className="relative z-[2] flex-none">
+        {/* Solapa con el logo, colgada del borde superior. Hueso y no el
+          * gradiente naranja→lima original: ese gradiente inventaba dos tonos
+          * intermedios que no existen en la paleta de dos colores. */}
+        {/* Los `min(..., Nvh)` de acá abajo son lo que reemplaza al letterboxing
+          * de la pieza aplanada: en un viewport bajo la identidad se achica en vez
+          * de empujar el bloque de decisión debajo del fold. */}
+        <div className="ml-5 flex w-[min(132px,16vh)] items-center justify-center rounded-b-[26px] bg-[var(--jec-bone)] px-3 py-3 sm:ml-8 sm:w-[min(168px,18vh)] sm:px-4 sm:py-4 lg:ml-12 lg:w-[min(196px,20vh)] lg:py-5">
           <Image
-            src={jecAssets.recursos.huellas}
+            src={jecAssets.hero.logo}
             alt=""
             aria-hidden
-            width={220}
-            height={220}
-            className="pointer-events-none absolute -bottom-8 -left-8 h-32 w-32 -rotate-6 opacity-80 sm:h-44 sm:w-44 md:h-56 md:w-56"
+            width={1200}
+            height={592}
+            sizes="196px"
+            className="w-full"
           />
-
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <span className="jec-mono flex flex-col items-center rounded-2xl bg-[var(--jec-amber)] px-4 py-2 text-center text-[0.65rem] font-black uppercase leading-[1.05] text-[var(--jec-ink)] sm:px-5 sm:py-2.5 sm:text-xs">
-              <span>Juntos</span>
-              <span>en casa</span>
-            </span>
-            <p className="jec-label max-w-[14rem] text-xs font-bold uppercase leading-tight tracking-[0.08em] text-[var(--jec-bone)] sm:max-w-xs sm:text-sm">
-              Conferencia de adolescentes y jóvenes 2026
-            </p>
-          </div>
-
-          <div className="relative flex flex-1 flex-col justify-center py-6">
-            <p className="jec-mono text-2xl font-black tracking-tight text-[var(--jec-amber)] sm:text-3xl md:text-4xl">
-              18 · 19 · 20 SEPT
-            </p>
-
-            <div className="relative -mx-2 mt-1">
-              <p aria-hidden className="jec-display select-none text-[clamp(3rem,15vw,9rem)] uppercase leading-[0.86] tracking-tight text-[var(--jec-bone)]">
-                Fieles
-                {/* Antes era el emoji 🔥, que ademas de no ser el activo de marca
-                  * se dibuja distinto en cada sistema. `llama.svg` es el mismo
-                  * fuego del personaje de JEC. Alto en `em` para que escale con
-                  * el clamp del wordmark. */}
-                <Image
-                  src={jecAssets.personaje.llama}
-                  alt=""
-                  aria-hidden
-                  width={728}
-                  height={1080}
-                  className="ml-3 inline-block h-[0.62em] w-auto align-middle"
-                />
-              </p>
-
-              <div
-                aria-hidden
-                className="pointer-events-none absolute left-[-10%] top-1/2 w-[120%] -translate-y-1/2 -rotate-3 overflow-hidden border-y-2 border-[var(--jec-ink)] bg-[var(--jec-amber)] py-1.5"
-              >
-                <div ref={tapeRef} className="flex w-max items-center gap-6 whitespace-nowrap will-change-transform">
-                  {tapeItems.map((phrase, index) => (
-                    <span
-                      key={`${phrase}-${index}`}
-                      className="jec-mono flex items-center gap-6 text-[0.6rem] font-black uppercase tracking-[0.16em] text-[var(--jec-ink)] sm:text-xs md:text-sm"
-                    >
-                      {phrase}
-                      <span className="text-[var(--jec-ember)]">•</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <span className="jec-label mt-4 inline-block w-fit bg-[var(--jec-amber)] px-3 py-1 text-xs font-black uppercase tracking-[0.1em] text-[var(--jec-ink)] sm:px-4 sm:py-1.5 sm:text-sm md:text-base">
-              Permaneciendo en su amor
-            </span>
-
-            {/* Que es y cuanto sale, en una linea. Antes lo unico concreto arriba
-              * del pliegue eran las tres fechas: que la entrada sea gratis vivia
-              * enterrado en el FAQ, siendo el dato mas persuasivo que hay.
-              *
-              * `jec-label`, nunca `jec-display`: la build personal-use de Cayento
-              * mapea los diez digitos al mismo glifo de marca de agua.
-              * `--jec-bone` y no `--suave` como el resto del bloque: esto va sobre
-              * la foto con scrim, donde bone es el nivel legible; `--suave` da
-              * 2.53:1 y no llega ni sobre brasa pelada. */}
-            <p className="jec-label mt-4 max-w-md text-sm font-bold leading-snug text-[var(--jec-bone)] sm:text-base md:text-lg">
-              Tres días para adolescentes y jóvenes en La Plata — entrada libre y gratuita con
-              inscripción previa.
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center gap-6 sm:gap-8">
-            {/* Estatico y sin region live: los digitos se refrescan cada 1000ms,
-              * asi que `role="timer" aria-live="polite"` hacia que el lector
-              * reanunciara la cuenta para siempre. El dato util es cuando
-              * empieza, no cuantos segundos faltan. */}
-            <p className="sr-only">
-              Faltan {units.days} dias para el inicio: 18, 19 y 20 de septiembre de 2026.
-            </p>
-
-            <div aria-hidden className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3">
-              {(Object.keys(labels) as Array<keyof typeof labels>).map((key, index) => (
-                <div key={key} className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3">
-                  <div
-                    className="flex flex-col items-center justify-center bg-[var(--jec-amber)] px-2.5 py-1.5 sm:px-3.5 sm:py-2 md:px-4 md:py-2.5"
-                    style={{
-                      clipPath:
-                        "polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%)",
-                    }}
-                  >
-                    <span className="jec-label text-xl font-black leading-none tracking-tight text-[var(--jec-ink)] tabular-nums sm:text-2xl md:text-4xl lg:text-5xl">
-                      {pad(units[key])}
-                    </span>
-                    <span className="jec-mono text-[0.5rem] font-bold uppercase tracking-[0.14em] text-[var(--jec-ink)]/70 sm:text-[0.6rem] md:text-xs">
-                      {labels[key]}
-                    </span>
-                  </div>
-                  {index < 3 ? (
-                    <span aria-hidden className="jec-mono text-sm font-black text-[var(--jec-amber)] sm:text-base md:text-xl">
-                      →
-                    </span>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-            <CtaButton href="/inscripcion" variant="pill">
-              Inscribirme
-            </CtaButton>
-
-            {/* Vive en el overlay de ScrollExpand, que recién se hace visible
-              * cuando el frame termina de abrirse (opacity con
-              * smoothstep(0.68, 1, p)). Ahí sí se entiende qué animación
-              * repite: la que el visitante acaba de terminar de ver. */}
-            {onReplay ? (
-              <button
-                type="button"
-                onClick={onReplay}
-                className="jec-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-[var(--jec-bone)]/60 underline underline-offset-4 transition-colors hover:text-[var(--jec-bone)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--jec-amber)] sm:text-xs"
-              >
-                Ver animación
-              </button>
-            ) : null}
-          </div>
         </div>
+
+        {/* El ancho se topea contra la altura del viewport (el wordmark es
+          * 1600×467, o sea 3.42:1) para que no empuje al bloque de abajo. */}
+        <div className="relative ml-4 mt-5 w-[72%] max-w-[min(820px,86vh)] sm:ml-8 sm:mt-7 sm:w-[76%] lg:ml-12 lg:w-[78%] lg:max-w-[min(980px,100vh)]">
+          {/* La cinta va detrás del wordmark y desbordada a propósito: el frame
+            * recorta lo que sobra. Los porcentajes son relativos a su propio
+            * tamaño, así que la composición aguanta cualquier ancho. Es también
+            * la única fuente visible de las cuatro frases de campaña: los tiles
+            * que las repetían debajo se eliminaron. */}
+          <Image
+            src={jecAssets.hero.cinta}
+            alt=""
+            aria-hidden
+            width={1200}
+            height={1200}
+            sizes="(min-width: 1024px) 1568px, (min-width: 640px) 1312px, 160vw"
+            className="pointer-events-none absolute left-0 top-0 z-[1] w-[160%] max-w-none translate-x-[-28.15%] translate-y-[-51.83%]"
+          />
+          <Image
+            src={jecAssets.hero.wordmark}
+            alt=""
+            aria-hidden
+            priority
+            width={840}
+            height={254}
+            sizes="(min-width: 1024px) 980px, (min-width: 640px) 820px, 87vw"
+            className="relative z-[2] w-full"
+          />
+        </div>
+      </div>
+
+      <div className="relative z-[3] mt-auto flex flex-col gap-[min(1.25rem,2.5vh)] px-5 pb-6 pt-[min(4rem,8vh)] sm:px-8 sm:pb-8 lg:px-12 lg:pb-10">
+        <div className="flex flex-col gap-1.5">
+          <span className="jec-label text-[0.8125rem] uppercase tracking-[0.14em] text-[var(--jec-bone)]/80 sm:text-sm">
+            Conferencia de
+          </span>
+          <span className="jec-label text-[1.5rem] font-bold uppercase leading-[1.05] text-[var(--jec-bone)] sm:text-[2rem] lg:text-[2.5rem]">
+            Adolescentes y jóvenes 2026
+          </span>
+        </div>
+
+        {/* Lugar y fecha en una sola línea. La fecha se imprimía dos veces —una
+          * horneada en la pieza de desktop y otra acá— y el lugar no aparecía en
+          * ningún breakpoint. */}
+        <p className="jec-mono m-0 text-[1.125rem] font-black uppercase leading-none tracking-tight text-[var(--jec-bone)] sm:text-2xl lg:text-[1.75rem]">
+          {EVENT_CITY} · {EVENT_DATE}
+        </p>
+
+        {/* Countdown y CTA juntos y no en extremos opuestos de la fila: son las
+          * dos mitades de la misma decisión ("cuándo" y "anotarme"), y separarlas
+          * 900px era el error de agrupación de la versión anterior. */}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:gap-8">
+          <div className="flex flex-col gap-2">
+            <span className="jec-mono text-[0.6875rem] font-bold uppercase tracking-[0.26em] text-[var(--jec-bone)]/70">
+              Comienza en
+            </span>
+            <Countdown units={units} />
+          </div>
+
+          <CtaButton href="/inscripcion" style={CTA_COLORS} className="w-full lg:w-auto">
+            Inscribirme
+          </CtaButton>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Hero final: frame de fondo que se expande con el scroll (`ScrollExpand`) y
+ * revela, ya en pantalla completa, la composición de Fieles 2026 con la cuenta
+ * regresiva y el CTA de inscripción.
+ */
+export function HeroFinale() {
+  const units = useCountdown(new Date(siteConfig.eventStartsAt).getTime());
+
+  return (
+    <div className="bg-[var(--jec-ember)]">
+      {/* Fuera de `ScrollExpand` a propósito: su overlay arranca `inert`, así que
+        * todo lo que viva adentro desaparece del árbol de accesibilidad hasta que
+        * el reveal pasa el 68%. El h1 tiene que estar disponible desde el
+        * principio, y con él las cuatro frases de la cinta, que sólo existen
+        * como ráster. */}
+      <h1 className="sr-only">
+        Juntos en casa - Fieles 2026 — conferencia de adolescentes y jóvenes, 18, 19 y 20 de
+        septiembre, {EVENT_CITY}. {jecTaglines.join(". ")}.
+      </h1>
+
+      <ScrollExpand
+        src={jecAssets.hero.background}
+        /* Decorativa: es una textura de halftone que no contiene ni el nombre de
+         * la conferencia ni la fecha. El h1 de arriba ya dice todo eso. */
+        alt=""
+        mediaWidth={BACKGROUND_WIDTH}
+        mediaHeight={BACKGROUND_HEIGHT}
+        className="scroll-expand--flush"
+        scrollDistance={SCROLL_DISTANCE}
+        /* La composición trae su propio degradado a tinta en el tercio inferior;
+         * un scrim uniforme encima sólo apagaría la brasa de la foto. */
+        overlayScrim={0}
+        scrollHint="Scrolleá para entrar"
+        useWindowScroll
+      >
+        <HeroComposition units={units} />
       </ScrollExpand>
     </div>
   );

@@ -29,9 +29,9 @@ export type ContenidoItem = {
   /** Session within the schedule, e.g. "Apertura · Viernes". Absent for non-session content. */
   session?: string
   /**
-   * Speaker name. Deliberately absent for the 2025 edition: the six names in
-   * `invitados/data.ts` are the 2026 line-up, so attributing them to 2025
-   * recordings would invent a fact. The UI marks an absent speaker as pending.
+   * Speaker name. Deliberately absent for the 2025 edition: the confirmed
+   * names are the 2026 line-up, so attributing them to 2025 recordings would
+   * invent a fact. The UI marks an absent speaker as pending.
    */
   speaker?: string
   /** YouTube video id. Paste the id only — not the full watch URL. */

@@ -25,6 +25,19 @@ export const jecAssets = {
   },
   hero: {
     finale: "/jec/hero/hero.png",
+    /** Foto de fondo del frame que se expande. */
+    background: "/jec/hero/hero-mobile-bg.webp",
+    /** Capas sueltas con las que se compone el hero en todos los anchos. */
+    wordmark: "/jec/hero/01.svg",
+    cinta: "/jec/hero/cinta-frases.webp",
+    logo: "/jec/hero/logo-juntos-en-casa.webp",
+  },
+  iconos: {
+    pisada: "/jec/iconos/pisada.png",
+    ancla: "/jec/iconos/ancla.png",
+  },
+  frases: {
+    esquina: "/jec/frases/esquina.png",
   },
   recursos: {
     huellas: "/jec/recursos/huellas.svg",
@@ -37,5 +50,13 @@ export const jecAssets = {
   },
   og: {
     default: "/jec/og/og-jec-2026.jpg",
+  },
+  galeria: {
+    foto1: "/jec/galeria/foto-1.jpg",
+    foto2: "/jec/galeria/foto-2.jpg",
+    foto3: "/jec/galeria/foto-3.jpg",
+    foto4: "/jec/galeria/foto-4.jpg",
+    foto5: "/jec/galeria/foto-5.jpg",
+    foto6: "/jec/galeria/foto-6.jpg",
   },
 } as const;

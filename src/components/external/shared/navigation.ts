@@ -19,7 +19,6 @@ export type SocialLink = {
  */
 export const navItems: readonly NavItem[] = [
   { href: "/#cronograma", label: "Cronograma" },
-  { href: "/#invitados", label: "Invitados" },
   { href: "/#ubicacion", label: "Ubicación" },
   { href: "/productos", label: "Productos" },
   { href: "/contenidos", label: "Contenidos" },

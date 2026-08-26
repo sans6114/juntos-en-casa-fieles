@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react"
+
 import Image from "next/image"
 import Link from "next/link"
 import { jecAssets } from "@/lib/jec-assets"
@@ -47,7 +49,7 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
           alt="Juntos en Casa"
           width={40}
           height={40}
-          className="h-8 w-auto md:h-10"
+          className="h-10 w-auto md:h-14"
         />
       </Link>
 
@@ -55,11 +57,12 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
         aria-label="Secciones"
         className="hidden items-center justify-end gap-x-5 gap-y-2 md:flex md:flex-wrap md:gap-x-7"
       >
-        {navItems.map((item) => (
+        {navItems.map((item, index) => (
           <Link
             key={item.href}
             href={item.href}
-            className={item.cta ? navCtaClass : navLinkClass}
+            className={cn("jec-nav-in", item.cta ? navCtaClass : navLinkClass)}
+            style={{ "--nav-delay": `${index * 70}ms` } as CSSProperties}
           >
             {item.label}
           </Link>
@@ -87,7 +90,7 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
             alt="Juntos en Casa"
             width={40}
             height={40}
-            className="h-8 w-auto"
+            className="h-10 w-auto"
           />
           <a
             href={CLOSE_HREF}
@@ -99,12 +102,14 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
         </div>
 
         <nav aria-label="Secciones" className="flex flex-col gap-1 px-6 pb-10 pt-8">
-          {navItems.map((item) =>
-            item.cta ? (
+          {navItems.map((item, index) => {
+            const delay = { "--nav-delay": `${index * 70}ms` } as CSSProperties
+            return item.cta ? (
               <a
                 key={item.href}
                 href={item.href}
-                className="jec-label mt-5 inline-flex min-h-14 items-center justify-center rounded-[6px] bg-[var(--cta-bg)] px-8 text-sm font-bold uppercase tracking-[0.14em] text-[var(--cta-fg)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--foco)]"
+                className="jec-label jec-nav-in mt-5 inline-flex min-h-14 items-center justify-center rounded-[6px] bg-[var(--cta-bg)] px-8 text-sm font-bold uppercase tracking-[0.14em] text-[var(--cta-fg)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--foco)]"
+                style={delay}
               >
                 {item.label}
               </a>
@@ -112,12 +117,13 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
               <a
                 key={item.href}
                 href={item.href}
-                className="jec-label flex min-h-14 items-center border-b border-[var(--linea)] text-2xl font-extrabold tracking-tight text-[var(--dato)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--foco)]"
+                className="jec-label jec-nav-in flex min-h-14 items-center border-b border-[var(--linea)] text-2xl font-extrabold tracking-tight text-[var(--dato)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--foco)]"
+                style={delay}
               >
                 {item.label}
               </a>
             )
-          )}
+          })}
         </nav>
       </div>
     </header>

@@ -49,7 +49,7 @@ export function SiteFooter({ className }: SiteFooterProps) {
               alt={siteConfig.name}
               width={80}
               height={80}
-              className="h-16 w-auto md:h-20"
+              className="h-20 w-auto md:h-24"
             />
           </Link>
           {/* Identidad estructural, no un lema: los dos valores salen de siteConfig. */}
