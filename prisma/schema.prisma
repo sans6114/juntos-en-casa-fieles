@@ -47,19 +47,24 @@ model Congregacion {
 }
 
 model Inscripcion {
-  id             String        @id @default(cuid())
-  nombre         String
-  email          String        @unique
-  telefono       String?
-  edad           Int
-  congregacionId String?
-  congregacion   Congregacion? @relation(fields: [congregacionId], references: [id])
-  contacto       Contacto?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  asistenciaDia1 DateTime?
-  asistenciaDia2 DateTime?
-  asistenciaDia3 DateTime?
+  id                String        @id @default(cuid())
+  nombre            String
+  email             String        @unique
+  telefono          String?
+  edad              Int
+  congregacionId    String?
+  congregacion      Congregacion? @relation(fields: [congregacionId], references: [id])
+  /// Congregacion escrita a mano cuando no estaba en la lista. Excluyente con
+  /// `congregacionId`: si el visitante eligio de la lista se llena la FK y esto
+  /// queda null, y al reves. Antes el texto tipeado se descartaba en silencio.
+  /// Desde admin se agrupan estos valores para promover los reales a Congregacion.
+  congregacionTexto String?
+  contacto          Contacto?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  asistenciaDia1    DateTime?
+  asistenciaDia2    DateTime?
+  asistenciaDia3    DateTime?
 
   @@index([congregacionId])
 }

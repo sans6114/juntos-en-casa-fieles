@@ -163,6 +163,16 @@
   --dato: var(--jec-ink);
   --suave: #57504a;
   --acento: var(--jec-ember);
+  /* Brasa legible. `--acento` sigue siendo el bloque decorativo de marca; este es
+     su gemelo SOLO para texto y bordes, donde la brasa pura falla contraste.
+     Sobre hueso #f4efe8: --acento 2.73:1 (falla 1.4.3 y 1.4.11), --acento-texto
+     5.68:1. En campo-tinta y campo-fuego apuntan al mismo color porque ahi la
+     brasa ya pasa: 15.5:1 y 6.3:1.
+
+     FUERA DE ALCANCE a proposito, no "completar" el barrido: `.jec-eyebrow::before`,
+     `.jec-disclosure > summary::after` y el gradiente al 18%. Son bloques de marca,
+     no texto; oscurecerlos apaga la brasa. */
+  --acento-texto: #a83800;
   --linea: rgb(11 10 15 / 12%);
   --regla: var(--jec-ink);
   --foco: var(--jec-ink);
@@ -204,6 +214,7 @@
   --dato: var(--jec-ink);
   --suave: #57504a;
   --acento: var(--jec-ember);
+  --acento-texto: #a83800;
   --linea: rgb(11 10 15 / 12%);
   --regla: var(--jec-ink);
   --foco: var(--jec-ink);
@@ -220,6 +231,9 @@
   --dato: var(--jec-bone);
   --suave: var(--jec-smoke);
   --acento: var(--jec-amber);
+  /* Ya pasa (15.5:1 sobre tinta): mismo color, el token existe para que los call
+     sites puedan usar --acento-texto sin ramificar por campo. */
+  --acento-texto: var(--jec-amber);
   --linea: rgb(244 239 232 / 12%);
   --regla: var(--jec-bone);
   --foco: var(--jec-bone);
@@ -236,6 +250,8 @@
   --dato: var(--jec-ink);
   --suave: var(--jec-ink);
   --acento: var(--jec-ink);
+  /* Ya pasa (6.3:1 sobre brasa). */
+  --acento-texto: var(--jec-ink);
   --linea: rgb(11 10 15 / 20%);
   --regla: var(--jec-ink);
   --foco: var(--jec-ink);
@@ -322,6 +338,30 @@
 @media (prefers-reduced-motion: reduce) {
   .jec-landing .jec-disclosure > summary::after {
     transition: none;
+  }
+}
+
+/* Entrada del nav: cada link aparece con fade + subida al montar el header,
+   escalonado por índice via la variable --nav-delay que pone cada <Link>. */
+@keyframes jec-nav-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.jec-landing .jec-nav-in {
+  animation: jec-nav-fade-up 0.5s ease-out both;
+  animation-delay: var(--nav-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jec-landing .jec-nav-in {
+    animation: none;
   }
 }
 

@@ -1,7 +1,7 @@
 export type NavItem = {
   href: string
   label: string
-  /** Primary action. Rendered as a CTA in the mobile menu instead of a plain link. */
+  /** Primary action. Rendered as a CTA instead of a plain link, at every breakpoint. */
   cta?: boolean
 }
 
@@ -19,8 +19,8 @@ export type SocialLink = {
  */
 export const navItems: readonly NavItem[] = [
   { href: "/#cronograma", label: "Cronograma" },
-  { href: "/#invitados", label: "Invitados" },
   { href: "/#ubicacion", label: "Ubicación" },
+  { href: "/productos", label: "Productos" },
   { href: "/contenidos", label: "Contenidos" },
   { href: "/inscripcion", label: "Inscribirme", cta: true },
 ]

@@ -7,7 +7,7 @@ type CronogramaDiaCardProps = {
 export function CronogramaDiaCard({ dia }: CronogramaDiaCardProps) {
   return (
     <article className="flex h-full flex-col border border-[var(--linea)] p-6 md:p-8">
-      <p className="jec-label text-xs font-bold uppercase tracking-[0.28em] text-[var(--acento)]">
+      <p className="jec-label text-xs font-bold uppercase tracking-[0.28em] text-[var(--acento-texto)]">
         {dia.dayLabel}
       </p>
       <h3 className="jec-label mt-3 text-2xl font-extrabold tracking-tight text-[var(--dato)] md:text-3xl">
@@ -21,7 +21,7 @@ export function CronogramaDiaCard({ dia }: CronogramaDiaCardProps) {
           >
             <time
               dateTime={item.time}
-              className="jec-label font-bold tabular-nums text-[var(--acento)]"
+              className="jec-label font-bold tabular-nums text-[var(--acento-texto)]"
             >
               {item.time}
             </time>

@@ -9,6 +9,11 @@ export const CrearInscripcionSchema = z.object({
     .max(13, "El teléfono debe tener como máximo 13 caracteres"),
   edad: z.coerce.number().min(12, "Debe tener al menos 12 años").max(99, "Edad inválida"),
   congregacionId: z.string().optional().nullable(),
+  // El texto tipeado en el combobox. Antes no estaba en el schema, asi que Zod lo
+  // descartaba y una congregacion escrita a mano pero no seleccionada se guardaba
+  // vacia, sin error y sin aviso. Ahora llega hasta la action, que decide si va a
+  // `congregacionId` (eligio de la lista) o a `congregacionTexto` (la escribio).
+  congregacionQuery: z.string().optional(),
 })
 
 export type CrearInscripcionDTO = z.infer<typeof CrearInscripcionSchema>
@@ -26,6 +31,11 @@ export type InscripcionDTO = {
   telefono: string | null
   edad: number
   congregacionId: string | null
+  /**
+   * Nombre a mostrar. Sale de la relacion cuando hay FK, y del texto libre cuando
+   * no la hay. Para saber cual es cual desde admin: `congregacionId === null` con
+   * `congregacionNombre` presente = escrita a mano, candidata a promover.
+   */
   congregacionNombre: string | null
   createdAt: string
   contactado?: boolean

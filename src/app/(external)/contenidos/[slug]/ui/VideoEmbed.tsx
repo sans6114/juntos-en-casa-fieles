@@ -21,8 +21,8 @@ export function VideoEmbed({ item }: VideoEmbedProps) {
         <p className="mt-3 flex flex-wrap items-center gap-3">
           <PlaceholderTag>Video pendiente</PlaceholderTag>
           <span className="text-[13px] text-[var(--suave)]">
-            Cargá el id de YouTube en <code className="font-mono">contenidos/data.ts</code> y el
-            reproductor reemplaza esta miniatura.
+            El video de esta charla todavía no está publicado. Cuando lo subamos, se reproduce
+            desde acá.
           </span>
         </p>
       </div>

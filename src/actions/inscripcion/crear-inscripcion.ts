@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
+import { after } from 'next/server';
 import { z } from 'zod';
 
 import {
@@ -31,6 +32,11 @@ export async function crearInscripcion(
     return { ok: false, message: "Revisá los datos ingresados.", fieldErrors }
   }
 
+  // Excluyentes a proposito: si eligio de la lista manda la FK, si la escribio a
+  // mano se guarda el texto crudo, y si no puso nada quedan las dos en null.
+  const congregacionId = parsed.data.congregacionId || null
+  const congregacionTexto = congregacionId ? null : parsed.data.congregacionQuery?.trim() || null
+
   try {
     const nuevaInscripcion = await prisma.inscripcion.create({
       data: {
@@ -38,16 +44,21 @@ export async function crearInscripcion(
         email: parsed.data.email,
         telefono: parsed.data.telefono,
         edad: parsed.data.edad,
-        congregacionId: parsed.data.congregacionId || null,
+        congregacionId,
+        congregacionTexto,
       },
     })
 
-    // Enviar email con QR
-    await sendQrEmail({
-      to: nuevaInscripcion.email,
-      nombre: nuevaInscripcion.nombre,
-      uuid: nuevaInscripcion.id,
-    })
+    // El email con el QR sale DESPUES de la respuesta. `sendQrEmail` se traga sus
+    // propios errores y nunca lanza, asi que esperarlo no garantizaba nada: solo
+    // dejaba al visitante mirando el boton "Enviando…" mientras Resend respondia.
+    after(() =>
+      sendQrEmail({
+        to: nuevaInscripcion.email,
+        nombre: nuevaInscripcion.nombre,
+        uuid: nuevaInscripcion.id,
+      })
+    )
 
     // Revalidar las rutas del dashboard admin para que los datos nuevos aparezcan al instante
     revalidatePath("/admin/inscripciones", "layout")
@@ -80,6 +91,6 @@ export async function crearInscripcion(
     }
 
     console.error("Error creando inscripción:", error)
-    return { ok: false, message: "No se pudo procesar la inscripción. Verifica los datos enviados." }
+    return { ok: false, message: "No se pudo procesar la inscripción. Verificá los datos enviados." }
   }
 }

@@ -69,6 +69,14 @@
   will-change: opacity, transform;
 }
 
+/* Respaldo para navegadores sin soporte de `inert`. El JS alterna el atributo en
+   el flip del 68% del reveal; mientras esta puesto, el overlay es invisible y no
+   debe recibir clics ni foco. */
+.scroll-expand__overlay[inert] {
+  pointer-events: none;
+  visibility: hidden;
+}
+
 .scroll-expand__title {
   position: absolute;
   inset: 0;
@@ -99,4 +107,15 @@
   color: rgba(255, 255, 255, 0.55);
   pointer-events: none;
   will-change: opacity, transform;
+}
+
+/* El overlay por defecto centra su contenido y lo separa de los bordes con un
+ * 6% de padding, que sirve para un título suelto sobre la imagen. El hero de
+ * Fieles necesita lo contrario: un panel que llegue al borde del frame y capas
+ * posicionadas en absoluto contra sus esquinas. */
+.scroll-expand--flush .scroll-expand__overlay {
+  padding: 0;
+  align-items: stretch;
+  justify-content: flex-start;
+  text-align: left;
 }

@@ -37,7 +37,7 @@ export async function obtenerInscripcionPorId(id: string) {
     telefono: inscripcion.telefono,
     edad: inscripcion.edad,
     congregacionId: inscripcion.congregacionId,
-    congregacionNombre: inscripcion.congregacion?.nombre ?? null,
+    congregacionNombre: inscripcion.congregacion?.nombre ?? inscripcion.congregacionTexto ?? null,
     createdAt: inscripcion.createdAt.toISOString(),
     puedeContactar: inscripcion.congregacionId === null,
     contacto: inscripcion.contacto

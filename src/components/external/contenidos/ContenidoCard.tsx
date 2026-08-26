@@ -20,7 +20,7 @@ export function ContenidoCard({ item }: ContenidoCardProps) {
         <ContenidoThumb item={item} />
 
         <div className="flex flex-grow flex-col gap-3 p-6">
-          <p className="jec-label text-xs font-bold uppercase tracking-[0.28em] text-[var(--acento)]">
+          <p className="jec-label text-xs font-bold uppercase tracking-[0.28em] text-[var(--acento-texto)]">
             {item.session ?? (item.kind === "podcast" ? "Podcast" : "Descargable")}
           </p>
 
@@ -44,9 +44,9 @@ export function ContenidoCard({ item }: ContenidoCardProps) {
             )}
 
             {isRecurso ? (
-              <DownloadIcon className="shrink-0 text-[var(--acento)]" />
+              <DownloadIcon className="shrink-0 text-[var(--acento-texto)]" />
             ) : (
-              <ArrowRightIcon className="shrink-0 text-[var(--acento)]" />
+              <ArrowRightIcon className="shrink-0 text-[var(--acento-texto)]" />
             )}
           </div>
         </div>
