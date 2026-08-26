@@ -22,9 +22,8 @@ export const cronogramaDias: CronogramaDia[] = [
     dayLabel: "Viernes 18",
     title: "Apertura",
     items: [
-      { time: "18:00", label: "Bienvenida y registro" },
-      { time: "19:30", label: "Culto de apertura" },
-      { time: "21:00", label: "Tiempo de comunión" },
+      { time: "19:00", label: "Adoración" },
+      { time: "20:00", label: "Sesión 1" },
     ],
   },
   {
@@ -32,10 +31,16 @@ export const cronogramaDias: CronogramaDia[] = [
     dayLabel: "Sábado 19",
     title: "Jornada plena",
     items: [
-      { time: "09:00", label: "Desayuno compartido" },
-      { time: "10:30", label: "Talleres por grupos" },
-      { time: "16:00", label: "Espacio creativo" },
-      { time: "20:00", label: "Noche de alabanza" },
+      { time: "14:00", label: "Lorem ipsum dolor sit amet" },
+      { time: "14:45", label: "Adoración" },
+      { time: "15:30", label: "Sesión 2" },
+      { time: "16:30", label: "Consectetur adipiscing elit" },
+      { time: "17:00", label: "Sesión 3" },
+      { time: "18:00", label: "Sed do eiusmod tempor" },
+      { time: "19:00", label: "Incididunt ut labore" },
+      { time: "20:00", label: "Adoración" },
+      { time: "20:45", label: "Sesión 4" },
+      { time: "22:00", label: "Magna aliqua ut enim" },
     ],
   },
   {
@@ -43,8 +48,8 @@ export const cronogramaDias: CronogramaDia[] = [
     dayLabel: "Domingo 20",
     title: "Cierre",
     items: [
-      { time: "10:00", label: "Celebración final" },
-      { time: "12:30", label: "Envío y despedida" },
+      { time: "10:30", label: "Adoración" },
+      { time: "11:30", label: "Sesión 5" },
     ],
   },
 ]
