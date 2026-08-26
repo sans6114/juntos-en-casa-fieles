@@ -54,3 +54,5 @@ next-env.d.ts
 
 # openspec: handoff prompts, no artefactos del change
 openspec/changes/**/apply-prompt.md
+
+certificates

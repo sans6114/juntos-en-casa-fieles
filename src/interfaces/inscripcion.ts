@@ -6,7 +6,7 @@ export const CrearInscripcionSchema = z.object({
   telefono: z
     .string()
     .min(8, "El teléfono debe tener al menos 8 dígitos")
-    .max(20, "Teléfono inválido"),
+    .max(13, "El teléfono debe tener como máximo 13 caracteres"),
   edad: z.coerce.number().min(12, "Debe tener al menos 12 años").max(99, "Edad inválida"),
   congregacionId: z.string().optional().nullable(),
 })

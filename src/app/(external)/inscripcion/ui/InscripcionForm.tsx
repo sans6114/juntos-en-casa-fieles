@@ -126,6 +126,7 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
           type="tel"
           defaultValue={submitted.telefono}
           autoComplete="tel"
+          maxLength={13}
           aria-invalid={Boolean(state.fieldErrors?.telefono)}
           aria-describedby={state.fieldErrors?.telefono ? "telefono-error" : undefined}
           className={inputClassName}
