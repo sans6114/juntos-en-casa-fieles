@@ -49,7 +49,12 @@ export const jecAssets = {
     logoNegroDesc: "/jec/recursos/logo-negro-desc.svg",
   },
   og: {
-    default: "/jec/og/og-jec-2026.jpg",
+    /** 1200x630 derived from `/jec/hero/hero-desktop.webp`. The filename carries
+     *  the edition on purpose: social platforms cache previews by URL, so a new
+     *  edition needs a new path to be refetched. */
+    default: "/jec/og/og-jec-2026-fieles.jpg",
+    width: 1200,
+    height: 630,
   },
   galeria: {
     foto1: "/jec/galeria/foto-1.jpg",
