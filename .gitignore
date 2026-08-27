@@ -56,3 +56,9 @@ next-env.d.ts
 openspec/changes/**/apply-prompt.md
 
 certificates
+
+# git worktrees creados por herramientas locales
+# Tailwind escanea el proyecto respetando .gitignore: sin esta regla lee la copia
+# de openspec/ que vive dentro del worktree y emite CSS invalido a partir de los
+# patrones comodin documentados ahi (bg-[var(--jec-*)]).
+/.claude/worktrees/
