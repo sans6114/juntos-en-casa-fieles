@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRightIcon, PlaceholderTag } from "@/components/external/shared"
+import { ArrowRightIcon, BrandName, PlaceholderTag } from "@/components/external/shared"
 
 import { ProductoPieza } from "./ProductoPieza"
 import type { ProductoItem } from "./data"
@@ -19,14 +19,16 @@ export function ProductoCard({ item }: ProductoCardProps) {
 
         <div className="flex flex-grow flex-col gap-3 p-6">
           <p className="jec-label text-xs font-bold uppercase tracking-[0.28em] text-[var(--acento-texto)]">
-            {item.kicker}
+            <BrandName>{item.kicker}</BrandName>
           </p>
 
           <h3 className="jec-label text-2xl font-extrabold leading-tight tracking-tight">
-            {item.title}
+            <BrandName>{item.title}</BrandName>
           </h3>
 
-          <p className="text-sm leading-relaxed text-[var(--suave)]">{item.description}</p>
+          <p className="text-sm leading-relaxed text-[var(--suave)]">
+            <BrandName>{item.description}</BrandName>
+          </p>
 
           <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--linea)] pt-4">
             <PlaceholderTag>Precio a confirmar</PlaceholderTag>

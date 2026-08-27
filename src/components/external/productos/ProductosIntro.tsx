@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { BrandName } from "@/components/external/shared"
 import { jecAssets } from "@/lib/jec-assets"
 
 export function ProductosIntro() {
@@ -13,8 +14,8 @@ export function ProductosIntro() {
             Productos
           </h1>
           <p className="mt-6 text-pretty text-base leading-relaxed text-[var(--suave)] md:text-lg">
-            Lo que vas a poder llevarte de JEC: remera y stickers, disponibles solo en el stand
-            del evento.
+            Lo que vas a poder llevarte de <BrandName>Juntos En Casa</BrandName>: remera y
+            stickers, disponibles solo en el stand del evento.
           </p>
         </div>
 

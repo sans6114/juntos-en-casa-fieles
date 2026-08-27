@@ -19,9 +19,9 @@ const dondeEs = ubicacionInfo.street
 export const faqItems: readonly FaqItem[] = [
   {
     id: "1",
-    question: "¿Qué es Juntos en Casa?",
+    question: "¿Qué es Juntos En Casa?",
     answer:
-      "Juntos en Casa es la Conferencia de adolescentes y jóvenes de Iglesia Vida Sobrenatural. Fue creada para crecer en unidad, ir más profundo en Dios y ser equipados para el desarrollo de nuestro propósito. También disfrutaremos de juegos, dinámicas y mas. Esta actividad esta especialmente planificada por y para jóvenes.",
+      "Juntos En Casa es la Conferencia de adolescentes y jóvenes de Iglesia Vida Sobrenatural. Fue creada para crecer en unidad, ir más profundo en Dios y ser equipados para el desarrollo de nuestro propósito. También disfrutaremos de juegos, dinámicas y mas. Esta actividad esta especialmente planificada por y para jóvenes.",
   },
   {
     id: "2",
