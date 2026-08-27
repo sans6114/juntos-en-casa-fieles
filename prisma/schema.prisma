@@ -12,6 +12,11 @@ enum Role {
   COLABORADOR
 }
 
+enum EstadoCongregacion {
+  PENDIENTE
+  APROBADA
+}
+
 model User {
   id                  String               @id @default(cuid())
   nombre              String
@@ -39,11 +44,16 @@ model PasswordResetToken {
 }
 
 model Congregacion {
-  id            String        @id @default(cuid())
-  nombre        String
-  inscripciones Inscripcion[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                String             @id @default(cuid())
+  nombre            String
+  /// Clave persistida de normalizacion (NFD, sin diacriticos, minuscula, sin
+  /// espacios duplicados). Cambiar el algoritmo que la genera exige una
+  /// migracion de backfill: ver `src/lib/congregacion/normalizar.ts`.
+  nombreNormalizado String             @unique
+  estado            EstadoCongregacion @default(PENDIENTE)
+  inscripciones     Inscripcion[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 }
 
 model Inscripcion {
@@ -54,11 +64,15 @@ model Inscripcion {
   edad              Int
   congregacionId    String?
   congregacion      Congregacion? @relation(fields: [congregacionId], references: [id])
-  /// Congregacion escrita a mano cuando no estaba en la lista. Excluyente con
-  /// `congregacionId`: si el visitante eligio de la lista se llena la FK y esto
-  /// queda null, y al reves. Antes el texto tipeado se descartaba en silencio.
-  /// Desde admin se agrupan estos valores para promover los reales a Congregacion.
+  /// Congregacion escrita a mano en filas anteriores a la normalizacion. Ya no
+  /// se escribe en altas nuevas (ver `resolverCongregacionId` en
+  /// `crear-inscripcion.ts`, que siempre asigna `congregacionId`); se
+  /// conserva solo como fallback de lectura para las filas legacy.
   congregacionTexto String?
+  /// Se marca `true` unicamente cuando un admin rechaza la Congregacion a la
+  /// que apuntaba esta inscripcion (ver `rechazar-congregacion.ts`). Invariante:
+  /// `sinCongregacion = true` implica `congregacionId = null`.
+  sinCongregacion   Boolean       @default(false)
   contacto          Contacto?
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt

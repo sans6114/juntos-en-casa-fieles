@@ -2,12 +2,13 @@
 
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/auth-guards"
+import { PASTORAL_WHERE } from "@/lib/contacto/es-candidato-pastoral"
 
 export async function obtenerContactosSinIglesia() {
   await requireAdmin()
 
   const inscripciones = await prisma.inscripcion.findMany({
-    where: { congregacionId: null },
+    where: PASTORAL_WHERE,
     include: {
       contacto: {
         include: {

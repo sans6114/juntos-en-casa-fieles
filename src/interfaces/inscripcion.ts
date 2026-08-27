@@ -32,11 +32,15 @@ export type InscripcionDTO = {
   edad: number
   congregacionId: string | null
   /**
-   * Nombre a mostrar. Sale de la relacion cuando hay FK, y del texto libre cuando
-   * no la hay. Para saber cual es cual desde admin: `congregacionId === null` con
-   * `congregacionNombre` presente = escrita a mano, candidata a promover.
+   * Nombre a mostrar. Sale de la relacion cuando hay FK, y del `congregacionTexto`
+   * legacy como fallback cuando no la hay (filas anteriores a la normalizacion;
+   * las altas nuevas siempre asignan la FK, ver `resolverCongregacionId`).
    */
   congregacionNombre: string | null
+  /** `null` cuando la fila no tiene FK (legacy por `congregacionTexto`, o sin iglesia). */
+  congregacionEstado: "PENDIENTE" | "APROBADA" | null
+  /** Ver `esCandidatoPastoral` en `src/lib/contacto/es-candidato-pastoral.ts`. */
+  puedeContactar: boolean
   createdAt: string
   contactado?: boolean
   contactoUsuarioNombre?: string | null

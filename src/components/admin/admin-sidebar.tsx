@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { logoutAdmin } from "@/actions"
 import {
+  Church,
   ClipboardList,
   LayoutDashboard,
   LogOut,
@@ -220,6 +221,18 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                   >
                     <Users />
                     <span>Usuarios</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={pathname.startsWith(ADMIN_PATHS.congregaciones)}
+                    tooltip="Congregaciones"
+                    render={
+                      <Link href={ADMIN_PATHS.congregaciones} onClick={closeSidebar} />
+                    }
+                  >
+                    <Church />
+                    <span>Congregaciones</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
