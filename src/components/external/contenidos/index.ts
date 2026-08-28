@@ -1,4 +1,5 @@
 export { ContenidoCard } from "./ContenidoCard"
+export { ContenidoCardBody } from "./ContenidoCardBody"
 export { ContenidosFiltros } from "./ContenidosFiltros"
 export { ContenidosGrid } from "./ContenidosGrid"
 export { ContenidosIntro } from "./ContenidosIntro"

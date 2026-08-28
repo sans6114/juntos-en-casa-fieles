@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { upload } from "@vercel/blob/client"
 import { toast } from "sonner"
 import { crearContenido, actualizarContenido } from "@/actions"
 import { Button } from "@/components/ui/button"
@@ -16,13 +17,17 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { ContenidoCardBody } from "@/components/external/contenidos"
+import { cayento, helveticaNeue, helveticaNeueCondensed } from "@/config/fonts"
 import {
   ActualizarContenidoSchema,
+  CAMPO_A_CLASE,
   CrearContenidoSchema,
   TIPO_A_KIND,
   kindLabel,
   type CampoThumb,
   type ContenidoAdminDTO,
+  type ContenidoVista,
   type TipoContenido,
 } from "@/interfaces/contenido"
 import { CONTENIDO_THUMB_ASSETS } from "@/lib/contenido-thumb-assets"
@@ -125,11 +130,37 @@ function toFormState(data?: ContenidoAdminDTO): ContenidoFormState {
   }
 }
 
+/**
+ * Helper local (design §7.1): arma el `ContenidoVista` que consume
+ * `ContenidoCardBody` a partir del estado en progreso del form, usando los
+ * mismos mapas (`TIPO_A_KIND`, `CAMPO_A_CLASE`) que usa el mapper
+ * server-side — así el DTO real y el estado del form comparten un único
+ * componente de preview sin ningún cast.
+ */
+function formToVista(form: ContenidoFormState): ContenidoVista {
+  return {
+    title: form.titulo || "Título del contenido",
+    description: form.descripcion,
+    kind: TIPO_A_KIND[form.tipo],
+    thumb: {
+      field: CAMPO_A_CLASE[form.campo],
+      src: form.imagenSrc || undefined,
+      fit: form.imagenCover ? "cover" : "contain",
+      dim: form.imagenAtenuada,
+    },
+    session: form.sesion || undefined,
+    speaker: form.orador || undefined,
+    durationLabel: form.duracion || undefined,
+    placasCount: form.placasCount,
+  }
+}
+
 export function ContenidoForm({ initialData }: ContenidoFormProps) {
   const router = useRouter()
   const [form, setForm] = useState<ContenidoFormState>(() => toFormState(initialData))
   const [errores, setErrores] = useState<Partial<Record<string, string>>>({})
   const [isPending, startTransition] = useTransition()
+  const [isUploadingPlacas, setIsUploadingPlacas] = useState(false)
 
   const campos = CAMPOS_POR_TIPO[form.tipo]
 
@@ -152,6 +183,42 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
       placasUrl: siguientes.placas === "oculto" ? "" : f.placasUrl,
       placasCount: siguientes.placas === "oculto" ? undefined : f.placasCount,
     }))
+  }
+
+  /**
+   * placasCount se deriva acá, en el browser, ANTES de subir — nunca se
+   * tipea a mano (decisión 14). Orden: cuenta primero, upload después, para
+   * que un PDF corrupto avise antes del paso de red lento (design §B5).
+   * Un conteo fallido NO bloquea la subida: `placasUrl` es lo único que
+   * exige `reglasPorTipo` para RECURSOS, no `placasCount`.
+   */
+  const handlePlacasFile = async (file: File | undefined) => {
+    if (!file) return
+
+    setIsUploadingPlacas(true)
+    try {
+      let paginas: number | undefined
+      try {
+        const bytes = await file.arrayBuffer()
+        const { PDFDocument } = await import("pdf-lib")
+        const doc = await PDFDocument.load(bytes, { ignoreEncryption: true })
+        paginas = doc.getPageCount()
+      } catch {
+        toast.error("No pudimos leer la cantidad de páginas del PDF")
+      }
+
+      const { url } = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/contenido/placas-upload",
+      })
+
+      setForm((f) => ({ ...f, placasUrl: url, placasCount: paginas }))
+      toast.success("PDF cargado")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo subir el PDF")
+    } finally {
+      setIsUploadingPlacas(false)
+    }
   }
 
   const applyIssues = (issues: readonly { path: PropertyKey[]; message: string }[]) => {
@@ -374,6 +441,34 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
           </div>
         ) : null}
 
+        {campos.placas !== "oculto" ? (
+          <div className="space-y-2">
+            <Label htmlFor="placas">
+              PDF de placas {campos.placas === "opcional" ? "(opcional)" : null}
+            </Label>
+            <Input
+              id="placas"
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => {
+                void handlePlacasFile(e.target.files?.[0])
+              }}
+              disabled={isPending || isUploadingPlacas}
+            />
+            {isUploadingPlacas ? (
+              <p className="text-sm text-muted-foreground">Subiendo PDF...</p>
+            ) : form.placasUrl ? (
+              <p className="text-sm text-muted-foreground">
+                Archivo cargado
+                {form.placasCount ? ` — ${form.placasCount} placas` : ""}
+              </p>
+            ) : null}
+            {errores.placasUrl ? (
+              <p className="text-sm text-destructive">{errores.placasUrl}</p>
+            ) : null}
+          </div>
+        ) : null}
+
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="campo">Campo de fondo</Label>
@@ -451,6 +546,33 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
           {isPending ? "Guardando..." : initialData ? "Guardar cambios" : "Crear contenido"}
         </Button>
       </div>
+
+      <aside className="space-y-4">
+        <div className="sticky top-6 space-y-4">
+          <p className="text-sm font-medium text-muted-foreground">Así se va a ver</p>
+
+          {/*
+            CRÍTICO (corrección 3, design-findings #144): sin este wrapper la
+            preview se renderiza sin estilos. `.jec-landing` se aplica en un
+            único elemento de todo el repo ((external)/layout.tsx:29) y ahí
+            viven `--regla`, `.campo-*`, `.jec-label` y `.jec-placeholder`
+            (globals.css). El admin corre bajo `.admin-shell`, aislado a
+            propósito de los tokens públicos.
+          */}
+          <div
+            className={`jec-landing ${cayento.variable} ${helveticaNeue.variable} ${helveticaNeueCondensed.variable} campo-papel flex flex-col overflow-hidden rounded-[6px] border border-[var(--linea)]`}
+          >
+            <ContenidoCardBody item={formToVista(form)} />
+          </div>
+
+          <ul className="space-y-1 text-sm text-muted-foreground">
+            <li>Edición: {form.edicion || "—"}</li>
+            <li>Duración: {form.duracion || "—"}</li>
+            <li>YouTube: {form.youtubeId ? "cargado" : "sin cargar"}</li>
+            <li>Placas: {form.placasUrl ? "archivo cargado" : "sin cargar"}</li>
+          </ul>
+        </div>
+      </aside>
     </form>
   )
 }
