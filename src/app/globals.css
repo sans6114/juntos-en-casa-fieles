@@ -382,6 +382,21 @@
     sans-serif;
 }
 
+/* Nombre de la conferencia: itálica de Helvetica Neue, la convención
+   tipográfica para nombres propios de eventos. Se distingue sin cortar el ritmo
+   del párrafo, que es lo que pasaría marcándolo en bold en cada mención.
+
+   No declara `font-weight` a propósito: la familia sólo trae itálicas reales en
+   400, 700 y 900, así que fijar 500 caería igual en la de 400 — y además
+   rompería el par peso+itálica cuando el nombre cae dentro de un título.
+   Heredando, en un párrafo sale la itálica de 400 y dentro de un heading
+   `font-extrabold` (800) sale la de 900: las dos son archivos reales, ninguna
+   sintetizada por el navegador. */
+.jec-landing .jec-brand {
+  font-family: var(--font-helvetica-neue), ui-sans-serif, system-ui, sans-serif;
+  font-style: italic;
+}
+
 /* Tokens portal admin — blanco / negro + rojo (aislados del sitio público) */
 .admin-shell {
   color-scheme: light only;

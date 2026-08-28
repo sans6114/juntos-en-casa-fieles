@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { BRAND_NAME, BrandName } from "@/components/external/shared"
 import { jecAssets } from "@/lib/jec-assets"
 import { cn } from "@/lib/utils"
 
@@ -132,7 +133,7 @@ function StickersPieza({ widthClassName }: { widthClassName: string }) {
       </div>
 
       <div className="jec-mono absolute bottom-[6%] left-[6%] w-[36%] rotate-[5deg] rounded-[6px] bg-[#f4efe8] px-3 py-2 text-center text-[11px] font-bold uppercase tracking-[0.14em] text-[#0b0a0f] shadow-[0_0_0_5px_#f4efe8]">
-        JEC 2026
+        <BrandName>{BRAND_NAME}</BrandName> 2026
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { PlaceholderTag, SectionHeading } from "@/components/external/shared"
+import { BRAND_NAME, BrandName, PlaceholderTag, SectionHeading } from "@/components/external/shared"
 import { cn } from "@/lib/utils"
 
 import { galeriaEdition, galeriaFotos } from "./data"
@@ -10,13 +10,17 @@ export function Galeria() {
   return (
     <section
       id="galeria"
-      aria-label={`Galería JEC ${galeriaEdition}`}
+      aria-label={`Galería ${BRAND_NAME} ${galeriaEdition}`}
       className="campo-tinta jec-anchor px-6 py-20 md:px-10 md:py-28 lg:px-16"
     >
       <div className="mx-auto max-w-6xl">
         <SectionHeading
           eyebrow="Lo que ya pasó"
-          title={`Galería JEC ${galeriaEdition}`}
+          title={
+            <>
+              Galería <BrandName>{BRAND_NAME}</BrandName> {galeriaEdition}
+            </>
+          }
           className="mb-6 max-w-2xl"
         />
         <p className="mb-12 max-w-2xl text-pretty text-base leading-relaxed text-[var(--suave)] md:mb-16 md:text-lg">
@@ -44,7 +48,7 @@ export function Galeria() {
               ) : (
                 <div className="jec-placeholder flex h-full items-end p-3">
                   <span className="jec-label text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--suave)]">
-                    Foto JEC {galeriaEdition}
+                    Foto <BrandName>{BRAND_NAME}</BrandName> {galeriaEdition}
                   </span>
                 </div>
               )}

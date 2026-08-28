@@ -1,4 +1,4 @@
-import { Disclosure, SectionHeading } from "@/components/external/shared"
+import { BrandName, Disclosure, SectionHeading } from "@/components/external/shared"
 
 import { faqItems } from "./data"
 
@@ -21,9 +21,13 @@ export function Faq() {
 
         <div className="flex max-w-3xl flex-col border-t border-[var(--linea)]">
           {faqItems.map((item) => (
-            <Disclosure key={item.id} summary={item.question} className={disclosureClass}>
+            <Disclosure
+              key={item.id}
+              summary={<BrandName>{item.question}</BrandName>}
+              className={disclosureClass}
+            >
               <p className="pb-5 pr-8 leading-relaxed text-[var(--suave)] md:pb-6">
-                {item.answer}
+                <BrandName>{item.answer}</BrandName>
               </p>
             </Disclosure>
           ))}

@@ -11,6 +11,7 @@ import {
 } from "@/components/external/contenidos"
 import {
   ArrowLeftIcon,
+  BrandName,
   ClockIcon,
   CtaButton,
   PlaceholderTag,
@@ -68,7 +69,7 @@ export default async function ContenidoPage({ params }: ContenidoPageProps) {
             </Link>
 
             <h1 className="jec-label mt-6 max-w-4xl text-pretty text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl md:text-5xl lg:text-6xl">
-              {item.title}
+              <BrandName>{item.title}</BrandName>
             </h1>
 
             <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -85,7 +86,7 @@ export default async function ContenidoPage({ params }: ContenidoPageProps) {
               ) : null}
 
               <span className="jec-mono text-sm font-bold uppercase tracking-[0.14em] text-[var(--suave)]">
-                JEC {item.edition}
+                <BrandName>Juntos En Casa</BrandName> {item.edition}
               </span>
 
               {item.durationLabel ? (
@@ -108,7 +109,7 @@ export default async function ContenidoPage({ params }: ContenidoPageProps) {
                   Sobre este contenido
                 </p>
                 <p className="max-w-2xl text-pretty text-base leading-[1.75] text-[var(--suave)] md:text-lg">
-                  {item.description}
+                  <BrandName>{item.description}</BrandName>
                 </p>
               </div>
             </div>
@@ -119,8 +120,11 @@ export default async function ContenidoPage({ params }: ContenidoPageProps) {
               <div className="campo-fuego rounded-[6px] p-7">
                 {/* jec-label, no jec-display: la build personal-use de Cayento mapea
                     los diez dígitos al mismo glifo de marca de agua. Sin números en display. */}
-                <p className="jec-label text-3xl font-extrabold leading-none tracking-tight">
-                  JEC 2026
+                {/* `leading-[1.05]` y no `leading-none`: con el nombre completo
+                    el bloque ocupa dos líneas en el ancho del aside, y a
+                    interlineado 1 las dos se tocan. */}
+                <p className="jec-label text-3xl font-extrabold leading-[1.05] tracking-tight">
+                  <BrandName>Juntos En Casa</BrandName> 2026
                 </p>
                 <p className="mt-3 text-[15px] font-medium leading-relaxed">
                   18, 19 y 20 de septiembre · La Plata

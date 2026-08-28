@@ -47,13 +47,13 @@ export const productos: readonly ProductoItem[] = [
     id: "remera-jec-2026",
     slug: "remera-jec-2026",
     kind: "indumentaria",
-    title: "Remera JEC 2026",
-    kicker: "Indumentaria · JEC 2026",
+    title: "Remera Juntos En Casa 2026",
+    kicker: "Indumentaria · Juntos En Casa 2026",
     badge: "Remera",
     description:
-      "La remera oficial de JEC 2026: estampa al frente, para llevar la conferencia puesta todo el año.",
+      "La remera oficial de Juntos En Casa 2026: estampa al frente, para llevar la conferencia puesta todo el año.",
     detalle:
-      "Corte unisex con el isotipo de Juntos en Casa estampado al frente. Se consigue únicamente en el stand del evento, sin venta online — la idea es que te la lleves puesta desde ahí mismo.",
+      "Corte unisex con el isotipo de Juntos En Casa estampado al frente. Se consigue únicamente en el stand del evento, sin venta online — la idea es que te la lleves puesta desde ahí mismo.",
     pieza: "remera",
     field: "campo-tinta",
     variantes: [
@@ -93,10 +93,11 @@ export const productos: readonly ProductoItem[] = [
     id: "pack-stickers",
     slug: "pack-stickers",
     kind: "papeleria",
-    title: "Pack de stickers JEC 2026",
-    kicker: "Papelería · JEC 2026",
+    title: "Pack de stickers Juntos En Casa 2026",
+    kicker: "Papelería · Juntos En Casa 2026",
     badge: "Stickers",
-    description: "Un pack de stickers con los íconos y el isotipo de JEC 2026, para pegar donde quieras.",
+    description:
+      "Un pack de stickers con los íconos y el isotipo de Juntos En Casa 2026, para pegar donde quieras.",
     detalle:
       "Cuatro diseños troquelados con símbolos de la conferencia: el isotipo, la llama y el ancla. Se consigue únicamente en el stand del evento, sin venta online.",
     pieza: "stickers",
@@ -104,7 +105,7 @@ export const productos: readonly ProductoItem[] = [
     ficha: [
       { term: "Talles", value: "A confirmar", placeholder: true },
       { term: "Material", value: "A confirmar", placeholder: true },
-      { term: "Estampa", value: "Diseños originales JEC 2026" },
+      { term: "Estampa", value: "Diseños originales Juntos En Casa 2026" },
       { term: "Dónde", value: "Stand del evento" },
     ],
   },

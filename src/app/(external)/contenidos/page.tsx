@@ -6,7 +6,7 @@ import {
   type ContenidoKind,
 } from "@/components/external/contenidos"
 import { Galeria } from "@/components/external/galeria"
-import { CtaButton, SiteFooter, SiteHeader } from "@/components/external/shared"
+import { BrandName, CtaButton, SiteFooter, SiteHeader } from "@/components/external/shared"
 import { createPageMetadata } from "@/lib/seo/site"
 
 export const metadata: Metadata = createPageMetadata({
@@ -43,8 +43,8 @@ export default async function ContenidosPage({ searchParams }: ContenidosPagePro
                 ¿Te lo perdiste?
               </h2>
               <p className="mt-5 text-pretty text-base font-medium leading-relaxed md:text-lg">
-                JEC 2026 ya tiene fecha: 18, 19 y 20 de septiembre en Iglesia cristiana Vida
-                Sobrenatural, La Plata.
+                <BrandName>Juntos En Casa</BrandName> 2026 ya tiene fecha: 18, 19 y 20 de
+                septiembre en Iglesia cristiana Vida Sobrenatural, La Plata.
               </p>
             </div>
             <CtaButton href="/inscripcion" className="shrink-0">

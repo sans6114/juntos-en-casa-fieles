@@ -1,5 +1,10 @@
 import Link from "next/link"
-import { ArrowRightIcon, DownloadIcon, PlaceholderTag } from "@/components/external/shared"
+import {
+  ArrowRightIcon,
+  BrandName,
+  DownloadIcon,
+  PlaceholderTag,
+} from "@/components/external/shared"
 
 import { ContenidoThumb } from "./ContenidoThumb"
 import type { ContenidoItem } from "./data"
@@ -25,10 +30,12 @@ export function ContenidoCard({ item }: ContenidoCardProps) {
           </p>
 
           <h3 className="jec-label text-2xl font-extrabold leading-tight tracking-tight">
-            {item.title}
+            <BrandName>{item.title}</BrandName>
           </h3>
 
-          <p className="text-sm leading-relaxed text-[var(--suave)]">{item.description}</p>
+          <p className="text-sm leading-relaxed text-[var(--suave)]">
+            <BrandName>{item.description}</BrandName>
+          </p>
 
           <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--linea)] pt-4">
             {item.speaker ? (
