@@ -8,6 +8,7 @@ export const ADMIN_PATHS = {
   colaboradorHome: "/admin/inscripciones/grilla",
   contacto: "/admin/contacto",
   usuarios: "/admin/usuarios",
+  contenidos: "/admin/contenidos",
 };
 
 export function isPublicAdminAuthPath(pathname: string): boolean {
