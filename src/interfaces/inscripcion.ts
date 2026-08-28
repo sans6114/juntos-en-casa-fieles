@@ -45,3 +45,11 @@ export type InscripcionDTO = {
   contactado?: boolean
   contactoUsuarioNombre?: string | null
 }
+
+export type AsistenciaDTO = {
+  id: string
+  nombre: string
+  email: string
+  telefono: string | null
+  horaLlegada: string
+}
