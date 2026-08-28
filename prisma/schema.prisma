@@ -83,3 +83,37 @@ model Contacto {
 
   @@index([usuarioId])
 }
+
+enum TipoContenido {
+  PREDICA
+  VIDEO
+  RECURSOS
+}
+
+enum CampoThumb {
+  CAMPO_PAPEL
+  CAMPO_TINTA
+  CAMPO_FUEGO
+}
+
+model Contenido {
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  titulo         String
+  descripcion    String
+  tipo           TipoContenido
+  edicion        Int
+  sesion         String?
+  orador         String?
+  youtubeId      String?
+  duracion       String?
+  placasUrl      String?
+  placasCount    Int?
+  campo          CampoThumb
+  imagenSrc      String?
+  imagenCover    Boolean        @default(false)
+  imagenAtenuada Boolean        @default(false)
+  publicado      Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
