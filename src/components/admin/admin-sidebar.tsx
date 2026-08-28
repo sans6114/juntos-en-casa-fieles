@@ -15,6 +15,7 @@ import {
   Table2,
   Users,
   X,
+  CalendarCheck,
 } from "lucide-react"
 import {
   Sidebar,
@@ -254,6 +255,18 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 >
                   <ScanLine />
                   <span>Escanear QR</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={pathname.startsWith("/admin/asistencias")}
+                  tooltip="Asistencias"
+                  render={
+                    <Link href="/admin/asistencias" onClick={closeSidebar} />
+                  }
+                >
+                  <CalendarCheck />
+                  <span>Asistencias</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
