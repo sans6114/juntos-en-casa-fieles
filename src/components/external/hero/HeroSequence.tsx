@@ -114,7 +114,7 @@ export function HeroSequence({ onIntroDone }: { onIntroDone: () => void }) {
             width={90}
             height={90}
             priority
-            className="mb-4 h-48 w-auto"
+            className="mb-4 h-48 w-auto md:mb-6 md:h-[min(18dvh,9rem)]"
           />
           <Image
             src={LOADER_FRAMES[frame]}
@@ -122,9 +122,9 @@ export function HeroSequence({ onIntroDone }: { onIntroDone: () => void }) {
             width={320}
             height={320}
             priority
-            className="h-auto w-[min(70vw,18rem)] md:w-[min(50vw,22rem)]"
+            className="h-auto w-[min(70vw,18rem)] md:h-[min(44dvh,22rem)] md:w-auto"
           />
-          <div className="mt-10 flex w-full max-w-xs flex-col items-center gap-3 md:max-w-sm">
+          <div className="mt-10 flex w-full max-w-xs flex-col items-center gap-3 md:mt-8 md:w-80 md:max-w-none">
             <span
               ref={progressRef}
               className="block h-4 w-full overflow-hidden rounded-full border-2 border-[var(--jec-bone)]"
