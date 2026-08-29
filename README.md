@@ -105,7 +105,7 @@ flowchart TD
 | `npm run lint` | ESLint |
 | `npx prisma studio` | Explorar la base de datos |
 | `npx prisma db seed` | Poblar admin, congregaciones e inscripciones de prueba |
-
+nada
 ## Estructura de carpetas
 
 ```
