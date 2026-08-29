@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { logoutAdmin } from "@/actions"
 import {
+  Church,
   ClipboardList,
   FileText,
   LayoutDashboard,
@@ -15,6 +16,7 @@ import {
   Table2,
   Users,
   X,
+  CalendarCheck,
 } from "lucide-react"
 import {
   Sidebar,
@@ -235,6 +237,18 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                     <span>Contenidos</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={pathname.startsWith(ADMIN_PATHS.congregaciones)}
+                    tooltip="Congregaciones"
+                    render={
+                      <Link href={ADMIN_PATHS.congregaciones} onClick={closeSidebar} />
+                    }
+                  >
+                    <Church />
+                    <span>Congregaciones</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -254,6 +268,18 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 >
                   <ScanLine />
                   <span>Escanear QR</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={pathname.startsWith("/admin/asistencias")}
+                  tooltip="Asistencias"
+                  render={
+                    <Link href="/admin/asistencias" onClick={closeSidebar} />
+                  }
+                >
+                  <CalendarCheck />
+                  <span>Asistencias</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

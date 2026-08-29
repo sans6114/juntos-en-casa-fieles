@@ -9,6 +9,7 @@ export const ADMIN_PATHS = {
   contacto: "/admin/contacto",
   usuarios: "/admin/usuarios",
   contenidos: "/admin/contenidos",
+  congregaciones: "/admin/congregaciones",
 };
 
 export function isPublicAdminAuthPath(pathname: string): boolean {
@@ -31,6 +32,8 @@ export function defaultHomeForRole(rol: Role): string {
 export function canColaboradorAccessPath(pathname: string): boolean {
   return (
     pathname.startsWith(ADMIN_PATHS.colaboradorHome) ||
+    pathname.startsWith("/admin/escanear-qr") ||
+    pathname.startsWith("/admin/asistencias") ||
     /^\/admin\/inscripciones\/[^/]+$/.test(pathname)
   )
 }

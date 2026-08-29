@@ -10,10 +10,36 @@ import {
   CrearInscripcionSchema,
   type InscripcionActionState,
 } from '@/interfaces/inscripcion';
+import { normalizarNombreCongregacion } from '@/lib/congregacion/normalizar';
 import { sendQrEmail } from '@/lib/email/send-qr-email';
 import { prisma } from '@/lib/prisma';
 
 import { Prisma } from '../../../generated/client';
+
+// Resuelve el texto libre del combobox a un FK de Congregacion, upserteando por
+// `nombreNormalizado`. Tiene su propio try/catch de P2002, aislado del catch de
+// email mas abajo: sin esto, una carrera sobre `nombreNormalizado` terminaria
+// mostrandole al visitante el mensaje de "email duplicado".
+async function resolverCongregacionId(query?: string | null): Promise<string | null> {
+  const nombre = query?.trim() ?? ""
+  const nombreNormalizado = normalizarNombreCongregacion(nombre)
+  if (!nombreNormalizado) return null
+
+  try {
+    const congregacion = await prisma.congregacion.upsert({
+      where: { nombreNormalizado },
+      update: {}, // nunca pisar un nombre curado por un admin con lo que tipeo un visitante despues
+      create: { nombre, nombreNormalizado }, // estado por default: PENDIENTE
+    })
+    return congregacion.id
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      const existente = await prisma.congregacion.findUnique({ where: { nombreNormalizado } })
+      if (existente) return existente.id // gano la creacion concurrente: adoptamos ese id
+    }
+    throw error
+  }
+}
 
 export async function crearInscripcion(
   _prevState: InscripcionActionState,
@@ -32,10 +58,10 @@ export async function crearInscripcion(
     return { ok: false, message: "Revisá los datos ingresados.", fieldErrors }
   }
 
-  // Excluyentes a proposito: si eligio de la lista manda la FK, si la escribio a
-  // mano se guarda el texto crudo, y si no puso nada quedan las dos en null.
-  const congregacionId = parsed.data.congregacionId || null
-  const congregacionTexto = congregacionId ? null : parsed.data.congregacionQuery?.trim() || null
+  // Si eligio de la lista manda la FK tal cual. Si no, se resuelve el texto
+  // libre a un FK (upsert por nombreNormalizado): `congregacionTexto` ya no se
+  // escribe en altas nuevas, queda frozen para lectura de filas legacy.
+  const congregacionId = parsed.data.congregacionId || (await resolverCongregacionId(parsed.data.congregacionQuery))
 
   try {
     const nuevaInscripcion = await prisma.inscripcion.create({
@@ -45,7 +71,6 @@ export async function crearInscripcion(
         telefono: parsed.data.telefono,
         edad: parsed.data.edad,
         congregacionId,
-        congregacionTexto,
       },
     })
 
@@ -62,6 +87,7 @@ export async function crearInscripcion(
 
     // Revalidar las rutas del dashboard admin para que los datos nuevos aparezcan al instante
     revalidatePath("/admin/inscripciones", "layout")
+    revalidatePath("/admin/congregaciones")
 
     const cookieStore = await cookies()
     cookieStore.set("jec_inscripcion_ok", "1", {
