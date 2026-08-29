@@ -1,2 +1,2 @@
 export { helveticaNeue, helveticaNeueCondensed } from "./helvetica";
-export { cayento, cayentoNarrow, cayentoWide } from "./cayento";
+export { cayento } from "./cayento";

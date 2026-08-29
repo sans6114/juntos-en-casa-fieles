@@ -4,6 +4,7 @@ import crypto from "crypto"
 import { prisma } from "@/lib/prisma"
 import { RequestPasswordResetSchema } from "@/interfaces/auth"
 import { sendPasswordResetEmail } from "@/lib/email/send-password-reset"
+import { rateLimitByKey, getClientIp } from "@/lib/rate-limit"
 
 const GENERIC_MESSAGE =
   "Si el email está registrado, te enviamos un enlace para restablecer tu contraseña."
@@ -16,6 +17,12 @@ function hashToken(token: string) {
 }
 
 export async function requestPasswordReset(email: string) {
+  const ip = await getClientIp()
+  const isAllowed = await rateLimitByKey(`reset-request:${ip}`, 3, 60 * 60 * 1000) // 3 requests per hour per IP
+  if (!isAllowed) {
+    return { ok: false, message: "Demasiados intentos. Por favor, esperá un tiempo." }
+  }
+
   const parsed = RequestPasswordResetSchema.safeParse({ email })
   if (!parsed.success) {
     return {

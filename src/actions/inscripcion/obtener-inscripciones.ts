@@ -2,12 +2,13 @@
 
 import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth-guards"
+import { esCandidatoPastoral } from "@/lib/contacto/es-candidato-pastoral"
 import type { InscripcionDTO } from "@/interfaces/inscripcion"
 
 export async function obtenerInscripciones(): Promise<InscripcionDTO[]> {
-  try {
-    await requireSession()
+  await requireSession()
 
+  try {
     const inscripciones = await prisma.inscripcion.findMany({
       include: {
         congregacion: true,
@@ -30,7 +31,11 @@ export async function obtenerInscripciones(): Promise<InscripcionDTO[]> {
       telefono: ins.telefono,
       edad: ins.edad,
       congregacionId: ins.congregacionId,
-      congregacionNombre: ins.congregacion?.nombre || null,
+      // Sin FK cae al texto libre legacy, para que una fila anterior a la
+      // normalizacion no aparezca como "Sin congregacion".
+      congregacionNombre: ins.congregacion?.nombre || ins.congregacionTexto || null,
+      congregacionEstado: ins.congregacion?.estado ?? null,
+      puedeContactar: esCandidatoPastoral(ins),
       createdAt: ins.createdAt.toISOString(),
       contactado: ins.contacto?.contactado ?? false,
       contactoUsuarioNombre: ins.contacto?.usuario.nombre ?? null,

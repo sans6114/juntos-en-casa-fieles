@@ -1,0 +1,25 @@
+/* La foto del frame es una textura de halftone a sangre, y el texto vivo de la
+ * composición no sobrevive encima: por eso la versión anterior necesitaba una
+ * losa blanca opaca, chips negros y una placa con gradiente detrás de la fecha.
+ *
+ * En vez de una losa, la brasa se apaga hacia tinta en el tercio inferior. La
+ * foto sigue siendo el fondo —arriba queda intacta, con el wordmark y el
+ * personaje encima— y el bloque de decisión gana contraste pleno sin agregar
+ * ningún material nuevo a la composición.
+ *
+ * `color-mix` en vez de `rgba()` para que los pasos intermedios sigan saliendo
+ * del token y no de un literal que después nadie sabe de dónde vino. */
+.hero-finale__stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: linear-gradient(
+    to top,
+    var(--jec-ink) 0%,
+    color-mix(in srgb, var(--jec-ink) 82%, transparent) 26%,
+    color-mix(in srgb, var(--jec-ink) 30%, transparent) 52%,
+    transparent 72%
+  );
+}

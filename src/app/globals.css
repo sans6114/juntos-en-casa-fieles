@@ -2,6 +2,10 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Docs contain literal token patterns like text-[var(--jec-*)]; Tailwind must
+   not scan them as class candidates or it emits invalid CSS. */
+@source not "../../openspec";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -49,6 +53,7 @@
 }
 
 :root {
+  color-scheme: light only;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -126,6 +131,10 @@
   }
   html {
     @apply font-sans;
+    color-scheme: light only;
+  }
+  .jec-landing :is(h1, h2, h3, h4, h5, h6) {
+    font-weight: 400;
   }
 }
 
@@ -135,8 +144,12 @@
   }
 }
 
-/* Tokens landing pública — La Casa Encendida (no pisa el tema admin) */
+/* Tokens landing pública — Papel encendido (no pisa el tema admin) */
 .jec-landing {
+  color-scheme: light only;
+  font-synthesis: none;
+  -webkit-font-synthesis: none;
+
   --jec-ink: #0b0a0f;
   --jec-ink-soft: #15121a;
   --jec-ash: #1c1814;
@@ -144,10 +157,212 @@
   --jec-amber: #c0f700;
   --jec-smoke: #a89f96;
   --jec-bone: #f4efe8;
-  background-color: var(--jec-ink);
-  color: var(--jec-bone);
+
+  /* Defaults de campo: hueso/papel, hasta que una sección declare otro campo */
+  --sup: var(--jec-bone);
+  --dato: var(--jec-ink);
+  --suave: #57504a;
+  --acento: var(--jec-ember);
+  /* Brasa legible. `--acento` sigue siendo el bloque decorativo de marca; este es
+     su gemelo SOLO para texto y bordes, donde la brasa pura falla contraste.
+     Sobre hueso #f4efe8: --acento 2.73:1 (falla 1.4.3 y 1.4.11), --acento-texto
+     5.68:1. En campo-tinta y campo-fuego apuntan al mismo color porque ahi la
+     brasa ya pasa: 15.5:1 y 6.3:1.
+
+     FUERA DE ALCANCE a proposito, no "completar" el barrido: `.jec-eyebrow::before`,
+     `.jec-disclosure > summary::after` y el gradiente al 18%. Son bloques de marca,
+     no texto; oscurecerlos apaga la brasa. */
+  --acento-texto: #a83800;
+  --linea: rgb(11 10 15 / 12%);
+  --regla: var(--jec-ink);
+  --foco: var(--jec-ink);
+  --cta-bg: var(--jec-ink);
+  --cta-fg: var(--jec-bone);
+
+  /* Header sticky de "/": altura declarada una vez, consumida por min-height y scroll-margin.
+     92px = pt-6 (24) + hamburguesa 44 (mínimo táctil) + pb-6 (24). Medido, no estimado:
+     min-h es piso y no recorta, así que la variable tiene que seguir a la altura real. */
+  --jec-header-h: 92px;
+
+  background-color: var(--sup);
+  color: var(--dato);
   font-family: var(--font-helvetica-neue), ui-sans-serif, system-ui,
     sans-serif;
+}
+
+@media (min-width: 768px) {
+  .jec-landing {
+    --jec-header-h: 104px;
+  }
+}
+
+/* Altura mínima de la barra CTA de "/" en móvil. La barra es `sticky bottom-0`
+   dentro del contenedor post-hero, no `fixed`: reserva su propio espacio en flujo
+   al final de la página, así que el footer ya no necesita compensarla. */
+.jec-landing {
+  --jec-cta-h: 4.5rem;
+}
+
+/* Los anclas de "/" aterrizan su título debajo del header fijado */
+.jec-landing .jec-anchor {
+  scroll-margin-top: calc(var(--jec-header-h) + 0.5rem);
+}
+
+/* Campo hueso/papel: fondo claro, tinta oscura, brasa naranja */
+.jec-landing .campo-papel {
+  --sup: var(--jec-bone);
+  --dato: var(--jec-ink);
+  --suave: #57504a;
+  --acento: var(--jec-ember);
+  --acento-texto: #a83800;
+  --linea: rgb(11 10 15 / 12%);
+  --regla: var(--jec-ink);
+  --foco: var(--jec-ink);
+  --cta-bg: var(--jec-ink);
+  --cta-fg: var(--jec-bone);
+
+  background-color: var(--sup);
+  color: var(--dato);
+}
+
+/* Campo tinta: fondo oscuro, texto hueso, brasa lima */
+.jec-landing .campo-tinta {
+  --sup: var(--jec-ink);
+  --dato: var(--jec-bone);
+  --suave: var(--jec-smoke);
+  --acento: var(--jec-amber);
+  /* Ya pasa (15.5:1 sobre tinta): mismo color, el token existe para que los call
+     sites puedan usar --acento-texto sin ramificar por campo. */
+  --acento-texto: var(--jec-amber);
+  --linea: rgb(244 239 232 / 12%);
+  --regla: var(--jec-bone);
+  --foco: var(--jec-bone);
+  --cta-bg: var(--jec-bone);
+  --cta-fg: var(--jec-ink);
+
+  background-color: var(--sup);
+  color: var(--dato);
+}
+
+/* Campo fuego: bloque naranja saturado, sin nivel de texto "suave" */
+.jec-landing .campo-fuego {
+  --sup: var(--jec-ember);
+  --dato: var(--jec-ink);
+  --suave: var(--jec-ink);
+  --acento: var(--jec-ink);
+  /* Ya pasa (6.3:1 sobre brasa). */
+  --acento-texto: var(--jec-ink);
+  --linea: rgb(11 10 15 / 20%);
+  --regla: var(--jec-ink);
+  --foco: var(--jec-ink);
+  --cta-bg: var(--jec-ink);
+  --cta-fg: var(--jec-bone);
+
+  background-color: var(--sup);
+  color: var(--dato);
+}
+
+/* Eyebrow: la brasa entra como regla de 28x3px, nunca como color de texto */
+.jec-landing .jec-eyebrow {
+  color: var(--suave);
+}
+
+.jec-landing .jec-eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 28px;
+  height: 3px;
+  vertical-align: middle;
+  margin-inline-end: 0.75rem;
+  background: var(--acento);
+}
+
+/* Menú móvil: panel `:target`, cero JavaScript, el header sigue siendo Server Component.
+   Abre con <a href="#menu-movil">. Cierra solo al tocar cualquier enlace, porque el hash
+   pasa a otro destino y el panel deja de ser :target — por eso sus enlaces son <a> planos
+   y no <Link> (pushState no actualiza el target element del documento).
+   El botón de cerrar apunta a #menu-cerrado, un fragmento que no existe: sin destino el
+   navegador no scrollea, así que el panel se cierra sin saltar al tope de la página. */
+.jec-landing .jec-menu-movil {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .jec-landing .jec-menu-movil:target {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Marcador de dato placeholder: trama diagonal + contorno, legible en los tres campos */
+.jec-landing .jec-placeholder {
+  background: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--acento) 18%, transparent) 0 6px,
+    transparent 6px 12px
+  );
+  box-shadow: inset 0 0 0 1px var(--acento);
+}
+
+/* Disclosure: <details> nativo, chevron en CSS, sin marcador por defecto */
+.jec-landing .jec-disclosure > summary {
+  list-style: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.jec-landing .jec-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.jec-landing .jec-disclosure > summary::after {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--acento);
+  transition: transform 0.2s ease;
+}
+
+.jec-landing .jec-disclosure[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jec-landing .jec-disclosure > summary::after {
+    transition: none;
+  }
+}
+
+/* Entrada del nav: cada link aparece con fade + subida al montar el header,
+   escalonado por índice via la variable --nav-delay que pone cada <Link>. */
+@keyframes jec-nav-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.jec-landing .jec-nav-in {
+  animation: jec-nav-fade-up 0.5s ease-out both;
+  animation-delay: var(--nav-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jec-landing .jec-nav-in {
+    animation: none;
+  }
 }
 
 /* Titular de impacto (hero): stencil, uso puntual y grande */
@@ -167,8 +382,24 @@
     sans-serif;
 }
 
+/* Nombre de la conferencia: itálica de Helvetica Neue, la convención
+   tipográfica para nombres propios de eventos. Se distingue sin cortar el ritmo
+   del párrafo, que es lo que pasaría marcándolo en bold en cada mención.
+
+   No declara `font-weight` a propósito: la familia sólo trae itálicas reales en
+   400, 700 y 900, así que fijar 500 caería igual en la de 400 — y además
+   rompería el par peso+itálica cuando el nombre cae dentro de un título.
+   Heredando, en un párrafo sale la itálica de 400 y dentro de un heading
+   `font-extrabold` (800) sale la de 900: las dos son archivos reales, ninguna
+   sintetizada por el navegador. */
+.jec-landing .jec-brand {
+  font-family: var(--font-helvetica-neue), ui-sans-serif, system-ui, sans-serif;
+  font-style: italic;
+}
+
 /* Tokens portal admin — blanco / negro + rojo (aislados del sitio público) */
 .admin-shell {
+  color-scheme: light only;
   --jec-admin-ink: #0a0a0a;
   --jec-admin-bone: #ffffff;
   --jec-admin-accent: #dc2626;

@@ -12,6 +12,11 @@ enum Role {
   COLABORADOR
 }
 
+enum EstadoCongregacion {
+  PENDIENTE
+  APROBADA
+}
+
 model User {
   id                  String               @id @default(cuid())
   nombre              String
@@ -39,24 +44,41 @@ model PasswordResetToken {
 }
 
 model Congregacion {
-  id            String        @id @default(cuid())
-  nombre        String
-  inscripciones Inscripcion[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                String             @id @default(cuid())
+  nombre            String
+  /// Clave persistida de normalizacion (NFD, sin diacriticos, minuscula, sin
+  /// espacios duplicados). Cambiar el algoritmo que la genera exige una
+  /// migracion de backfill: ver `src/lib/congregacion/normalizar.ts`.
+  nombreNormalizado String             @unique
+  estado            EstadoCongregacion @default(PENDIENTE)
+  inscripciones     Inscripcion[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 }
 
 model Inscripcion {
-  id             String        @id @default(cuid())
-  nombre         String
-  email          String
-  telefono       String?
-  edad           Int
-  congregacionId String?
-  congregacion   Congregacion? @relation(fields: [congregacionId], references: [id])
-  contacto       Contacto?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id                String        @id @default(cuid())
+  nombre            String
+  email             String        @unique
+  telefono          String?
+  edad              Int
+  congregacionId    String?
+  congregacion      Congregacion? @relation(fields: [congregacionId], references: [id])
+  /// Congregacion escrita a mano en filas anteriores a la normalizacion. Ya no
+  /// se escribe en altas nuevas (ver `resolverCongregacionId` en
+  /// `crear-inscripcion.ts`, que siempre asigna `congregacionId`); se
+  /// conserva solo como fallback de lectura para las filas legacy.
+  congregacionTexto String?
+  /// Se marca `true` unicamente cuando un admin rechaza la Congregacion a la
+  /// que apuntaba esta inscripcion (ver `rechazar-congregacion.ts`). Invariante:
+  /// `sinCongregacion = true` implica `congregacionId = null`.
+  sinCongregacion   Boolean       @default(false)
+  contacto          Contacto?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  asistenciaDia1    DateTime?
+  asistenciaDia2    DateTime?
+  asistenciaDia3    DateTime?
 
   @@index([congregacionId])
 }
@@ -74,4 +96,38 @@ model Contacto {
   updatedAt     DateTime    @updatedAt
 
   @@index([usuarioId])
+}
+
+enum TipoContenido {
+  PREDICA
+  VIDEO
+  RECURSOS
+}
+
+enum CampoThumb {
+  CAMPO_PAPEL
+  CAMPO_TINTA
+  CAMPO_FUEGO
+}
+
+model Contenido {
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  titulo         String
+  descripcion    String
+  tipo           TipoContenido
+  edicion        Int
+  sesion         String?
+  orador         String?
+  youtubeId      String?
+  duracion       String?
+  placasUrl      String?
+  placasCount    Int?
+  campo          CampoThumb
+  imagenSrc      String?
+  imagenCover    Boolean        @default(false)
+  imagenAtenuada Boolean        @default(false)
+  publicado      Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }

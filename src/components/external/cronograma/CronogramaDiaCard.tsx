@@ -6,14 +6,14 @@ type CronogramaDiaCardProps = {
 
 export function CronogramaDiaCard({ dia }: CronogramaDiaCardProps) {
   return (
-    <article className="flex h-full flex-col bg-[var(--jec-ink-soft)] p-6 md:p-8">
-      <p className="jec-display text-xs font-bold uppercase tracking-[0.28em] text-[var(--jec-amber)]">
+    <article className="flex h-full flex-col border border-[var(--linea)] p-6 md:p-8">
+      <p className="jec-label text-xs font-bold uppercase tracking-[0.28em] text-[var(--acento-texto)]">
         {dia.dayLabel}
       </p>
-      <h3 className="jec-display mt-3 text-2xl font-extrabold tracking-tight text-[var(--jec-bone)] md:text-3xl">
+      <h3 className="jec-label mt-3 text-2xl font-extrabold tracking-tight text-[var(--dato)] md:text-3xl">
         {dia.title}
       </h3>
-      <ul className="mt-8 flex flex-col gap-4 border-t border-[var(--jec-bone)]/10 pt-6">
+      <ul className="mt-8 flex flex-col gap-4 border-t border-[var(--linea)] pt-6">
         {dia.items.map((item) => (
           <li
             key={`${dia.id}-${item.time}-${item.label}`}
@@ -21,11 +21,11 @@ export function CronogramaDiaCard({ dia }: CronogramaDiaCardProps) {
           >
             <time
               dateTime={item.time}
-              className="jec-display font-bold tabular-nums text-[var(--jec-ember)]"
+              className="jec-label font-bold tabular-nums text-[var(--acento-texto)]"
             >
               {item.time}
             </time>
-            <span className="text-[var(--jec-smoke)]">{item.label}</span>
+            <span className="text-[var(--suave)]">{item.label}</span>
           </li>
         ))}
       </ul>

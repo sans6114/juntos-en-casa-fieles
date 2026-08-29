@@ -1,9 +1,14 @@
 "use server"
 
-import { AuthError } from "next-auth"
-import { redirect } from "next/navigation"
-import { z } from "zod"
-import { signIn } from "@/auth.config"
+import { AuthError } from 'next-auth';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
+
+import { signIn } from '@/auth.config';
+import {
+  getClientIp,
+  rateLimitByKey,
+} from '@/lib/rate-limit';
 
 export type LoginAdminState = {
   ok: boolean
@@ -12,16 +17,23 @@ export type LoginAdminState = {
 
 const credentialsSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(1),
+  password: z.string().min(4),
 })
 
 export async function loginAdmin(
   _prevState: LoginAdminState,
   formData: FormData
 ): Promise<LoginAdminState> {
+  const ip = await getClientIp()
   const parsed = credentialsSchema.safeParse(Object.fromEntries(formData))
+  
   if (!parsed.success) {
     return { ok: false, message: "Completá todos los campos." }
+  }
+
+  const isAllowed = await rateLimitByKey(`login:${parsed.data.email}:${ip}`, 5, 15 * 60 * 1000) // 5 attempts per 15 minutes
+  if (!isAllowed) {
+    return { ok: false, message: "Demasiados intentos. Por favor, esperá unos minutos." }
   }
 
   try {

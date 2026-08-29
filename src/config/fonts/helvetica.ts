@@ -3,42 +3,42 @@ import localFont from "next/font/local";
 export const helveticaNeue = localFont({
   src: [
     {
-      path: "../../fonts/Helvetica/HelveticaNeueLTStd-Lt.otf",
+      path: "../../fonts/Helvetica/HelveticaNeueLTStd-Lt.woff2",
       weight: "300",
       style: "normal",
     },
     {
-      path: "../../fonts/Helvetica/HelveticaNeueLTStd-Roman.otf",
+      path: "../../fonts/Helvetica/HelveticaNeueLTStd-Roman.woff2",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../../fonts/Helvetica/HelveticaNeueLTStd-It.otf",
+      path: "../../fonts/Helvetica/HelveticaNeueLTStd-It.woff2",
       weight: "400",
       style: "italic",
     },
     {
-      path: "../../fonts/Helvetica/HelveticaNeueLTStd-Md.otf",
+      path: "../../fonts/Helvetica/HelveticaNeueLTStd-Md.woff2",
       weight: "500",
       style: "normal",
     },
     {
-      path: "../../fonts/Helvetica/HelveticaNeueLTStd-Bd.otf",
+      path: "../../fonts/Helvetica/HelveticaNeueLTStd-Bd.woff2",
       weight: "700",
       style: "normal",
     },
     {
-      path: "../../fonts/Helvetica/HelveticaNeueLTStd-BdIt.otf",
+      path: "../../fonts/Helvetica/HelveticaNeueLTStd-BdIt.woff2",
       weight: "700",
       style: "italic",
     },
     {
-      path: "../../fonts/Helvetica/HelveticaNeueLTStd-Blk.otf",
+      path: "../../fonts/Helvetica/HelveticaNeueLTStd-Blk.woff2",
       weight: "900",
       style: "normal",
     },
     {
-      path: "../../fonts/Helvetica/HelveticaNeueLTStd-BlkIt.otf",
+      path: "../../fonts/Helvetica/HelveticaNeueLTStd-BlkIt.woff2",
       weight: "900",
       style: "italic",
     },
@@ -50,22 +50,22 @@ export const helveticaNeue = localFont({
 export const helveticaNeueCondensed = localFont({
   src: [
     {
-      path: "../../fonts/Helvetica/HelveticaNeueLTStd-Cn.otf",
+      path: "../../fonts/Helvetica/HelveticaNeueLTStd-Cn.woff2",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../../fonts/Helvetica/HelveticaNeueLTStd-MdCn.otf",
+      path: "../../fonts/Helvetica/HelveticaNeueLTStd-MdCn.woff2",
       weight: "500",
       style: "normal",
     },
     {
-      path: "../../fonts/Helvetica/HelveticaNeueLTStd-BdCn.otf",
+      path: "../../fonts/Helvetica/HelveticaNeueLTStd-BdCn.woff2",
       weight: "700",
       style: "normal",
     },
     {
-      path: "../../fonts/Helvetica/HelveticaNeueLTStd-BlkCn.otf",
+      path: "../../fonts/Helvetica/HelveticaNeueLTStd-BlkCn.woff2",
       weight: "900",
       style: "normal",
     },

@@ -1,26 +1,28 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { siteConfig } from "@/lib/seo/site";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+/* Geist vive en el layout de admin, no aca. Cargarlo en la raiz lo bajaba en
+ * TODAS las rutas, incluidas las publicas, que lo pisan entero: la landing pinta
+ * con Cayento/Helvetica via `.jec-landing` y no usa una sola utilidad
+ * `font-sans`/`font-mono`/`font-heading`. Admin es el unico consumidor real,
+ * a traves de --font-sans/--font-mono en `globals.css`. */
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
+/* Fallback para cualquier ruta que no declare metadata propia. Sale de
+ * `siteConfig` para no mantener dos descripciones distintas del mismo evento:
+ * admin la pisa entera y las publicas pasan por `createPageMetadata`. */
 export const metadata: Metadata = {
   title: {
-    default: "Juntos En Casa",
-    template: "%s · Juntos En Casa",
+    default: `${siteConfig.name} ${siteConfig.year}`,
+    template: `%s · ${siteConfig.name}`,
   },
-  description:
-    "Conferencia de adolescentes y jóvenes · Iglesia Vida Sobrenatural",
+  description: siteConfig.description,
+};
+
+export const viewport: Viewport = {
+  colorScheme: "only light",
 };
 
 export default function RootLayout({
@@ -29,11 +31,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className={`${geistSans.className} flex min-h-full flex-col`}>
+    <html lang="es" className="h-full antialiased">
+      <body className="flex min-h-full flex-col font-sans">
         <TooltipProvider>
           {children}
           <Toaster />

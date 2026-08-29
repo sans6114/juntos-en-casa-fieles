@@ -1,6 +1,7 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo } from 'react';
+
 import {
   Bar,
   BarChart,
@@ -9,23 +10,30 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { AgeRangeKey } from "@/lib/data/inscripciones"
+} from 'recharts';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { AgeRangeKeys } from '@/lib/data/inscripciones';
 
 type AgeRangesChartProps = {
-  data: Record<AgeRangeKey, number>
+  data: Record<AgeRangeKeys, number>
 }
 
-const labels: Record<AgeRangeKey, string> = {
-  "12-18": "12 - 18",
-  "18-28": "18 - 28",
-  "+28": "+28",
+const labels: Record<AgeRangeKeys, string> = {
+  [AgeRangeKeys.adolescentes]: "12 - 18",
+  [AgeRangeKeys.jovenes]: "18 - 28",
+  [AgeRangeKeys.masDe28]: "+28",
 }
 
 export function AgeRangesChart({ data }: AgeRangesChartProps) {
   const chartData = useMemo(() => {
-    return (Object.keys(data) as AgeRangeKey[]).map((key) => ({
+    return (Object.keys(data) as AgeRangeKeys[]).map((key) => ({
       rango: labels[key],
       cantidad: data[key],
     }))

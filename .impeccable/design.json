@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-21T00:34:44Z",
+  "title": "Design System: Juntos En Casa 2026 (Landing pública)",
+  "extensions": {
+    "colorMeta": {
+      "fuego-naranja": {
+        "role": "primary",
+        "displayName": "Fuego Naranja",
+        "canonical": "#ff5a00"
+      },
+      "fuego-verde": {
+        "role": "secondary",
+        "displayName": "Fuego Verde",
+        "canonical": "#c0f700"
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Cayento", "purpose": "Momentos declarativos: frases del hero, titulares grandes." },
+      "label": { "displayName": "Helvetica Neue", "purpose": "Texto de lectura y etiquetas." },
+      "condensed": { "displayName": "Helvetica Neue Condensed", "purpose": "Contextos numéricos y ticker ajustados." }
+    }
+  },
+  "components": [],
+  "narrative": {
+    "overview": "Este archivo documenta deliberadamente poco. La implementación visual previa de (external) (fondo --jec-ink casi negro, formas sin redondeo, cero sombras) la produjo un pase de IA anterior que no distinguió identidad de marca real de decisión arbitraria — por eso no quedó documentada como doctrina, y quedó abierta a reemplazo. Esa pregunta ya está resuelta: ver \"Dirección visual — Papel encendido (decidida)\" más abajo. Lo que sigue en el resto de este archivo es lo que el equipo confirmó como identidad real de JEC — la parte que la dirección visual respeta y no reemplaza.\n\nDirección visual — Papel encendido (decidida). Tres direcciones se construyeron sobre el mismo contenido y se compararon; el equipo eligió B — \"Papel encendido\": campo hueso (--jec-bone) dominante en vez de tinta oscura, tinta negra (--jec-ink) como texto y estructura, las dos brasas de marca (naranja/verde) entrando como bloque de color — nunca como color de texto de cuerpo —, radio de 6px, reglas estructurales de 3px en vez de sombras. color-scheme pasa de dark only a light only, alineado con el punto \"Do\" de modo claro forzado más abajo.\n\nImplementada en el change landing-tokens-b vía tres clases de campo (campo-papel / campo-tinta / campo-fuego) que reescriben un mismo set de tokens semánticos (--sup, --dato, --suave, --linea, --acento, --regla, --foco, --cta-bg, --cta-fg), de forma que cualquier primitivo colocado en un campo hereda su contraste correcto sin lógica condicional por componente. Contrastes objetivo verificados: CTA 17.25:1 en los tres campos, foco 17.25:1 sobre claro / 15.54:1 sobre oscuro, eyebrow 6.31:1.\n\nEsto reemplaza — no complementa — el fondo oscuro, las formas sin redondeo y la ausencia de sombras que el \"Don't\" de abajo marcaba como no confirmados. Esa doctrina anterior queda cerrada.",
+    "keyCharacteristics": [
+      "Dualidad de fuego en dos colores: naranja y verde.",
+      "Fueguín como mascota/personaje central del evento.",
+      "El ancla como símbolo de marca disponible (sin regla de uso todavía).",
+      "La historia de apertura se cuenta con una secuencia animada de frases (GSAP), no con una imagen estática.",
+      "Tono enérgico y juvenil en motion, copy y ritmo."
+    ],
+    "rules": [
+      { "name": "La Regla de las Dos Brasas", "body": "La paleta de JEC son exactamente dos colores — naranja y verde — y ambos existen porque vienen del fuego. No sumar un tercer acento sin confirmarlo primero como identidad de marca.", "section": "colors" }
+    ],
+    "dos": [
+      "Do usar Cayento para momentos display/titulares, Helvetica Neue para label y texto de lectura, Helvetica Neue Condensed para contextos numéricos/ticker.",
+      "Do construir la paleta desde naranja (#ff5a00) y verde (#c0f700) — los dos colores de marca confirmados.",
+      "Do dar a Fueguín protagonismo como mascota del evento.",
+      "Do mantener el tono enérgico y juvenil — en motion, copy y ritmo, no corporativo ni solemne.",
+      "Do contar momentos clave de apertura con secuencias de frases animadas en vez de una imagen estática sola."
+    ],
+    "donts": [
+      "Don't reintroducir el fondo oscuro (--jec-ink como base), las formas sin redondeo o la ausencia de sombras del pase de IA anterior — esa pregunta ya está resuelta.",
+      "Don't sumar un tercer color de acento sin confirmarlo primero.",
+      "Don't asumir que el nombre del token CSS --jec-amber describe el color real — hoy contiene el verde de marca confirmado (#c0f700), no ámbar."
+    ]
+  }
+}

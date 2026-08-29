@@ -1,20 +1,42 @@
-import type { Metadata } from "next";
-import { jecAssets } from "@/lib/jec-assets";
+import type { Metadata } from 'next';
 
-const fallbackUrl = "http://localhost:3000";
+import { jecAssets } from '@/lib/jec-assets';
+
+/**
+ * Absolute origin used for canonicals, `metadataBase` and OG image URLs.
+ *
+ * Only ever read while rendering metadata on the server, so the Vercel system
+ * env vars are readable here. They matter: without them a deploy that forgets
+ * `NEXT_PUBLIC_SITE_URL` would publish `http://localhost:3000` canonicals and
+ * OG images, which no crawler or social scraper can fetch.
+ */
+function resolveSiteUrl() {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL;
+  if (explicit) return explicit.replace(/\/$/, "");
+
+  const production = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (production) return `https://${production}`;
+
+  const preview = process.env.VERCEL_URL;
+  if (preview) return `https://${preview}`;
+
+  return "http://localhost:3000";
+}
 
 export const siteConfig = {
   name: "Juntos En Casa",
   shortName: "JEC",
   year: 2026,
-  tagline: "Conferencia de adolescentes y jóvenes",
+  /** Nombre de la edición 2026, el que aparece en toda la pieza gráfica. */
+  edition: "Fieles",
+  tagline: "Conferencia cristiana de adolescentes y jóvenes",
   description:
-    "Únete a nuestra conferencia cristiana de jóvenes y adolescentes: adoración, palabra, talleres y unidad. Iglesia Vida Sobrenatural · La Plata.",
+    "Sé parte de Fieles, la conferencia cristiana de adolescentes y jóvenes: 18, 19 y 20 de septiembre de 2026 en La Plata. Iglesia Vida Sobrenatural.",
   locale: "es_AR",
-  url: process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || fallbackUrl,
-  org: "Iglesia Vida Sobrenatural",
+  url: resolveSiteUrl(),
+  org: "Iglesia cristiana Vida Sobrenatural",
   city: "La Plata, Buenos Aires",
-  ogImage: jecAssets.background.hero,
+  ogImage: jecAssets.og.default,
   twitterHandle: undefined as string | undefined,
   /** Inicio del evento: primer día de 3 (18, 19 y 20 de septiembre 2026). */
   eventStartsAt: "2026-09-18T19:00:00-03:00",
@@ -53,10 +75,22 @@ export function createPageMetadata({
     : `${siteConfig.name} ${siteConfig.year}`;
   const canonical = absoluteUrl(path);
   const ogImage = absoluteImage(image);
+  /* Solo la imagen por defecto tiene medidas conocidas. Declarar 1200x630
+   * sobre una imagen custom haría que el scraper reserve un recuadro que la
+   * imagen real no llena. */
+  const ogImageSize =
+    image === siteConfig.ogImage
+      ? { width: jecAssets.og.width, height: jecAssets.og.height, type: "image/jpeg" }
+      : {};
 
   return {
     metadataBase: new URL(siteConfig.url),
-    title: {
+    /* Una página con `title` propio devuelve un string y deja que el template
+     * del layout le agregue el sufijo, que es lo que hace `pageTitle` a mano
+     * para OG/Twitter. Devolver siempre el objeto `{ default, template }` hacía
+     * que TODAS las rutas públicas titularan "Juntos En Casa 2026": `template`
+     * solo aplica a los segmentos hijos, nunca al propio. */
+    title: title ?? {
       default: `${siteConfig.name} ${siteConfig.year}`,
       template: `%s · ${siteConfig.name}`,
     },
@@ -86,7 +120,8 @@ export function createPageMetadata({
       images: [
         {
           url: ogImage,
-          alt: `${siteConfig.name} ${siteConfig.year}`,
+          ...ogImageSize,
+          alt: `${siteConfig.name} ${siteConfig.year} · ${siteConfig.edition}`,
         },
       ],
     },

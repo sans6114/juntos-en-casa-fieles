@@ -111,7 +111,7 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
               </TableRow>
             ) : (
               pageItems.map((item) => {
-                const canOpenDetail = isAdmin || item.congregacionId === null
+                const canOpenDetail = isAdmin || item.puedeContactar
                 return (
                   <TableRow key={item.id}>
                     <TableCell className="text-base font-medium">
@@ -121,7 +121,7 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
                           className="text-amber-800 underline decoration-amber-300 underline-offset-4 hover:text-amber-950"
                         >
                           {item.nombre}
-                          {item.congregacionId === null ? (
+                          {item.puedeContactar ? (
                             <span className="ml-2 text-sm font-normal text-amber-700">
                               · contactar
                             </span>
@@ -142,7 +142,7 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
                       )}
                     </TableCell>
                     <TableCell>
-                      {item.congregacionId === null ? (
+                      {item.puedeContactar ? (
                         item.contactado ? (
                           <Badge>Contactado</Badge>
                         ) : (
@@ -237,7 +237,7 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
                   {item.congregacionNombre ?? "Sin congregación"}
                 </td>
                 <td className="py-1.5 pr-2">
-                  {item.congregacionId === null
+                  {item.puedeContactar
                     ? item.contactado
                       ? "Contactado"
                       : "Pendiente"

@@ -1,8 +1,12 @@
+import type { ReactNode } from "react"
+
 import { cn } from "@/lib/utils"
 
 type SectionHeadingProps = {
   eyebrow?: string
-  title: string
+  /* `ReactNode` y no `string` para que el título pueda traer `<BrandName>`
+   * cuando menciona el nombre de la conferencia. */
+  title: ReactNode
   className?: string
   align?: "left" | "center"
   as?: "h2" | "h3"
@@ -23,11 +27,11 @@ export function SectionHeading({
       )}
     >
       {eyebrow ? (
-        <p className="jec-label mb-3 text-xs font-bold uppercase tracking-[0.28em] text-[var(--jec-amber)] md:mb-4 md:text-sm">
+        <p className="jec-label jec-eyebrow mb-3 text-xs font-bold uppercase tracking-[0.28em] md:mb-4 md:text-sm">
           {eyebrow}
         </p>
       ) : null}
-      <TitleTag className="jec-label text-3xl font-extrabold tracking-tight text-[var(--jec-bone)] md:text-4xl lg:text-5xl">
+      <TitleTag className="jec-label text-3xl font-extrabold tracking-tight text-[var(--dato)] md:text-4xl lg:text-5xl">
         {title}
       </TitleTag>
     </header>
