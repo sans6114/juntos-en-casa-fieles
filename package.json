@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "migrar:contenidos": "npx tsx prisma/scripts/migrar-contenidos-iniciales.ts",
     "postinstall": "DATABASE_URL=${DATABASE_URL:-postgresql://placeholder:placeholder@localhost:5432/placeholder} prisma generate || true"
   },
   "dependencies": {

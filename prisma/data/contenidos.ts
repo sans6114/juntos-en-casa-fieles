@@ -29,6 +29,14 @@ export type ContenidoSeed = {
   imagenCover?: boolean
   imagenAtenuada?: boolean
   publicado?: boolean
+  /**
+   * Override opcional de `createdAt` (por defecto `now()` en el schema). Lo
+   * usa `prisma/scripts/migrar-contenidos-iniciales.ts` para escalonar las
+   * fechas de los seis items rescatados y preservar su orden original una
+   * vez publicados, ya que `orderBy` en las lecturas públicas es
+   * `createdAt: "desc"` (D16).
+   */
+  createdAt?: Date
 }
 
 export const contenidosSeed: ContenidoSeed[] = []
