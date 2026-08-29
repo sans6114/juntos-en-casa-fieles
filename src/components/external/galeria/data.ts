@@ -1,3 +1,5 @@
+import { jecAssets } from "@/lib/jec-assets"
+
 export type GaleriaFoto = {
   id: string
   /**
@@ -11,20 +13,44 @@ export type GaleriaFoto = {
   span?: "wide"
 }
 
-/**
- * Photos from the previous edition.
- *
- * There are no event photos in `public/jec/` yet, so every entry is intentionally
- * srcless: the grid keeps its shape and each tile says so in its rendered text.
- * Drop the files under `public/jec/galeria/` and fill `src` + `alt` one by one.
- */
+/** Photos from the previous edition. */
 export const galeriaEdition = 2025
 
 export const galeriaFotos: readonly GaleriaFoto[] = [
-  { id: "foto-1", span: "wide" },
-  { id: "foto-2" },
-  { id: "foto-3" },
-  { id: "foto-4" },
-  { id: "foto-5" },
-  { id: "foto-6", span: "wide" },
+  {
+    id: "foto-1",
+    span: "wide",
+    src: jecAssets.galeria.foto1,
+    alt: "Un grupo de chicos posando y sonriendo entre las butacas, con las pantallas del escenario detrás.",
+  },
+  {
+    id: "foto-2",
+    src: jecAssets.galeria.foto2,
+    alt: "Cuatro jóvenes del staff sonriendo juntos frente al escenario.",
+  },
+  {
+    id: "foto-3",
+    src: jecAssets.galeria.foto3,
+    alt: "Una chica con la mano en alto durante un momento de adoración, con luces cálidas de fondo.",
+  },
+  {
+    id: "foto-4",
+    src: jecAssets.galeria.foto4,
+    alt: "El público con las manos levantadas durante la adoración, bajo las luces del escenario.",
+  },
+  {
+    id: "foto-5",
+    src: jecAssets.galeria.foto5,
+    alt: "Tres chicos abrazados y sonriendo, con el escenario iluminado detrás.",
+  },
+  {
+    id: "foto-6",
+    span: "wide",
+    src: jecAssets.galeria.foto6,
+    alt: "Una chica con los ojos cerrados en un momento de oración, entre el resto del público.",
+  },
 ]
+
+/** Link al álbum completo de fotos en Google Drive. */
+export const galeriaDriveUrl =
+  "https://drive.google.com/drive/folders/1aEqHbjqBu_nNQZgHI0tvyZoHfIYWD5c8?usp=sharing"

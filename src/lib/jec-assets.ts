@@ -57,11 +57,11 @@ export const jecAssets = {
     height: 630,
   },
   galeria: {
-    foto1: "/jec/galeria/foto-1.jpg",
-    foto2: "/jec/galeria/foto-2.jpg",
-    foto3: "/jec/galeria/foto-3.jpg",
-    foto4: "/jec/galeria/foto-4.jpg",
-    foto5: "/jec/galeria/foto-5.jpg",
-    foto6: "/jec/galeria/foto-6.jpg",
+    foto1: "/jec/galeria/foto-1.webp",
+    foto2: "/jec/galeria/foto-2.webp",
+    foto3: "/jec/galeria/foto-3.webp",
+    foto4: "/jec/galeria/foto-4.webp",
+    foto5: "/jec/galeria/foto-5.webp",
+    foto6: "/jec/galeria/foto-6.webp",
   },
 } as const;
