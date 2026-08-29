@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 
 import {
   findProducto,
+  PRODUCTOS_RESUELTO,
   productos,
   ProductoCard,
   ProductoPieza,
@@ -25,6 +26,7 @@ type ProductoPageProps = {
 }
 
 export function generateStaticParams() {
+  if (!PRODUCTOS_RESUELTO) return []
   return productos.map((item) => ({ slug: item.slug }))
 }
 
@@ -42,6 +44,8 @@ export async function generateMetadata({ params }: ProductoPageProps): Promise<M
 }
 
 export default async function ProductoPage({ params }: ProductoPageProps) {
+  if (!PRODUCTOS_RESUELTO) notFound()
+
   const { slug } = await params
   const item = findProducto(slug)
 

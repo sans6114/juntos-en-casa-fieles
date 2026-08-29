@@ -39,6 +39,14 @@ export type ProductoItem = {
   foto?: string
 }
 
+/**
+ * Flag manual: el catálogo de productos abajo es placeholder (precio, talles y
+ * material sin confirmar). En false, /productos muestra el estado "Próximamente"
+ * en vez del grid. Pasar a true (o quitar la bandera) cuando el usuario confirme
+ * los productos reales del evento.
+ */
+export const PRODUCTOS_RESUELTO = false
+
 // TODO(productos-exhibicion): confirmar con el usuario — precio, talles y
 // material son placeholders; description y detalle son copy estructural a
 // revisar antes de publicar.
