@@ -1,6 +1,9 @@
 "use client";
 
-import { useRef, useState } from 'react';
+import {
+  useRef,
+  useState,
+} from 'react';
 
 import gsap from 'gsap';
 import Image from 'next/image';
@@ -124,7 +127,7 @@ export function HeroSequence({ onIntroDone }: { onIntroDone: () => void }) {
             width={320}
             height={320}
             priority
-            className="h-auto w-[min(70vw,18rem)] md:h-[min(44dvh,22rem)] md:w-auto"
+            className="h-auto w-[min(70vw,13rem)] md:h-[min(44dvh,30rem)] md:w-auto"
           />
           <div className="mt-10 flex w-full max-w-xs flex-col items-center gap-3 md:mt-8 md:w-80 md:max-w-none">
             <span

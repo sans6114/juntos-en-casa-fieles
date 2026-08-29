@@ -31,10 +31,9 @@ export async function obtenerInscripciones(): Promise<InscripcionDTO[]> {
       telefono: ins.telefono,
       edad: ins.edad,
       congregacionId: ins.congregacionId,
-      // Sin FK cae al texto libre legacy, para que una fila anterior a la
-      // normalizacion no aparezca como "Sin congregacion".
-      congregacionNombre: ins.congregacion?.nombre || ins.congregacionTexto || null,
+      congregacionNombre: ins.congregacion?.nombre ?? null,
       congregacionEstado: ins.congregacion?.estado ?? null,
+      sinCongregacion: ins.sinCongregacion,
       puedeContactar: esCandidatoPastoral(ins),
       createdAt: ins.createdAt.toISOString(),
       contactado: ins.contacto?.contactado ?? false,

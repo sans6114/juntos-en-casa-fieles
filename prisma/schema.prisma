@@ -64,14 +64,11 @@ model Inscripcion {
   edad              Int
   congregacionId    String?
   congregacion      Congregacion? @relation(fields: [congregacionId], references: [id])
-  /// Congregacion escrita a mano en filas anteriores a la normalizacion. Ya no
-  /// se escribe en altas nuevas (ver `resolverCongregacionId` en
-  /// `crear-inscripcion.ts`, que siempre asigna `congregacionId`); se
-  /// conserva solo como fallback de lectura para las filas legacy.
-  congregacionTexto String?
-  /// Se marca `true` unicamente cuando un admin rechaza la Congregacion a la
-  /// que apuntaba esta inscripcion (ver `rechazar-congregacion.ts`). Invariante:
-  /// `sinCongregacion = true` implica `congregacionId = null`.
+  /// Se marca `true` unicamente cuando el visitante declara que no tiene
+  /// congregacion al inscribirse (checkbox "Soy nuevo", ver
+  /// `crear-inscripcion.ts`). Rechazar una congregacion NO lo escribe: eso
+  /// invalida un nombre cargado, no niega que la persona tenga iglesia.
+  /// Invariante: `sinCongregacion = true` implica `congregacionId = null`.
   sinCongregacion   Boolean       @default(false)
   contacto          Contacto?
   createdAt         DateTime      @default(now())
