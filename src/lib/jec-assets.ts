@@ -7,6 +7,18 @@ export const jecAssets = {
      *  para que un telefono no baje 314 KB pudiendo bajar 119. */
     pisadaSrcSet:
       "/jec/background/background-960.webp 960w, /jec/background/background-1280.webp 1280w, /jec/background/background.webp 1920w",
+    /** El mismo fondo en AVIF, generado DESDE `background.webp` (1920) con
+     *  `resize(lanczos3)` y `quality: 72` — nunca desde los WebP chicos, que ya
+     *  son una encodeada con perdida y apilarian una segunda encima.
+     *
+     *  No es solo mas liviano: es mas FIEL. Midiendo el error medio por canal
+     *  contra el master de 1920 reescalado, el WebP de 960 que se servia daba
+     *  4,13 y este AVIF da 1,95, a 40% del peso (187 KB -> 75 KB). El WebP
+     *  chico estaba mal encodeado, no es que AVIF degrade menos de lo esperado.
+     *
+     *  Se queda como `<source>`: el WebP sigue siendo el fallback del `<img>`. */
+    pisadaAvifSrcSet:
+      "/jec/background/background-960.avif 960w, /jec/background/background-1280.avif 1280w, /jec/background/background.avif 1920w",
   },
   logos: {
     jecWhiteSvg: "/jec/logos/logoblanco.svg",
