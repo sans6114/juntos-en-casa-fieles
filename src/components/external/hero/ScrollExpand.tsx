@@ -39,7 +39,7 @@ export interface ScrollExpandProps {
   mediaSrcSet?: string;
   mediaSizes?: string;
   title?: string;
-  scrollHint?: ReactNode;
+  scrollHint?: string;
   startWidth?: number;
   startHeight?: number;
   startRadius?: number;
