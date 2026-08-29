@@ -4,7 +4,7 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import congregacionesSeed from '../data/congregaciones.json'
 import { normalizarNombreCongregacion } from '../../src/lib/congregacion/normalizar'
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+const adapter = new PrismaPg({ connectionString: process.env.NEON_DATABASE_URL || process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
