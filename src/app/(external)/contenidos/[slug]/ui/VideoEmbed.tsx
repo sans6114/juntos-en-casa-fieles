@@ -1,8 +1,9 @@
-import { ContenidoThumb, type ContenidoItem } from "@/components/external/contenidos"
+import { ContenidoThumb } from "@/components/external/contenidos"
 import { PlaceholderTag } from "@/components/external/shared"
+import type { ContenidoPublicoDTO } from "@/interfaces/contenido"
 
 type VideoEmbedProps = {
-  item: ContenidoItem
+  item: ContenidoPublicoDTO
 }
 
 /**

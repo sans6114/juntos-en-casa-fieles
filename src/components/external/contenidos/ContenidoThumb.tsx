@@ -1,11 +1,14 @@
 import Image from "next/image"
 import { ImagesIcon, PlayIcon } from "@/components/external/shared"
+import { kindLabel, type ContenidoVista } from "@/interfaces/contenido"
 import { cn } from "@/lib/utils"
 
-import { kindLabel, type ContenidoItem } from "./data"
-
 type ContenidoThumbProps = {
-  item: ContenidoItem
+  /**
+   * Solo lo que la card grafica necesita — el mismo recorte que usan tanto el
+   * catálogo público como la vista previa en vivo del admin (design §B6).
+   */
+  item: Pick<ContenidoVista, "thumb" | "kind" | "durationLabel" | "placasCount">
   /** Diameter of the play badge; the related-content strip uses a smaller one. */
   playSize?: "sm" | "md"
   className?: string
@@ -17,7 +20,7 @@ type ContenidoThumbProps = {
  */
 export function ContenidoThumb({ item, playSize = "md", className }: ContenidoThumbProps) {
   const { thumb, kind, durationLabel, placasCount } = item
-  const isPlayable = kind !== "recurso"
+  const isPlayable = kind !== "recursos"
 
   return (
     <div
@@ -40,7 +43,7 @@ export function ContenidoThumb({ item, playSize = "md", className }: ContenidoTh
         />
       ) : null}
 
-      {kind === "recurso" && placasCount ? (
+      {kind === "recursos" && placasCount ? (
         <div className="relative flex flex-col items-center gap-2 text-[var(--dato)]">
           <ImagesIcon size={48} strokeWidth={1.6} />
           <p className="jec-mono text-[13px] font-bold uppercase tracking-[0.28em]">

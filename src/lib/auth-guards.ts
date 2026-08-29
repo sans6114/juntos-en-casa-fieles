@@ -29,4 +29,23 @@ export async function requireAdmin(): Promise<SessionUser> {
   }
   return user
 }
-
+
+/**
+ * Misma regla de autorización que `requireAdmin()` (`isAdminRole`), otra
+ * política de fallo: acá se TIRA un error en vez de llamar `redirect()`.
+ *
+ * Existe porque `redirect()` lanza `NEXT_REDIRECT`, y ese throw solo se
+ * convierte en navegación cuando sube hasta el framework. Dentro de un
+ * callback de terceros —`onBeforeGenerateToken` de `handleUpload`, por
+ * ejemplo— queda silenciado y termina en un 400 genérico. En una ruta que
+ * responde JSON, además, redirigir no es la semántica correcta.
+ *
+ * Usar en rutas `app/api`. Para pages y server actions va `requireAdmin()`.
+ */
+export async function requireAdminApi(): Promise<SessionUser> {
+  const user = await getSessionUser()
+  if (!user || !isAdminRole(user.rol)) {
+    throw new Error("No autorizado")
+  }
+  return user
+}

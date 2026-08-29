@@ -46,7 +46,7 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
       <Link href="/" className="inline-flex shrink-0 items-center" aria-label="Inicio">
         <Image
           src={logoSrc[logo]}
-          alt="Juntos en Casa"
+          alt="Juntos En Casa"
           width={40}
           height={40}
           className="h-10 w-auto md:h-14"
@@ -87,7 +87,7 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
         <div className="flex items-center justify-between gap-4 px-6 pt-6">
           <Image
             src={jecAssets.logos.wordmarkWhite}
-            alt="Juntos en Casa"
+            alt="Juntos En Casa"
             width={40}
             height={40}
             className="h-10 w-auto"

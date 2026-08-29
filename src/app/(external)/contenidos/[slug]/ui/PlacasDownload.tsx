@@ -1,8 +1,8 @@
-import type { ContenidoItem } from "@/components/external/contenidos"
 import { CtaButton, DownloadIcon, ImagesIcon, PlaceholderTag } from "@/components/external/shared"
+import type { ContenidoPublicoDTO } from "@/interfaces/contenido"
 
 type PlacasDownloadProps = {
-  item: ContenidoItem
+  item: ContenidoPublicoDTO
 }
 
 /**

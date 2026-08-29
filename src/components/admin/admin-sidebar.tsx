@@ -7,6 +7,7 @@ import { logoutAdmin } from "@/actions"
 import {
   Church,
   ClipboardList,
+  FileText,
   LayoutDashboard,
   LogOut,
   MessageCircle,
@@ -222,6 +223,18 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                   >
                     <Users />
                     <span>Usuarios</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={pathname.startsWith(ADMIN_PATHS.contenidos)}
+                    tooltip="Contenidos"
+                    render={
+                      <Link href={ADMIN_PATHS.contenidos} onClick={closeSidebar} />
+                    }
+                  >
+                    <FileText />
+                    <span>Contenidos</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

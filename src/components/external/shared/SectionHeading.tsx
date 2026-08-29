@@ -1,8 +1,12 @@
+import type { ReactNode } from "react"
+
 import { cn } from "@/lib/utils"
 
 type SectionHeadingProps = {
   eyebrow?: string
-  title: string
+  /* `ReactNode` y no `string` para que el título pueda traer `<BrandName>`
+   * cuando menciona el nombre de la conferencia. */
+  title: ReactNode
   className?: string
   align?: "left" | "center"
   as?: "h2" | "h3"

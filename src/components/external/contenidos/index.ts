@@ -1,7 +1,6 @@
 export { ContenidoCard } from "./ContenidoCard"
+export { ContenidoCardBody } from "./ContenidoCardBody"
 export { ContenidosFiltros } from "./ContenidosFiltros"
 export { ContenidosGrid } from "./ContenidosGrid"
 export { ContenidosIntro } from "./ContenidosIntro"
 export { ContenidoThumb } from "./ContenidoThumb"
-export { contenidos, findContenido, kindLabel, relatedContenidos } from "./data"
-export type { ContenidoItem, ContenidoKind, ContenidoThumb as ContenidoThumbData } from "./data"

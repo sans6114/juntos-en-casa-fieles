@@ -42,6 +42,7 @@ El seed crea el usuario **ADMIN** a partir de `ADMIN_EMAIL` / `ADMIN_PASSWORD`. 
 | `ADMIN_PASSWORD` | Password del admin (solo para el seed; se guarda hasheada) |
 | `AUTH_SECRET` | Secreto de Auth.js para firmar la sesión JWT |
 | `NEXT_PUBLIC_SITE_URL` | URL pública del sitio |
+| `BLOB_READ_WRITE_TOKEN` | Token de Vercel Blob para subir las placas (PDF) de RECURSOS |
 
 ## Roles
 

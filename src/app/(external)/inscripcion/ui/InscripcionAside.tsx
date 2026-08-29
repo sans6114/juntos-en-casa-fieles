@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { BrandName } from "@/components/external/shared"
 import { jecAssets } from "@/lib/jec-assets"
 import { siteConfig } from "@/lib/seo/site"
 
@@ -45,7 +46,7 @@ export function InscripcionAside() {
     <div className="flex min-w-0 flex-col gap-11">
       <div>
         <p className="jec-label jec-eyebrow mb-3 text-xs font-bold uppercase tracking-[0.28em] md:mb-4 md:text-sm">
-          Inscripción · JEC {siteConfig.year}
+          Inscripción · <BrandName>{siteConfig.name}</BrandName> {siteConfig.year}
         </p>
         <h1 className="jec-display text-pretty text-4xl leading-[0.94] tracking-tight sm:text-5xl lg:text-7xl">
           Sumate a la conferencia
