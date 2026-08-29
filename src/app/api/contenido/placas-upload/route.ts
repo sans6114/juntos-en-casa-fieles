@@ -23,8 +23,7 @@
  */
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client"
 import { NextResponse } from "next/server"
-import { getSessionUser } from "@/lib/auth-guards"
-import { isAdminRole } from "@/lib/admin-access"
+import { requireAdminApi } from "@/lib/auth-guards"
 
 export async function POST(request: Request): Promise<NextResponse> {
   const body = (await request.json()) as HandleUploadBody
@@ -34,13 +33,10 @@ export async function POST(request: Request): Promise<NextResponse> {
       body,
       request,
       onBeforeGenerateToken: async () => {
-        // NUNCA requireAdmin(): auth-guards.ts:20 y :28 llaman redirect(),
-        // que TIRA NEXT_REDIRECT. Dentro de este callback ese throw queda
-        // silenciado y termina en un 400 genérico, nunca en un redirect.
-        const user = await getSessionUser()
-        if (!user || !isAdminRole(user.rol)) {
-          throw new Error("No autorizado")
-        }
+        // NUNCA requireAdmin(): llama redirect(), que TIRA NEXT_REDIRECT, y
+        // dentro de este callback ese throw queda silenciado y termina en un
+        // 400 genérico. `requireAdminApi` aplica la misma regla tirando error.
+        await requireAdminApi()
 
         return {
           allowedContentTypes: ["application/pdf"],
