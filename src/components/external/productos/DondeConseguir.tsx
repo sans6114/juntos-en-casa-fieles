@@ -8,7 +8,7 @@ export function DondeConseguir() {
           <SectionHeading eyebrow="Cómo conseguirlas" title="Se venden solo en el stand" />
           <p className="mt-5 text-pretty text-base font-medium leading-relaxed md:text-lg">
             No hay venta online: los productos se consiguen únicamente en el stand de{" "}
-            <BrandName>Juntos En Casa</BrandName>, durante los tres días de la conferencia.
+            <BrandName className="!text-white">Juntos En Casa</BrandName>, durante los tres días de la conferencia.
           </p>
           <p className="jec-mono mt-4 text-sm font-bold uppercase tracking-[0.14em]">
             18, 19 y 20 de septiembre · La Plata

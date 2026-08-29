@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { cayento, helveticaNeue, helveticaNeueCondensed } from "@/config/fonts";
 import { createPageMetadata, siteConfig } from "@/lib/seo/site";
-import { jecAssets } from "@/lib/jec-assets";
 
+/* Sin `icons` explicito: favicon.ico / icon.png / apple-icon.png en src/app/
+ * son file-convention de Next y se sirven solos. Un `icons.icon` manual aca
+ * los pisaria. */
 export const metadata: Metadata = {
   ...createPageMetadata({ path: "/" }),
-  icons: {
-    icon: jecAssets.favicon,
-  },
   keywords: [
     "Juntos En Casa",
     "conferencia",

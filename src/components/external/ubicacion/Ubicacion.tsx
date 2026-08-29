@@ -11,7 +11,7 @@ export function Ubicacion() {
     <section
       id="ubicacion"
       aria-label="Ubicación"
-      className="campo-papel jec-anchor px-6 py-20 md:px-10 md:py-28 lg:px-16"
+      className="campo-tinta jec-anchor px-6 py-20 md:px-10 md:py-28 lg:px-16"
     >
       <div className="mx-auto max-w-6xl">
         <SectionHeading eyebrow="Encontranos" title="Ubicación" className="mb-12 md:mb-16" />

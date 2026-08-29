@@ -25,7 +25,7 @@ export function Frases() {
     <section
       id="frases"
       aria-label="Frases"
-      className="campo-papel flex h-dvh w-full items-center justify-center px-6 md:px-10 lg:px-16"
+      className="campo-papel flex h-dvh w-full items-center justify-center overflow-hidden px-6 md:px-10 lg:px-16"
     >
       <div className="relative flex h-[80vh] w-[80vw] max-w-3xl flex-col items-center justify-center gap-8 rounded-[2rem] border-4 border-[var(--acento)] bg-[var(--jec-ember)] px-6 text-center sm:px-12">
         <div className="relative w-full flex-1">
@@ -97,12 +97,12 @@ export function Frases() {
           * hacia afuera (valores explícitos, no fracciones de Tailwind), así
           * queda mitad adentro y mitad afuera del borde. */}
         <Image
-          src={jecAssets.frases.esquina}
+          src={jecAssets.personaje.señalando}
           alt=""
           aria-hidden
           width={672}
           height={673}
-          className="pointer-events-none absolute bottom-0 right-0 z-20 w-20 translate-x-[50%] translate-y-[50%] sm:w-32"
+          className="pointer-events-none absolute bottom-20 right-4 z-20 w-48 translate-x-[50%] translate-y-[50%] sm:w-80"
         />
       </div>
     </section>

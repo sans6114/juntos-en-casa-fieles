@@ -26,4 +26,7 @@ export const navItems: readonly NavItem[] = [
 ]
 
 /** Sin URLs reales en el repo todavía; el footer de landing-home-secciones no renderiza nada mientras esté vacío. */
-export const socialLinks: readonly SocialLink[] = []
+export const socialLinks: readonly SocialLink[] = [
+  { href: "https://www.instagram.com/juntosencasa.ivs/?hl=es", label: "Instagram", handle: "juntosencasa.ivs" },
+  { href: "https://www.youtube.com/@juntosencasaivs", label: "YouTube", handle: "@juntosencasaivs" },
+]

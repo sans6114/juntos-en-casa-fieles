@@ -49,7 +49,7 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
           alt="Juntos En Casa"
           width={40}
           height={40}
-          className="h-10 w-auto md:h-14"
+          className="h-12 w-auto md:h-16"
         />
       </Link>
 

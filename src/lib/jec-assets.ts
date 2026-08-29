@@ -1,7 +1,6 @@
 /** Paths estáticos bajo `public/jec/` (año 2025 → prototipo 2026). */
 
 export const jecAssets = {
-  favicon: "/jec/favicon.svg",
   background: {
     pisada: "/jec/background/background.webp",
     /** Mismo fondo en tres anchos. El de 1920 es `pisada`; los otros dos existen
@@ -19,9 +18,11 @@ export const jecAssets = {
   },
   personaje: {
     llama: "/jec/personaje/llama.svg",
-    orando: "/jec/personaje/fuegoorando.svg",
-    festejando: "/jec/personaje/fuegofestejando.png",
-    apuntando: "/jec/personaje/fuegoapuntandoizq.png",
+    alegre: "/jec/personaje/fueguin-alegre.svg",
+    handsUp: "/jec/personaje/fueguin-hands-up.svg",
+    saludo: "/jec/personaje/fueguin-saludo.svg",
+    señalando: "/jec/personaje/fueguin-señalando.svg",
+    sorpresa: "/jec/personaje/fueguin-sorpresa.svg",
   },
   hero: {
     finale: "/jec/hero/hero.png",
@@ -31,6 +32,9 @@ export const jecAssets = {
     wordmark: "/jec/hero/01.svg",
     cinta: "/jec/hero/cinta-frases.webp",
     logo: "/jec/hero/logo-juntos-en-casa.webp",
+    /** Pieza definitiva del finale: ancla + "Anclados en Jesus" + fecha, ya
+     *  compuesta y con transparencia. Reemplaza al wordmark y al ancla sueltos. */
+    piezaFinale: "/jec/hero/logo-hero.webp",
   },
   iconos: {
     pisada: "/jec/iconos/pisada.png",
@@ -59,7 +63,7 @@ export const jecAssets = {
   galeria: {
     foto1: "/jec/galeria/foto-1.webp",
     foto2: "/jec/galeria/foto-2.webp",
-    foto3: "/jec/galeria/foto-3.webp",
+    foto3: "/jec/galeria/foto-3-v2.webp",
     foto4: "/jec/galeria/foto-4.webp",
     foto5: "/jec/galeria/foto-5.webp",
     foto6: "/jec/galeria/foto-6.webp",
