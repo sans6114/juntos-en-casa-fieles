@@ -97,7 +97,7 @@ export function InscripcionAside() {
       </div>
 
       <Image
-        src={jecAssets.personaje.apuntando}
+        src={jecAssets.personaje.saludo}
         alt=""
         width={200}
         height={267}
