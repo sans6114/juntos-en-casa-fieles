@@ -2,6 +2,7 @@ export type InscripcionMetricRow = {
   edad: number
   congregacionId: string | null
   congregacionNombre: string | null
+  congregacionEstado: "PENDIENTE" | "APROBADA" | null
 }
 
 /** Total de inscriptos del evento anterior (dato histórico real). */
@@ -36,7 +37,7 @@ export function getInscripcionesMetrics(data: InscripcionMetricRow[]) {
 
   const congregacionMap = new Map<
     string,
-    { id: string | null; nombre: string; total: number }
+    { id: string | null; nombre: string; total: number; estado: "PENDIENTE" | "APROBADA" | null }
   >()
 
   let sinCongregacion = 0
@@ -47,6 +48,9 @@ export function getInscripcionesMetrics(data: InscripcionMetricRow[]) {
       continue
     }
 
+    // Agrupar primero por FK (fuente de verdad); solo cae al string legacy de
+    // congregacionNombre para filas anteriores a la normalizacion, que no
+    // tienen FK. Esas filas legacy quedan con estado: null (no cuentan en el KPI).
     const key = item.congregacionId ?? item.congregacionNombre ?? "unknown"
     const nombre = item.congregacionNombre ?? "Sin nombre"
     const existing = congregacionMap.get(key)
@@ -58,6 +62,7 @@ export function getInscripcionesMetrics(data: InscripcionMetricRow[]) {
         id: item.congregacionId,
         nombre,
         total: 1,
+        estado: item.congregacionId ? item.congregacionEstado : null,
       })
     }
   }
@@ -73,7 +78,9 @@ export function getInscripcionesMetrics(data: InscripcionMetricRow[]) {
           ((total - inscripcionesEventoAnterior) / inscripcionesEventoAnterior) * 100
         )
 
-  const congregacionesActivas = porCongregacion.filter((item) => item.total > 0).length
+  // PENDIENTE y las filas legacy (estado: null) siguen renderizando como barra
+  // en el chart admin, pero no suman al KPI de congregaciones activas.
+  const congregacionesActivas = porCongregacion.filter((item) => item.estado === "APROBADA").length
 
   return {
     total,

@@ -1,15 +1,22 @@
+import { PlaceholderTag } from "@/components/external/shared"
+import type { ContenidoKind, ContenidoPublicoDTO } from "@/interfaces/contenido"
+
 import { ContenidoCard } from "./ContenidoCard"
 import { ContenidosFiltros } from "./ContenidosFiltros"
-import { contenidos, type ContenidoKind } from "./data"
 
 type ContenidosGridProps = {
   /** Active kind filter, read from the `?tipo=` search param by the page. */
   tipo?: ContenidoKind
+  /** Published items matching the active filter, already resolved by the page. */
+  items: ContenidoPublicoDTO[]
+  /**
+   * True when the whole catalog has zero published items, regardless of the
+   * active filter — distinct from a filter that simply matches nothing.
+   */
+  catalogoVacio: boolean
 }
 
-export function ContenidosGrid({ tipo }: ContenidosGridProps) {
-  const visibles = tipo ? contenidos.filter((item) => item.kind === tipo) : contenidos
-
+export function ContenidosGrid({ tipo, items, catalogoVacio }: ContenidosGridProps) {
   return (
     <section
       id="catalogo"
@@ -25,13 +32,21 @@ export function ContenidosGrid({ tipo }: ContenidosGridProps) {
         */}
         <h2 className="sr-only">Catálogo de contenidos</h2>
 
-        <ContenidosFiltros active={tipo} total={visibles.length} />
+        <ContenidosFiltros active={tipo} total={items.length} />
 
-        {visibles.length > 0 ? (
+        {items.length > 0 ? (
           <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {visibles.map((item) => (
+            {items.map((item) => (
               <ContenidoCard key={item.id} item={item} />
             ))}
+          </div>
+        ) : catalogoVacio ? (
+          <div className="mt-10 flex flex-col items-start gap-3 border-t-[3px] border-[var(--regla)] pt-8">
+            <PlaceholderTag>Próximamente...</PlaceholderTag>
+            <p className="max-w-xl text-base leading-relaxed text-[var(--suave)]">
+              Estamos subiendo las prédicas, los videos y los recursos de esta edición. Volvé en
+              unos días y vas a encontrar todo acá.
+            </p>
           </div>
         ) : (
           <p className="mt-10 text-base text-[var(--suave)]">

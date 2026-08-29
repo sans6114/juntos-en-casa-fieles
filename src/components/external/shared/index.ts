@@ -1,3 +1,4 @@
+export { BRAND_NAME, BrandName } from "./BrandName"
 export { CtaButton } from "./CtaButton"
 export type { CtaButtonProps } from "./CtaButton"
 export { Disclosure } from "./Disclosure"

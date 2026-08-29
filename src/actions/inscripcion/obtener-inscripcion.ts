@@ -3,6 +3,7 @@
 import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth-guards"
+import { esCandidatoPastoral } from "@/lib/contacto/es-candidato-pastoral"
 
 export async function obtenerInscripcionPorId(id: string) {
   const user = await requireSession()
@@ -25,8 +26,8 @@ export async function obtenerInscripcionPorId(id: string) {
     notFound()
   }
 
-  // Colaborador solo puede ver detalle de sin iglesia
-  if (user.rol === "COLABORADOR" && inscripcion.congregacionId !== null) {
+  // Colaborador solo puede ver detalle de candidatos a contacto pastoral
+  if (user.rol === "COLABORADOR" && !esCandidatoPastoral(inscripcion)) {
     notFound()
   }
 
@@ -39,7 +40,7 @@ export async function obtenerInscripcionPorId(id: string) {
     congregacionId: inscripcion.congregacionId,
     congregacionNombre: inscripcion.congregacion?.nombre ?? inscripcion.congregacionTexto ?? null,
     createdAt: inscripcion.createdAt.toISOString(),
-    puedeContactar: inscripcion.congregacionId === null,
+    puedeContactar: esCandidatoPastoral(inscripcion),
     contacto: inscripcion.contacto
       ? {
           id: inscripcion.contacto.id,

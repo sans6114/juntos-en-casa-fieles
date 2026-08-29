@@ -207,7 +207,7 @@ export function HeroFinale() {
         * principio, y con él las cuatro frases de la cinta, que sólo existen
         * como ráster. */}
       <h1 className="sr-only">
-        Juntos en casa - Fieles 2026 — conferencia de adolescentes y jóvenes, 18, 19 y 20 de
+        Juntos En Casa - Fieles 2026 — conferencia de adolescentes y jóvenes, 18, 19 y 20 de
         septiembre, {EVENT_CITY}. {jecTaglines.join(". ")}.
       </h1>
 

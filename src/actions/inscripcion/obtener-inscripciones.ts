@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth-guards"
+import { esCandidatoPastoral } from "@/lib/contacto/es-candidato-pastoral"
 import type { InscripcionDTO } from "@/interfaces/inscripcion"
 
 export async function obtenerInscripciones(): Promise<InscripcionDTO[]> {
@@ -30,9 +31,11 @@ export async function obtenerInscripciones(): Promise<InscripcionDTO[]> {
       telefono: ins.telefono,
       edad: ins.edad,
       congregacionId: ins.congregacionId,
-      // Sin FK cae al texto libre, para que una congregacion escrita a mano no
-      // aparezca como "Sin congregacion" cuando el visitante si la declaro.
+      // Sin FK cae al texto libre legacy, para que una fila anterior a la
+      // normalizacion no aparezca como "Sin congregacion".
       congregacionNombre: ins.congregacion?.nombre || ins.congregacionTexto || null,
+      congregacionEstado: ins.congregacion?.estado ?? null,
+      puedeContactar: esCandidatoPastoral(ins),
       createdAt: ins.createdAt.toISOString(),
       contactado: ins.contacto?.contactado ?? false,
       contactoUsuarioNombre: ins.contacto?.usuario.nombre ?? null,

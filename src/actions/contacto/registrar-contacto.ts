@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth-guards"
+import { esCandidatoPastoral } from "@/lib/contacto/es-candidato-pastoral"
 import { RegistrarContactoSchema, type RegistrarContactoDTO } from "@/interfaces/contacto"
 
 export async function registrarContacto(data: RegistrarContactoDTO) {
@@ -22,7 +23,7 @@ export async function registrarContacto(data: RegistrarContactoDTO) {
       return { ok: false as const, message: "Inscripción no encontrada." }
     }
 
-    if (inscripcion.congregacionId !== null) {
+    if (!esCandidatoPastoral(inscripcion)) {
       return {
         ok: false as const,
         message: "Solo se pueden contactar inscripciones sin iglesia asignada.",

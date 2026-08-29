@@ -76,7 +76,7 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
     // Solo tras un envio real, y nunca mientras la action sigue corriendo: los dos
     // destinos se excluyen entre si, asi que a lo sumo uno esta montado.
     if (!hasSubmitted.current || isPending) return
-    ;(successRef.current ?? alertRef.current)?.focus()
+      ; (successRef.current ?? alertRef.current)?.focus()
   }, [state, isPending])
 
   if (state.ok) {
@@ -113,7 +113,7 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
         </p>
       ) : null}
 
-      <Field label="Nombre" htmlFor="nombre" error={state.fieldErrors?.nombre}>
+      <Field label="Nombre y Apellido" htmlFor="nombre" error={state.fieldErrors?.nombre}>
         <input
           id="nombre"
           name="nombre"
