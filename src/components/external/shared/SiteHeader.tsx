@@ -1,11 +1,16 @@
-import type { CSSProperties } from "react"
+import type { CSSProperties } from 'react';
 
-import Image from "next/image"
-import Link from "next/link"
-import { jecAssets } from "@/lib/jec-assets"
-import { cn } from "@/lib/utils"
-import { CloseIcon, MenuIcon } from "./icons"
-import { navItems } from "./navigation"
+import Image from 'next/image';
+import Link from 'next/link';
+
+import { jecAssets } from '@/lib/jec-assets';
+import { cn } from '@/lib/utils';
+
+import {
+  CloseIcon,
+  MenuIcon,
+} from './icons';
+import { navItems } from './navigation';
 
 const navLinkClass =
   "jec-label text-xs font-bold uppercase tracking-[0.18em] text-[var(--dato)] transition-colors hover:text-[var(--acento-texto)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--foco)]"
@@ -39,7 +44,7 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
   return (
     <header
       className={cn(
-        "relative z-10 flex items-center justify-between gap-4 px-6 pt-6 md:px-10 md:pt-8",
+        "relative z-10 flex items-center justify-between gap-4 px-6 pt-6 pb-2 md:px-10 md:pt-8",
         className
       )}
     >
@@ -47,9 +52,11 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
         <Image
           src={logoSrc[logo]}
           alt="Juntos En Casa"
-          width={40}
-          height={40}
-          className="h-10 w-auto md:h-14"
+
+          width={60}
+          height={60}
+          className="h-12 w-auto origin-left scale-[2.0] md:h-14 md:scale-[1.9]"
+
         />
       </Link>
 
@@ -90,7 +97,7 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
             alt="Juntos En Casa"
             width={40}
             height={40}
-            className="h-10 w-auto"
+            className="h-10 w-auto origin-left scale-[1.8]"
           />
           <a
             href={CLOSE_HREF}

@@ -10,28 +10,28 @@ export type Congregacion = {
 
 type CongregacionComboboxProps = {
   congregaciones: Congregacion[]
-  defaultQuery?: string
-  defaultCongregacionId?: string
+  query: string
+  selectedId: string
+  onChange: (query: string, id: string) => void
 }
 
 function normalizeQuery(value: string) {
   return value
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "") // Fixed regex range to avoid syntax errors
     .toLowerCase()
     .trim()
 }
 
 export function CongregacionCombobox({
   congregaciones,
-  defaultQuery = "",
-  defaultCongregacionId = "",
+  query,
+  selectedId,
+  onChange,
 }: CongregacionComboboxProps) {
   const listboxId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const [query, setQuery] = useState(defaultQuery)
-  const [selectedId, setSelectedId] = useState(defaultCongregacionId)
   const [isOpen, setIsOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
 
@@ -47,23 +47,23 @@ export function CongregacionCombobox({
   }, [query, congregaciones, fuse])
 
   function selectCongregacion(congregacion: Congregacion) {
-    setQuery(congregacion.nombre)
-    setSelectedId(congregacion.id)
+    onChange(congregacion.nombre, congregacion.id)
     setIsOpen(false)
     setActiveIndex(-1)
     inputRef.current?.focus()
   }
 
   function handleChange(value: string) {
-    setQuery(value)
-    setIsOpen(true)
-    setActiveIndex(-1)
+    let nextId = selectedId
     if (selectedId) {
-      const selected = congregaciones.find((congregacion) => congregacion.id === selectedId)
+      const selected = congregaciones.find((c) => c.id === selectedId)
       if (!selected || selected.nombre !== value) {
-        setSelectedId("")
+        nextId = ""
       }
     }
+    onChange(value, nextId)
+    setIsOpen(true)
+    setActiveIndex(-1)
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
