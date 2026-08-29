@@ -1,7 +1,6 @@
 /** Paths estáticos bajo `public/jec/` (año 2025 → prototipo 2026). */
 
 export const jecAssets = {
-  favicon: "/jec/favicon.svg",
   background: {
     pisada: "/jec/background/background.webp",
     /** Mismo fondo en tres anchos. El de 1920 es `pisada`; los otros dos existen
@@ -31,6 +30,9 @@ export const jecAssets = {
     wordmark: "/jec/hero/01.svg",
     cinta: "/jec/hero/cinta-frases.webp",
     logo: "/jec/hero/logo-juntos-en-casa.webp",
+    /** Pieza definitiva del finale: ancla + "Anclados en Jesus" + fecha, ya
+     *  compuesta y con transparencia. Reemplaza al wordmark y al ancla sueltos. */
+    piezaFinale: "/jec/hero/logo-hero.webp",
   },
   iconos: {
     pisada: "/jec/iconos/pisada.png",
