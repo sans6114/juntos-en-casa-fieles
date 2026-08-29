@@ -47,9 +47,9 @@ export function SiteHeader({ className, logo = "light" }: SiteHeaderProps) {
         <Image
           src={logoSrc[logo]}
           alt="Juntos En Casa"
-          width={40}
-          height={40}
-          className="h-10 w-auto md:h-14"
+          width={60}
+          height={60}
+          className="h-40 w-auto md:h-40"
         />
       </Link>
 
