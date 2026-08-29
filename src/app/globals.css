@@ -418,7 +418,9 @@
    sintetizada por el navegador. */
 .jec-landing .jec-brand {
   font-family: var(--font-helvetica-neue), ui-sans-serif, system-ui, sans-serif;
-  font-style: italic;
+  font-style: normal;
+  font-weight: bold;
+  color: var(--jec-ember);
 }
 
 /* Tokens portal admin — blanco / negro + rojo (aislados del sitio público) */
