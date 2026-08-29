@@ -1,7 +1,10 @@
-import { PlaceholderTag } from "@/components/external/shared"
+import { PlaceholderTag } from '@/components/external/shared';
 
-import { ProductoCard } from "./ProductoCard"
-import { PRODUCTOS_RESUELTO, productos } from "./data"
+import {
+  productos,
+  PRODUCTOS_RESUELTO,
+} from './data';
+import { ProductoCard } from './ProductoCard';
 
 export function ProductosGrid() {
   return (
@@ -18,10 +21,6 @@ export function ProductosGrid() {
         ) : (
           <div className="flex flex-col items-start gap-3 border-t-[3px] border-[var(--regla)] pt-8">
             <PlaceholderTag>Próximamente...</PlaceholderTag>
-            <p className="max-w-xl text-base leading-relaxed text-[var(--suave)]">
-              Estamos definiendo la remera, los stickers y el resto de los productos de esta
-              edición. Volvé en unos días y vas a encontrar todo acá.
-            </p>
           </div>
         )}
       </div>
