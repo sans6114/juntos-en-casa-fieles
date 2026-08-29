@@ -20,7 +20,7 @@ export function ProductosIntro() {
         </div>
 
         <Image
-          src={jecAssets.personaje.festejando}
+          src={jecAssets.personaje.handsUp}
           alt=""
           width={190}
           height={253}

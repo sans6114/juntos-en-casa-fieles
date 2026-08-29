@@ -10,4 +10,4 @@ export const jecTaglines = [
  * Frases del scroll reveal (frames discretos).
  * La 4ª tagline queda solo en el ticker, no en el reveal.
  */
-export const jecRevealPhrases = jecTaglines.slice(0, 3);
+export const jecRevealPhrases = jecTaglines.slice(0, 4);
