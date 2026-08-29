@@ -1,14 +1,14 @@
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
-import type { ContenidoKind } from "./data"
+import type { ContenidoKind } from "@/interfaces/contenido"
 
 /** `undefined` is the "Todo" filter — it renders as `/contenidos` with no query. */
 const FILTROS: { value?: ContenidoKind; label: string }[] = [
   { value: undefined, label: "Todo" },
   { value: "predica", label: "Prédicas" },
-  { value: "podcast", label: "Podcast" },
-  { value: "recurso", label: "Recursos" },
+  { value: "video", label: "Videos" },
+  { value: "recursos", label: "Recursos" },
 ]
 
 type ContenidosFiltrosProps = {

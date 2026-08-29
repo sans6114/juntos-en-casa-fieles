@@ -14,9 +14,9 @@ export function ContenidosIntro() {
             Contenidos
           </h1>
           <p className="mt-6 text-pretty text-base leading-relaxed text-[var(--suave)] md:text-lg">
-            Las prédicas completas de <BrandName>Juntos En Casa</BrandName>, los episodios del
-            podcast y las placas para compartir. Todo lo que pasó en la conferencia, para volver a
-            verlo cuando quieras.
+            Las prédicas completas de <BrandName>Juntos En Casa</BrandName>, los videos y las
+            placas para compartir. Todo lo que pasó en la conferencia, para volver a verlo cuando
+            quieras.
           </p>
         </div>
 

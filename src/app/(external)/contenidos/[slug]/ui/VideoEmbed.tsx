@@ -1,22 +1,9 @@
-import { ContenidoThumb, type ContenidoItem, type ContenidoKind } from "@/components/external/contenidos"
+import { ContenidoThumb } from "@/components/external/contenidos"
 import { PlaceholderTag } from "@/components/external/shared"
-import type { ContenidoVista } from "@/interfaces/contenido"
+import type { ContenidoPublicoDTO } from "@/interfaces/contenido"
 
 type VideoEmbedProps = {
-  item: ContenidoItem
-}
-
-/**
- * Mismo adaptador temporal que `ContenidoCard.tsx` (taxonomía vieja de
- * `./data`, slice 9, → la nueva de `ContenidoVista`, slice 2): `ContenidoThumb`
- * ahora comparte tipo con la vista previa del admin (design §B6), y este es
- * el único otro consumidor directo. Se borra junto con `data.ts` en el corte
- * del slice 8/9.
- */
-const KIND_A_VISTA: Record<ContenidoKind, ContenidoVista["kind"]> = {
-  predica: "predica",
-  podcast: "video",
-  recurso: "recursos",
+  item: ContenidoPublicoDTO
 }
 
 /**
@@ -31,10 +18,7 @@ export function VideoEmbed({ item }: VideoEmbedProps) {
   if (!item.youtubeId) {
     return (
       <div>
-        <ContenidoThumb
-          item={{ ...item, kind: KIND_A_VISTA[item.kind] }}
-          className="rounded-[6px]"
-        />
+        <ContenidoThumb item={item} className="rounded-[6px]" />
         <p className="mt-3 flex flex-wrap items-center gap-3">
           <PlaceholderTag>Video pendiente</PlaceholderTag>
           <span className="text-[13px] text-[var(--suave)]">

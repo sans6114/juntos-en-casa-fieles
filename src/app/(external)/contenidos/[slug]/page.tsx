@@ -2,13 +2,8 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import {
-  ContenidoCard,
-  contenidos,
-  findContenido,
-  kindLabel,
-  relatedContenidos,
-} from "@/components/external/contenidos"
+import { obtenerContenidoPorSlug, obtenerContenidosRelacionados } from "@/actions"
+import { ContenidoCard } from "@/components/external/contenidos"
 import {
   ArrowLeftIcon,
   BrandName,
@@ -19,6 +14,7 @@ import {
   SiteFooter,
   SiteHeader,
 } from "@/components/external/shared"
+import { kindLabel } from "@/interfaces/contenido"
 import { createPageMetadata } from "@/lib/seo/site"
 
 import { PlacasDownload } from "./ui/PlacasDownload"
@@ -28,13 +24,9 @@ type ContenidoPageProps = {
   params: Promise<{ slug: string }>
 }
 
-export function generateStaticParams() {
-  return contenidos.map((item) => ({ slug: item.slug }))
-}
-
 export async function generateMetadata({ params }: ContenidoPageProps): Promise<Metadata> {
   const { slug } = await params
-  const item = findContenido(slug)
+  const item = await obtenerContenidoPorSlug(slug)
 
   if (!item) return createPageMetadata({ path: `/contenidos/${slug}` })
 
@@ -47,11 +39,11 @@ export async function generateMetadata({ params }: ContenidoPageProps): Promise<
 
 export default async function ContenidoPage({ params }: ContenidoPageProps) {
   const { slug } = await params
-  const item = findContenido(slug)
+  const item = await obtenerContenidoPorSlug(slug)
 
   if (!item) notFound()
 
-  const relacionados = relatedContenidos(item.slug)
+  const relacionados = await obtenerContenidosRelacionados(item.slug)
 
   return (
     <>
