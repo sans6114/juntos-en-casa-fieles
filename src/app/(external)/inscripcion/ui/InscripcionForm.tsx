@@ -1,11 +1,26 @@
 "use client"
 
-import { useActionState, useEffect, useRef, useState, type ReactNode } from "react"
-import { useRouter } from "next/navigation"
-import { crearInscripcion } from "@/actions"
-import type { InscripcionActionState } from "@/interfaces/inscripcion"
-import { CongregacionCombobox, type Congregacion } from "./CongregacionCombobox"
-import { AlertIcon, CtaButton } from "@/components/external/shared"
+import {
+  type ReactNode,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+
+import { useRouter } from 'next/navigation';
+
+import { crearInscripcion } from '@/actions';
+import {
+  AlertIcon,
+  CtaButton,
+} from '@/components/external/shared';
+import type { InscripcionActionState } from '@/interfaces/inscripcion';
+
+import {
+  type Congregacion,
+  CongregacionCombobox,
+} from './CongregacionCombobox';
 
 type InscripcionFormProps = {
   congregaciones: Congregacion[]
@@ -216,7 +231,7 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
               onChange={() => setSelection("vsn")}
               className="h-4 w-4 rounded-[4px] border-[var(--regla)] bg-transparent accent-[var(--acento)] focus:ring-[var(--foco)]"
             />
-            Soy de Vida Sobre Natural
+            Soy de Vida Sobrenatural
           </label>
           <label className="flex items-center gap-2 cursor-pointer text-sm text-[var(--suave)]">
             <input
