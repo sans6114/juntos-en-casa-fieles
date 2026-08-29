@@ -38,6 +38,36 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
   const router = useRouter()
   const [submitted, setSubmitted] = useState<SubmittedValues>(emptySubmitted)
 
+  // Identify "Vida Sobre Natural" to wire up the checkbox
+  const vsnCongregacion = congregaciones.find(
+    (c) =>
+      c.nombre.toLowerCase().includes("vida sobrenatural") ||
+      c.nombre.toLowerCase().includes("vida sobre natural")
+  )
+
+  type SelectionType = "vsn" | "nuevo" | "otra" | null
+  const [selection, setSelection] = useState<SelectionType>(null)
+  const [comboQuery, setComboQuery] = useState(submitted.congregacionQuery)
+  const [comboId, setComboId] = useState(submitted.congregacionId)
+
+  // Sync when submitted state updates after a server action
+  useEffect(() => {
+    if (vsnCongregacion && submitted.congregacionId === vsnCongregacion.id) {
+      setSelection("vsn")
+    } else if (submitted.congregacionId || submitted.congregacionQuery) {
+      setSelection("otra")
+      setComboQuery(submitted.congregacionQuery)
+      setComboId(submitted.congregacionId)
+    } else if (hasSubmitted.current) {
+      setSelection("nuevo")
+    }
+  }, [submitted, vsnCongregacion])
+
+  function handleComboboxChange(query: string, id: string) {
+    setComboQuery(query)
+    setComboId(id)
+  }
+
   const [state, formAction, isPending] = useActionState(submitInscripcion, initialState)
 
   // El resultado del envio aparece lejos del boton (arriba del formulario, o
@@ -167,7 +197,7 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
         />
       </Field>
 
-      <div className="space-y-2">
+      <div className="space-y-4">
         <label
           htmlFor="congregacion-input"
           className="jec-label block text-xs font-bold uppercase tracking-[0.14em] text-[var(--suave)]"
@@ -175,11 +205,66 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
           Congregación{" "}
           <span className="font-normal normal-case tracking-normal">(opcional)</span>
         </label>
-        <CongregacionCombobox
-          congregaciones={congregaciones}
-          defaultQuery={submitted.congregacionQuery}
-          defaultCongregacionId={submitted.congregacionId}
-        />
+        
+        <div className="flex flex-col gap-3">
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-[var(--suave)]">
+            <input
+              type="checkbox"
+              name="tipoCongregacion"
+              value="vsn"
+              checked={selection === "vsn"}
+              onChange={() => setSelection("vsn")}
+              className="h-4 w-4 rounded-[4px] border-[var(--regla)] bg-transparent accent-[var(--acento)] focus:ring-[var(--foco)]"
+            />
+            Soy de Vida Sobre Natural
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-[var(--suave)]">
+            <input
+              type="checkbox"
+              name="tipoCongregacion"
+              value="nuevo"
+              checked={selection === "nuevo"}
+              onChange={() => setSelection("nuevo")}
+              className="h-4 w-4 rounded-[4px] border-[var(--regla)] bg-transparent accent-[var(--acento)] focus:ring-[var(--foco)]"
+            />
+            Soy nuevo
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-[var(--suave)]">
+            <input
+              type="checkbox"
+              name="tipoCongregacion"
+              value="otra"
+              checked={selection === "otra"}
+              onChange={() => setSelection("otra")}
+              className="h-4 w-4 rounded-[4px] border-[var(--regla)] bg-transparent accent-[var(--acento)] focus:ring-[var(--foco)]"
+            />
+            Soy de otra congregación
+          </label>
+        </div>
+
+        {selection === "otra" && (
+          <CongregacionCombobox
+            congregaciones={congregaciones.filter((c) => c.id !== vsnCongregacion?.id)}
+            query={comboQuery}
+            selectedId={comboId}
+            onChange={handleComboboxChange}
+          />
+        )}
+        
+        {selection !== "otra" && (
+          <>
+            <input
+              type="hidden"
+              name="congregacionId"
+              value={selection === "vsn" ? vsnCongregacion?.id || "" : ""}
+            />
+            <input
+              type="hidden"
+              name="congregacionQuery"
+              value={selection === "vsn" ? vsnCongregacion?.nombre || "" : ""}
+            />
+          </>
+        )}
       </div>
 
       <CtaButton as="button" type="submit" disabled={isPending} className="w-full">
