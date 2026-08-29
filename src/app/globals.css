@@ -309,6 +309,30 @@
   box-shadow: inset 0 0 0 1px var(--acento);
 }
 
+/* Pin de Ubicación (MapaSimulado): anillos que laten alrededor del ancla.
+   Con reduced-motion se apagan y queda solo el ancla quieta sobre el mapa. */
+@keyframes jec-baliza-ping {
+  from {
+    transform: scale(0.6);
+    opacity: 0.45;
+  }
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+.jec-landing .jec-baliza-ring {
+  animation: jec-baliza-ping 2.8s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jec-landing .jec-baliza-ring {
+    animation: none;
+    opacity: 0;
+  }
+}
+
 /* Disclosure: <details> nativo, chevron en CSS, sin marcador por defecto */
 .jec-landing .jec-disclosure > summary {
   list-style: none;
@@ -394,7 +418,9 @@
    sintetizada por el navegador. */
 .jec-landing .jec-brand {
   font-family: var(--font-helvetica-neue), ui-sans-serif, system-ui, sans-serif;
-  font-style: italic;
+  font-style: normal;
+  font-weight: bold;
+  color: var(--jec-ember);
 }
 
 /* Tokens portal admin — blanco / negro + rojo (aislados del sitio público) */

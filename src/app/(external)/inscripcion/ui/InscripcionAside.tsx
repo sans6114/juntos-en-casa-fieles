@@ -1,7 +1,8 @@
-import Image from "next/image"
-import { BrandName } from "@/components/external/shared"
-import { jecAssets } from "@/lib/jec-assets"
-import { siteConfig } from "@/lib/seo/site"
+import Image from 'next/image';
+
+import { BrandName } from '@/components/external/shared';
+import { jecAssets } from '@/lib/jec-assets';
+import { siteConfig } from '@/lib/seo/site';
 
 /** The three facts a visitor checks before filling anything in. */
 const DATOS = [
@@ -52,8 +53,7 @@ export function InscripcionAside() {
           Sumate a la conferencia
         </h1>
         <p className="mt-6 max-w-lg text-pretty text-base leading-relaxed text-[var(--suave)] md:text-lg">
-          Tres días de adoración, palabra y unidad en La Plata. Completá tus datos y te reservamos
-          el lugar.
+        Tres días para disfrutar y crecer juntos en la presencia de Dios. Completá tus datos para reservar tu lugar.
         </p>
       </div>
 

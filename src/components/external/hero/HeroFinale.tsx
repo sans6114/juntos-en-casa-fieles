@@ -23,12 +23,11 @@ import {
  * tramo (en alturas de viewport) durante el cual la imagen se expande. */
 const SCROLL_DISTANCE = 1.2;
 
-/** Dimensiones intrínsecas de `hero.background`. Sin ellas el navegador no
+/** Dimensiones intrínsecas de `background.pisada`. Sin ellas el navegador no
  * puede reservar la caja antes de decodificar y el hero produce CLS. */
 const BACKGROUND_WIDTH = 1920;
 const BACKGROUND_HEIGHT = 1081;
 
-const EVENT_DATE = "18.19.20 SEPT";
 /** `siteConfig.city` es "La Plata, Buenos Aires"; en el hero entra la ciudad
  * sola, que es lo que contesta "¿dónde es?" sin gastar una línea entera. */
 const EVENT_CITY = siteConfig.city.split(",")[0];
@@ -109,32 +108,49 @@ function HeroComposition({ units }: { units: TimeLeft }) {
           />
         </div>
 
-        {/* El ancho se topea contra la altura del viewport (el wordmark es
-          * 1600×467, o sea 3.42:1) para que no empuje al bloque de abajo. */}
-        <div className="relative ml-4 mt-5 w-[72%] max-w-[min(820px,86vh)] sm:ml-8 sm:mt-7 sm:w-[76%] lg:ml-12 lg:w-[78%] lg:max-w-[min(980px,100vh)]">
-          {/* La cinta va detrás del wordmark y desbordada a propósito: el frame
-            * recorta lo que sobra. Los porcentajes son relativos a su propio
-            * tamaño, así que la composición aguanta cualquier ancho. Es también
-            * la única fuente visible de las cuatro frases de campaña: los tiles
-            * que las repetían debajo se eliminaron. */}
+        {/* Pieza definitiva de identidad: ancla, "Anclados en Jesus" y la cinta
+          * de frases vienen ya compuestos en el archivo, así que acá no se apila
+          * nada.
+          *
+          * El margen izquierdo es negativo a propósito: la cinta entra sangrando
+          * por el borde y la corta `.scroll-expand__stage`, que ya es
+          * `overflow: hidden`. Con margen positivo la cinta terminaba en el aire
+          * y se leía como un recorte.
+          *
+          * El ancho se topea contra la altura del viewport —y no solo en px—
+          * para que el bloque de decisión de abajo no quede empujado debajo del
+          * fold: con aspecto 2.125 el alto es el ancho sobre 2.125.
+          *
+          * En `lg` el tope es afín y no proporcional. El bloque de decisión no
+          * mide lo mismo en todos lados —sus `gap` y `padding` ya son `min(rem,
+          * vh)`— así que su altura es `c0 + k·vh`, y un tope en `Nvh` puro se
+          * pasaba abajo y desperdiciaba altura arriba. Los dos coeficientes
+          * salen de medir el bloque a 600, 719 y 945 px de alto. */}
+        <div className="relative -ml-[6%] mt-[min(2rem,4vh)] w-[104%] max-w-[min(900px,62vh)] sm:w-full lg:-ml-[7%] lg:mt-4 lg:w-[102%] lg:max-w-[min(1180px,calc(100vh*1.755-740px))]">
+          {/* Reserva el alto del flujo. La imagen no lo hace porque está fuera
+            * del flujo: se ancla abajo y crece hacia arriba para que la cinta
+            * salga por el borde superior en vez de terminar cortada en el aire.
+            * El excedente son los `21.25vh + 125px` de más que lleva la imagen:
+            * 2.125 (el aspecto) por la altura de la solapa del logo, que mide
+            * `0.1·vh + 40px`, más ~20px de aire.
+            *
+            * Debajo de `lg` esa cuenta no sirve: con aspecto 2.125, sangrar
+            * 88px hacia arriba obliga a 688px de ancho en una pantalla de 375 y
+            * deja el 85% de la pieza fuera. Subir el bloque hasta el tope del
+            * stage tampoco: ahí la cinta le pasa por encima a la solapa del
+            * logo. Así que debajo de `lg` la pieza arranca por debajo de la
+            * solapa y la cinta se corta arriba; el excedente queda en 34px, que
+            * es aire, no sangrado. */}
+          <div className="aspect-[2.125]" aria-hidden />
           <Image
-            src={jecAssets.hero.cinta}
-            alt=""
-            aria-hidden
-            width={1200}
-            height={1200}
-            sizes="(min-width: 1024px) 1568px, (min-width: 640px) 1312px, 160vw"
-            className="pointer-events-none absolute left-0 top-0 z-[1] w-[160%] max-w-none translate-x-[-28.15%] translate-y-[-51.83%]"
-          />
-          <Image
-            src={jecAssets.hero.wordmark}
+            src={jecAssets.hero.piezaFinale}
             alt=""
             aria-hidden
             priority
-            width={840}
-            height={254}
-            sizes="(min-width: 1024px) 980px, (min-width: 640px) 820px, 87vw"
-            className="relative z-[2] w-full"
+            width={5655}
+            height={2661}
+            sizes="(min-width: 1024px) 1250px, (min-width: 640px) 1000px, 190vw"
+            className="absolute bottom-0 right-0 h-auto w-[calc(100%+34px)] max-w-none lg:left-0 lg:right-auto lg:w-[calc(100%+21.25vh+125px)]"
           />
         </div>
       </div>
@@ -149,11 +165,11 @@ function HeroComposition({ units }: { units: TimeLeft }) {
           </span>
         </div>
 
-        {/* Lugar y fecha en una sola línea. La fecha se imprimía dos veces —una
-          * horneada en la pieza de desktop y otra acá— y el lugar no aparecía en
-          * ningún breakpoint. */}
+        {/* Solo el lugar: la fecha ya viene horneada en la pieza de identidad y
+          * repetirla acá la imprimía dos veces en la misma pantalla. Sigue
+          * disponible para lectores de pantalla en el `h1` de abajo. */}
         <p className="jec-mono m-0 text-[1.125rem] font-black uppercase leading-none tracking-tight text-[var(--jec-bone)] sm:text-2xl lg:text-[1.75rem]">
-          {EVENT_CITY} · {EVENT_DATE}
+          {EVENT_CITY}
         </p>
 
         {/* Countdown y CTA juntos y no en extremos opuestos de la fila: son las
@@ -197,7 +213,9 @@ export function HeroFinale() {
       </h1>
 
       <ScrollExpand
-        src={jecAssets.hero.background}
+        src={jecAssets.background.pisada}
+        mediaSrcSet={jecAssets.background.pisadaSrcSet}
+        mediaSizes="100vw"
         /* Decorativa: es una textura de halftone que no contiene ni el nombre de
          * la conferencia ni la fecha. El h1 de arriba ya dice todo eso. */
         alt=""

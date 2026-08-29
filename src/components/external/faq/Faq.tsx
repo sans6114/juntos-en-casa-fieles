@@ -23,7 +23,7 @@ export function Faq() {
           {faqItems.map((item) => (
             <Disclosure
               key={item.id}
-              summary={<BrandName>{item.question}</BrandName>}
+              summary={<span><BrandName>{item.question}</BrandName></span>}
               className={disclosureClass}
             >
               <p className="pb-5 pr-8 leading-relaxed text-[var(--suave)] md:pb-6">
