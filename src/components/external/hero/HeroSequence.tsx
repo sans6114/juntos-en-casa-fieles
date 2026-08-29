@@ -13,9 +13,11 @@ if (typeof window !== "undefined") {
 }
 
 const LOADER_FRAMES = [
-  jecAssets.personaje.orando,
-  jecAssets.personaje.festejando,
-  jecAssets.personaje.apuntando,
+  jecAssets.personaje.alegre,
+  jecAssets.personaje.handsUp,
+  jecAssets.personaje.saludo,
+  jecAssets.personaje.señalando,
+  jecAssets.personaje.sorpresa,
 ];
 
 const FRAME_INTERVAL_MS = 420;
@@ -111,8 +113,8 @@ export function HeroSequence({ onIntroDone }: { onIntroDone: () => void }) {
           <Image
             src={jecAssets.logos.jecWhiteSvg}
             alt=""
-            width={90}
-            height={90}
+            width={160}
+            height={160}
             priority
             className="mb-4 h-48 w-auto md:mb-6 md:h-[min(18dvh,9rem)]"
           />
