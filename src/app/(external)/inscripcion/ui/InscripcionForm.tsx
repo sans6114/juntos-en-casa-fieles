@@ -1,11 +1,27 @@
 "use client"
 
-import { useActionState, useEffect, useRef, useState, type ReactNode } from "react"
-import { useRouter } from "next/navigation"
-import { crearInscripcion } from "@/actions"
-import type { InscripcionActionState } from "@/interfaces/inscripcion"
-import { CongregacionCombobox, type Congregacion } from "./CongregacionCombobox"
-import { AlertIcon, CtaButton } from "@/components/external/shared"
+import {
+  type ReactNode,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+
+import { useRouter } from 'next/navigation';
+
+import { crearInscripcion } from '@/actions';
+import {
+  AlertIcon,
+  CtaButton,
+} from '@/components/external/shared';
+import type { InscripcionActionState } from '@/interfaces/inscripcion';
+import { esVidaSobrenatural } from '@/lib/congregacion/vida-sobrenatural';
+
+import {
+  type Congregacion,
+  CongregacionCombobox,
+} from './CongregacionCombobox';
 
 type InscripcionFormProps = {
   congregaciones: Congregacion[]
@@ -18,6 +34,7 @@ type SubmittedValues = {
   edad: string
   congregacionId: string
   congregacionQuery: string
+  tipoCongregacion: string
 }
 
 const initialState: InscripcionActionState = { ok: false }
@@ -29,6 +46,7 @@ const emptySubmitted: SubmittedValues = {
   edad: "",
   congregacionId: "",
   congregacionQuery: "",
+  tipoCongregacion: "",
 }
 
 const inputClassName =
@@ -38,30 +56,32 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
   const router = useRouter()
   const [submitted, setSubmitted] = useState<SubmittedValues>(emptySubmitted)
 
-  // Identify "Vida Sobre Natural" to wire up the checkbox
-  const vsnCongregacion = congregaciones.find(
-    (c) =>
-      c.nombre.toLowerCase().includes("vida sobrenatural") ||
-      c.nombre.toLowerCase().includes("vida sobre natural")
-  )
+  // La congregacion propia del evento se saca del listado de "otra" para no
+  // ofrecerla dos veces. La FK NO se resuelve aca: la resuelve `crearInscripcion`
+  // en el servidor, asi el checkbox funciona aunque la fila este PENDIENTE,
+  // renombrada, o todavia no exista.
+  const otrasCongregaciones = congregaciones.filter((c) => !esVidaSobrenatural(c.nombre))
 
   type SelectionType = "vsn" | "nuevo" | "otra" | null
   const [selection, setSelection] = useState<SelectionType>(null)
   const [comboQuery, setComboQuery] = useState(submitted.congregacionQuery)
   const [comboId, setComboId] = useState(submitted.congregacionId)
 
-  // Sync when submitted state updates after a server action
+  // Restaura la eleccion tras un envio rechazado por el servidor. Lee el valor
+  // que se envio en vez de deducirlo de los campos: la version anterior asumia
+  // "nuevo" cuando id y query venian vacios, asi que a quien no marcaba nada le
+  // dejaba "Soy nuevo" pre-marcado y podia terminar declarando algo que no eligio.
   useEffect(() => {
-    if (vsnCongregacion && submitted.congregacionId === vsnCongregacion.id) {
-      setSelection("vsn")
-    } else if (submitted.congregacionId || submitted.congregacionQuery) {
-      setSelection("otra")
+    if (!hasSubmitted.current) return
+
+    const tipo = submitted.tipoCongregacion
+    setSelection(tipo === "vsn" || tipo === "nuevo" || tipo === "otra" ? tipo : null)
+
+    if (tipo === "otra") {
       setComboQuery(submitted.congregacionQuery)
       setComboId(submitted.congregacionId)
-    } else if (hasSubmitted.current) {
-      setSelection("nuevo")
     }
-  }, [submitted, vsnCongregacion])
+  }, [submitted])
 
   function handleComboboxChange(query: string, id: string) {
     setComboQuery(query)
@@ -88,6 +108,7 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
       edad: String(formData.get("edad") ?? ""),
       congregacionId: String(formData.get("congregacionId") ?? ""),
       congregacionQuery: String(formData.get("congregacionQuery") ?? ""),
+      tipoCongregacion: String(formData.get("tipoCongregacion") ?? ""),
     })
     hasSubmitted.current = true
     // Sin estado optimista a propósito: el éxito se anuncia SOLO cuando la action
@@ -197,15 +218,21 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
         />
       </Field>
 
-      <div className="space-y-4">
-        <label
-          htmlFor="congregacion-input"
+      <div
+        role="group"
+        aria-labelledby="congregacion-titulo"
+        aria-describedby={state.fieldErrors?.tipoCongregacion ? "tipoCongregacion-error" : undefined}
+        className="space-y-4"
+      >
+        {/* Ya no dice "(opcional)": la pagina declara que todo campo sin marca es
+            obligatorio, y elegir una opcion aca ahora lo exige tambien el schema. */}
+        <p
+          id="congregacion-titulo"
           className="jec-label block text-xs font-bold uppercase tracking-[0.14em] text-[var(--suave)]"
         >
-          Congregación{" "}
-          <span className="font-normal normal-case tracking-normal">(opcional)</span>
-        </label>
-        
+          Congregación
+        </p>
+
         <div className="flex flex-col gap-3">
           <label className="flex items-center gap-2 cursor-pointer text-sm text-[var(--suave)]">
             <input
@@ -216,7 +243,7 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
               onChange={() => setSelection("vsn")}
               className="h-4 w-4 rounded-[4px] border-[var(--regla)] bg-transparent accent-[var(--acento)] focus:ring-[var(--foco)]"
             />
-            Soy de Vida Sobre Natural
+            Soy de Vida Sobrenatural
           </label>
           <label className="flex items-center gap-2 cursor-pointer text-sm text-[var(--suave)]">
             <input
@@ -242,29 +269,29 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
           </label>
         </div>
 
-        {selection === "otra" && (
-          <CongregacionCombobox
-            congregaciones={congregaciones.filter((c) => c.id !== vsnCongregacion?.id)}
-            query={comboQuery}
-            selectedId={comboId}
-            onChange={handleComboboxChange}
-          />
-        )}
-        
-        {selection !== "otra" && (
-          <>
-            <input
-              type="hidden"
-              name="congregacionId"
-              value={selection === "vsn" ? vsnCongregacion?.id || "" : ""}
+        {state.fieldErrors?.tipoCongregacion ? (
+          <p id="tipoCongregacion-error" className="flex items-center gap-1.5 text-sm text-[var(--acento-texto)]">
+            <AlertIcon size={16} className="shrink-0" />
+            {state.fieldErrors.tipoCongregacion}
+          </p>
+        ) : null}
+
+        {selection === "otra" ? (
+          <div className="space-y-2">
+            <CongregacionCombobox
+              congregaciones={otrasCongregaciones}
+              query={comboQuery}
+              selectedId={comboId}
+              onChange={handleComboboxChange}
             />
-            <input
-              type="hidden"
-              name="congregacionQuery"
-              value={selection === "vsn" ? vsnCongregacion?.nombre || "" : ""}
-            />
-          </>
-        )}
+            {state.fieldErrors?.congregacionQuery ? (
+              <p className="flex items-center gap-1.5 text-sm text-[var(--acento-texto)]">
+                <AlertIcon size={16} className="shrink-0" />
+                {state.fieldErrors.congregacionQuery}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <CtaButton as="button" type="submit" disabled={isPending} className="w-full">

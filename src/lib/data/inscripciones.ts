@@ -3,6 +3,7 @@ export type InscripcionMetricRow = {
   congregacionId: string | null
   congregacionNombre: string | null
   congregacionEstado: "PENDIENTE" | "APROBADA" | null
+  sinCongregacion: boolean
 }
 
 /** Total de inscriptos del evento anterior (dato histórico real). */
@@ -40,29 +41,33 @@ export function getInscripcionesMetrics(data: InscripcionMetricRow[]) {
     { id: string | null; nombre: string; total: number; estado: "PENDIENTE" | "APROBADA" | null }
   >()
 
+  // Cuenta el dato AFIRMADO por el visitante ("Soy nuevo"), no la ausencia de
+  // FK. Antes se infería con `!congregacionId && !congregacionNombre`, y esa
+  // heuristica metia en la barra "Sin congregacion" a gente que si declaro
+  // iglesia pero se quedo sin FK porque un admin se la rechazo.
   let sinCongregacion = 0
 
   for (const item of data) {
-    if (!item.congregacionId && !item.congregacionNombre) {
+    if (item.sinCongregacion) {
       sinCongregacion += 1
       continue
     }
 
-    // Agrupar primero por FK (fuente de verdad); solo cae al string legacy de
-    // congregacionNombre para filas anteriores a la normalizacion, que no
-    // tienen FK. Esas filas legacy quedan con estado: null (no cuentan en el KPI).
-    const key = item.congregacionId ?? item.congregacionNombre ?? "unknown"
-    const nombre = item.congregacionNombre ?? "Sin nombre"
-    const existing = congregacionMap.get(key)
+    // Sin FK no hay congregacion que atribuir: es una fila sin dato (nadie marco
+    // nada, o el admin le rechazo la congregacion). No suma a ninguna barra ni a
+    // "Sin congregacion", que significa algo distinto y mas fuerte.
+    if (!item.congregacionId) continue
+
+    const existing = congregacionMap.get(item.congregacionId)
 
     if (existing) {
       existing.total += 1
     } else {
-      congregacionMap.set(key, {
+      congregacionMap.set(item.congregacionId, {
         id: item.congregacionId,
-        nombre,
+        nombre: item.congregacionNombre ?? "Sin nombre",
         total: 1,
-        estado: item.congregacionId ? item.congregacionEstado : null,
+        estado: item.congregacionEstado,
       })
     }
   }

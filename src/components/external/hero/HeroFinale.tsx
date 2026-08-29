@@ -146,10 +146,28 @@ function HeroComposition({ units }: { units: TimeLeft }) {
             src={jecAssets.hero.piezaFinale}
             alt=""
             aria-hidden
-            priority
-            width={5655}
-            height={2661}
-            sizes="(min-width: 1024px) 1250px, (min-width: 640px) 1000px, 190vw"
+            /* `loading="eager"` con `fetchPriority="low"`, y NUNCA `priority`.
+             * `priority` emite un `<link rel="preload">` que compite de igual a
+             * igual con la imagen del LCP, y esta pieza no se ve al cargar: vive
+             * dentro de `.scroll-expand__overlay`, que arranca en `opacity: 0`
+             * hasta el 68% del reveal, y ademas la tapa el loader de 3s de
+             * `HeroSequence`. Eran 90,6 KB adelantandose al fondo sin motivo.
+             * `eager` la mantiene fuera de `loading="lazy"`, asi que empieza a
+             * bajar igual de temprano; solo deja de robarle la prioridad. */
+            loading="eager"
+            fetchPriority="low"
+            /* Dimensiones INTRINSECAS reales del archivo. Antes decia
+             * 5655x2661, que no es el tamano de `logo-hero.webp`. La relacion
+             * daba casi igual (2,1258 vs 2,1252) asi que no habia CLS, pero el
+             * dato era falso. */
+            width={2400}
+            height={1129}
+            /* El termino movil era `190vw` y la pieza mide ~112vw: el contenedor
+             * es `w-[104%]` del stage —que es 100vw— y la imagen `calc(100% +
+             * 34px)`. Medido en el navegador a 412px: 462 CSS px, no 783. Con
+             * `190vw` el browser elegia el candidato de 1920w para un hueco que
+             * se satisface con uno bastante menor. */
+            sizes="(min-width: 1024px) 1250px, (min-width: 640px) 1000px, 115vw"
             className="absolute bottom-0 right-0 h-auto w-[calc(100%+34px)] max-w-none lg:left-0 lg:right-auto lg:w-[calc(100%+21.25vh+125px)]"
           />
         </div>
@@ -215,6 +233,7 @@ export function HeroFinale() {
       <ScrollExpand
         src={jecAssets.background.pisada}
         mediaSrcSet={jecAssets.background.pisadaSrcSet}
+        mediaAvifSrcSet={jecAssets.background.pisadaAvifSrcSet}
         mediaSizes="100vw"
         /* Decorativa: es una textura de halftone que no contiene ni el nombre de
          * la conferencia ni la fecha. El h1 de arriba ya dice todo eso. */

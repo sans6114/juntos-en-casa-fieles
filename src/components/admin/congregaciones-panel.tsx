@@ -277,9 +277,8 @@ export function CongregacionesPanel({ data }: CongregacionesPanelProps) {
           <DialogHeader>
             <DialogTitle>Rechazar congregación</DialogTitle>
             <DialogDescription>
-              &ldquo;{rejectTarget?.nombre}&rdquo; se eliminará y sus inscripciones pasarán a la
-              cola de contacto pastoral como &ldquo;sin congregación&rdquo;. Esta acción no se
-              puede deshacer.
+              &ldquo;{rejectTarget?.nombre}&rdquo; se eliminará y sus inscripciones quedarán sin
+              congregación asignada. Esta acción no se puede deshacer.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

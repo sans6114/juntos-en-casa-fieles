@@ -37,6 +37,9 @@ export interface ScrollExpandProps {
   /** `srcset`/`sizes` del media. El frame se pinta a ancho completo, asi que un
    *  telefono no tiene por que bajar el archivo de 1920px. */
   mediaSrcSet?: string;
+  /** `srcset` AVIF del media. Si viene, el `<img>` se envuelve en un `<picture>`
+   *  y el WebP de `mediaSrcSet` queda como fallback. */
+  mediaAvifSrcSet?: string;
   mediaSizes?: string;
   title?: string;
   scrollHint?: ReactNode;
@@ -65,6 +68,7 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
   mediaWidth,
   mediaHeight,
   mediaSrcSet,
+  mediaAvifSrcSet,
   mediaSizes,
   title = "",
   scrollHint = "",
@@ -266,6 +270,25 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
     };
   }, [applyProgress, useWindowScroll]);
 
+  /* `fetchPriority="high"`: es el LCP de la home y compite con el resto de la
+     cascada. `width`/`height` reservan la caja antes de decodificar. No pasa
+     por `next/image` porque el CSS lo escala y recorta por frame de scroll. */
+  const img = (
+    <img
+      ref={mediaRef}
+      className="scroll-expand__media"
+      src={src}
+      srcSet={mediaSrcSet}
+      sizes={mediaSizes}
+      alt={alt}
+      width={mediaWidth}
+      height={mediaHeight}
+      fetchPriority="high"
+      decoding="async"
+      draggable={false}
+    />
+  );
+
   const media =
     mediaType === "video" ? (
       <video
@@ -278,23 +301,38 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
         loop
         playsInline
       />
+    ) : mediaAvifSrcSet ? (
+      <>
+        {/* El preload va A MANO y no lo emite React. En `react-dom` 19 el
+            renderer descarta el preload automatico de una imagen cuando esta
+            dentro de un `<picture>`:
+
+              pictureOrNoScriptTagInScope = formatContext.tagScope & 3
+              if (!( ... || "low" === props.fetchPriority
+                        || pictureOrNoScriptTagInScope )) { emite preload }
+
+            O sea que envolver el LCP en `<picture>` le sacaba justo el unico
+            preload que sirve. Este apunta al AVIF y no al WebP: si preloadeara
+            el WebP, un browser con AVIF bajaria LAS DOS.
+
+            El `type` es lo que lo hace seguro para los que no soportan AVIF:
+            descartan el preload por tipo desconocido y se llevan el WebP del
+            `<img>` por la via normal. */}
+        <link
+          rel="preload"
+          as="image"
+          type="image/avif"
+          imageSrcSet={mediaAvifSrcSet}
+          imageSizes={mediaSizes}
+          fetchPriority="high"
+        />
+        <picture>
+          <source type="image/avif" srcSet={mediaAvifSrcSet} sizes={mediaSizes} />
+          {img}
+        </picture>
+      </>
     ) : (
-      /* `fetchPriority="high"`: es el LCP de la home y compite con el resto de la
-         cascada. `width`/`height` reservan la caja antes de decodificar. No pasa
-         por `next/image` porque el CSS lo escala y recorta por frame de scroll. */
-      <img
-        ref={mediaRef}
-        className="scroll-expand__media"
-        src={src}
-        srcSet={mediaSrcSet}
-        sizes={mediaSizes}
-        alt={alt}
-        width={mediaWidth}
-        height={mediaHeight}
-        fetchPriority="high"
-        decoding="async"
-        draggable={false}
-      />
+      img
     );
 
   return (

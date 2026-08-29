@@ -11,6 +11,10 @@ import {
   type InscripcionActionState,
 } from '@/interfaces/inscripcion';
 import { normalizarNombreCongregacion } from '@/lib/congregacion/normalizar';
+import {
+  esVidaSobrenatural,
+  VIDA_SOBRENATURAL_NOMBRE,
+} from '@/lib/congregacion/vida-sobrenatural';
 import { sendQrEmail } from '@/lib/email/send-qr-email';
 import { prisma } from '@/lib/prisma';
 
@@ -41,6 +45,26 @@ async function resolverCongregacionId(query?: string | null): Promise<string | n
   }
 }
 
+// La FK de la congregacion propia del evento se resuelve ACA, no en el cliente.
+// El checkbox "Soy de Vida Sobrenatural" solia depender de que el nombre exacto
+// apareciera en la lista de congregaciones aprobadas que se manda al formulario;
+// cuando un admin la renombraba, o mientras estaba PENDIENTE, el checkbox mandaba
+// la FK vacia y la persona quedaba anotada a ninguna congregacion, en silencio.
+//
+// La tabla tiene decenas de filas, no miles: un findMany y un match en memoria
+// es correcto y barato, y ademas tolera cualquier grafia. Si la fila todavia no
+// existe se crea, para que la inscripcion nunca se quede sin FK.
+async function resolverVidaSobrenaturalId(): Promise<string | null> {
+  const congregaciones = await prisma.congregacion.findMany({
+    select: { id: true, nombre: true },
+  })
+
+  const propia = congregaciones.find((c) => esVidaSobrenatural(c.nombre))
+  if (propia) return propia.id
+
+  return resolverCongregacionId(VIDA_SOBRENATURAL_NOMBRE)
+}
+
 export async function crearInscripcion(
   _prevState: InscripcionActionState,
   formData: FormData
@@ -58,10 +82,25 @@ export async function crearInscripcion(
     return { ok: false, message: "Revisá los datos ingresados.", fieldErrors }
   }
 
-  // Si eligio de la lista manda la FK tal cual. Si no, se resuelve el texto
-  // libre a un FK (upsert por nombreNormalizado): `congregacionTexto` ya no se
-  // escribe en altas nuevas, queda frozen para lectura de filas legacy.
-  const congregacionId = parsed.data.congregacionId || (await resolverCongregacionId(parsed.data.congregacionQuery))
+  // "Soy nuevo" es una declaracion explicita del visitante, no una ausencia de
+  // dato: no hay nada que resolver ni que normalizar. Se persiste como
+  // `sinCongregacion = true`, sosteniendo la invariante documentada en el schema
+  // (`sinCongregacion = true` implica `congregacionId = null`) aunque el cliente
+  // mande basura en `congregacionId`.
+  const sinCongregacion = parsed.data.tipoCongregacion === "nuevo"
+
+  // Para el resto: si eligio de la lista manda la FK tal cual. Si no, se resuelve
+  // el texto libre a un FK (upsert por nombreNormalizado, estado PENDIENTE) y la
+  // normalizacion real queda en manos del admin, que la fusiona con una existente
+  // o la renombra desde /admin/congregaciones. La FK es la unica representacion
+  // de "a que congregacion pertenece": no hay campo de texto paralelo.
+  let congregacionId: string | null = null
+  if (parsed.data.tipoCongregacion === "vsn") {
+    congregacionId = await resolverVidaSobrenaturalId()
+  } else if (!sinCongregacion) {
+    congregacionId =
+      parsed.data.congregacionId || (await resolverCongregacionId(parsed.data.congregacionQuery))
+  }
 
   try {
     const nuevaInscripcion = await prisma.inscripcion.create({
@@ -71,6 +110,7 @@ export async function crearInscripcion(
         telefono: parsed.data.telefono,
         edad: parsed.data.edad,
         congregacionId,
+        sinCongregacion,
       },
     })
 
