@@ -1,25 +1,24 @@
 import type { Prisma } from "../../../generated/client"
 
 export type InscripcionPastoralShape = {
-  congregacionId: string | null
-  congregacionTexto: string | null
   sinCongregacion: boolean
 }
 
 // Predicado unico para "es candidato a contacto pastoral". No duplicar esta
-// condicion inline: una inscripcion entra al circuito de contacto cuando (a)
-// nunca declaro ninguna congregacion (ni FK ni texto libre), o (b) su
-// congregacion fue rechazada por un admin (`sinCongregacion = true`, que por
-// invariante ya implica `congregacionId = null`).
+// condicion inline.
+//
+// Una sola senal, explicita: la persona declaro que no tiene congregacion
+// marcando "Soy nuevo" en el formulario. Antes el predicado tambien inferia el
+// caso por ausencia de datos, una heuristica heredada del formulario viejo de un
+// solo campo de texto libre. Esa inferencia atrapaba por accidente a quien no
+// marcaba nada y a quien quedaba sin FK porque un admin le rechazo la
+// congregacion. Con el checkbox obligatorio no hay nada que adivinar.
 export function esCandidatoPastoral(inscripcion: InscripcionPastoralShape): boolean {
-  return (
-    (inscripcion.congregacionId === null && inscripcion.congregacionTexto === null) ||
-    inscripcion.sinCongregacion === true
-  )
+  return inscripcion.sinCongregacion === true
 }
 
 // Mismo predicado expresado como filtro Prisma, para queries donde no
 // conviene traer todo a memoria para filtrar en JS (ver obtener-contactos.ts).
 export const PASTORAL_WHERE: Prisma.InscripcionWhereInput = {
-  OR: [{ congregacionId: null, congregacionTexto: null }, { sinCongregacion: true }],
+  sinCongregacion: true,
 }

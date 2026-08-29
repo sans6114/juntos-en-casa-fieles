@@ -30,7 +30,8 @@ const DATOS = [
 const PASOS = [
   {
     titulo: "Completás el formulario",
-    detalle: "Cinco campos. La congregación es opcional — si no vas a ninguna, dejalo vacío.",
+    detalle:
+      "Cinco campos. Si no vas a ninguna congregación, marcá «Soy nuevo» y listo.",
   },
   {
     titulo: "Te llega un email con tu QR",

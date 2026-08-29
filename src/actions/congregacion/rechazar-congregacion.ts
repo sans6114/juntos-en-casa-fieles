@@ -14,12 +14,17 @@ export async function rechazarCongregacion(id: string) {
     }
 
     // FK limpio antes del delete: garantiza que ninguna inscripcion quede
-    // apuntando a una fila borrada, y que `sinCongregacion` caiga exactamente
-    // sobre el set de inscripciones que apuntaban a esta congregacion.
+    // apuntando a una fila borrada.
+    //
+    // NO escribe `sinCongregacion`. Rechazar significa "este nombre de
+    // congregacion no es valido", no "esta persona no tiene congregacion": el
+    // visitante si declaro una. `sinCongregacion` quedo reservado para la
+    // declaracion explicita del visitante ("Soy nuevo" en el formulario, ver
+    // `crear-inscripcion.ts`), que es su unico escritor.
     await prisma.$transaction([
       prisma.inscripcion.updateMany({
         where: { congregacionId: id },
-        data: { congregacionId: null, sinCongregacion: true },
+        data: { congregacionId: null },
       }),
       prisma.congregacion.delete({ where: { id } }),
     ])
