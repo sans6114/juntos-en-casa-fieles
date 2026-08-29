@@ -21,7 +21,7 @@ export function ContenidosIntro() {
         </div>
 
         <Image
-          src={jecAssets.personaje.alegre}
+          src={jecAssets.personaje.festejando}
           alt=""
           width={190}
           height={253}

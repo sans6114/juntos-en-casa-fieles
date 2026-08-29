@@ -18,11 +18,9 @@ export const jecAssets = {
   },
   personaje: {
     llama: "/jec/personaje/llama.svg",
-    alegre: "/jec/personaje/fueguin-alegre.svg",
-    handsUp: "/jec/personaje/fueguin-hands-up.svg",
-    saludo: "/jec/personaje/fueguin-saludo.svg",
-    señalando: "/jec/personaje/fueguin-señalando.svg",
-    sorpresa: "/jec/personaje/fueguin-sorpresa.svg",
+    orando: "/jec/personaje/fuegoorando.svg",
+    festejando: "/jec/personaje/fuegofestejando.png",
+    apuntando: "/jec/personaje/fuegoapuntandoizq.png",
   },
   hero: {
     finale: "/jec/hero/hero.png",
@@ -63,7 +61,7 @@ export const jecAssets = {
   galeria: {
     foto1: "/jec/galeria/foto-1.webp",
     foto2: "/jec/galeria/foto-2.webp",
-    foto3: "/jec/galeria/foto-3-v2.webp",
+    foto3: "/jec/galeria/foto-3.webp",
     foto4: "/jec/galeria/foto-4.webp",
     foto5: "/jec/galeria/foto-5.webp",
     foto6: "/jec/galeria/foto-6.webp",

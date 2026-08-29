@@ -13,11 +13,9 @@ if (typeof window !== "undefined") {
 }
 
 const LOADER_FRAMES = [
-  jecAssets.personaje.alegre,
-  jecAssets.personaje.handsUp,
-  jecAssets.personaje.saludo,
-  jecAssets.personaje.señalando,
-  jecAssets.personaje.sorpresa,
+  jecAssets.personaje.orando,
+  jecAssets.personaje.festejando,
+  jecAssets.personaje.apuntando,
 ];
 
 const FRAME_INTERVAL_MS = 420;

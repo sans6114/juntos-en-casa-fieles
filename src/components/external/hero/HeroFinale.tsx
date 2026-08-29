@@ -7,7 +7,6 @@ import Image from "next/image";
 import { CtaButton, jecTaglines } from "@/components/external/shared";
 import { jecAssets } from "@/lib/jec-assets";
 import { siteConfig } from "@/lib/seo/site";
-import { ChevronsDown } from "lucide-react";
 
 import ScrollExpand from "./ScrollExpand";
 import "./HeroFinale.css";
@@ -226,12 +225,7 @@ export function HeroFinale() {
         /* La composición trae su propio degradado a tinta en el tercio inferior;
          * un scrim uniforme encima sólo apagaría la brasa de la foto. */
         overlayScrim={0}
-        scrollHint={
-          <span className="flex flex-col items-center gap-1 text-center">
-            <span>Scrolleá para entrar</span>
-            <ChevronsDown className="h-5 w-5" />
-          </span>
-        }
+        scrollHint="Scrolleá para entrar"
         useWindowScroll
       >
         <HeroComposition units={units} />

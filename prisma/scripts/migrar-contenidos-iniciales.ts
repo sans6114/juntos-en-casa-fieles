@@ -59,14 +59,13 @@
 
 import "dotenv/config"
 import { PrismaPg } from "@prisma/adapter-pg"
-import { Pool } from "pg"
 
 import { PrismaClient } from "../../generated/client"
 import type { ContenidoSeed } from "../data/contenidos"
 
-const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL || process.env.DATABASE_URL })
-const adapter = new PrismaPg(pool)
-const prisma = new PrismaClient({ adapter })
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
+})
 
 /**
  * Fechas escalonadas (D15): con `orderBy: { createdAt: "desc" }` en las
