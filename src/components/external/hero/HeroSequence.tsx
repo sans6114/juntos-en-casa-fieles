@@ -13,9 +13,11 @@ if (typeof window !== "undefined") {
 }
 
 const LOADER_FRAMES = [
-  jecAssets.personaje.orando,
-  jecAssets.personaje.festejando,
-  jecAssets.personaje.apuntando,
+  jecAssets.personaje.alegre,
+  jecAssets.personaje.handsUp,
+  jecAssets.personaje.saludo,
+  jecAssets.personaje.señalando,
+  jecAssets.personaje.sorpresa,
 ];
 
 const FRAME_INTERVAL_MS = 420;
@@ -111,10 +113,10 @@ export function HeroSequence({ onIntroDone }: { onIntroDone: () => void }) {
           <Image
             src={jecAssets.logos.jecWhiteSvg}
             alt=""
-            width={90}
-            height={90}
+            width={160}
+            height={160}
             priority
-            className="mb-4 h-48 w-auto"
+            className="mb-4 h-56 max-h-[30vh] w-auto md:h-64"
           />
           <Image
             src={LOADER_FRAMES[frame]}
@@ -122,9 +124,9 @@ export function HeroSequence({ onIntroDone }: { onIntroDone: () => void }) {
             width={320}
             height={320}
             priority
-            className="h-auto w-[min(70vw,18rem)] md:w-[min(50vw,22rem)]"
+            className="h-auto max-h-[50vh] w-[min(55vw,14rem)] object-contain md:w-[min(45vw,18rem)]"
           />
-          <div className="mt-10 flex w-full max-w-xs flex-col items-center gap-3 md:max-w-sm">
+          <div className="mt-8 flex w-full max-w-xs flex-col items-center gap-3 md:max-w-sm">
             <span
               ref={progressRef}
               className="block h-4 w-full overflow-hidden rounded-full border-2 border-[var(--jec-bone)]"
