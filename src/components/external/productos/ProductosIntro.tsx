@@ -22,8 +22,9 @@ export function ProductosIntro() {
         <Image
           src={jecAssets.personaje.handsUp}
           alt=""
+          /* Relacion real del archivo (1080x1920), no 190x253. */
           width={190}
-          height={253}
+          height={338}
           className="hidden w-[190px] shrink-0 lg:block"
         />
       </div>

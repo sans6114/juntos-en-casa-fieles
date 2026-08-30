@@ -114,18 +114,28 @@ export function HeroSequence({ onIntroDone }: { onIntroDone: () => void }) {
       >
         <div className="relative flex flex-col items-center">
           <Image
-            src={jecAssets.logos.jecWhiteSvg}
+            src={jecAssets.logos.jecWhite}
             alt=""
-            width={160}
-            height={160}
+            /* Relacion REAL del archivo (728x1080), no 160x160. El alto lo pone
+             * el CSS (`h-48` / `md:h-[...]`) y el ancho es `auto`, asi que esto
+             * solo define la caja reservada y los candidatos del srcset: con
+             * 240 declarados salen 240w y 480w, y 480 cubre `h-48` hasta DPR 3. */
+            width={240}
+            height={356}
             priority
             className="mb-4 h-48 w-auto md:mb-6 md:h-[min(18dvh,9rem)]"
           />
           <Image
             src={LOADER_FRAMES[frame]}
             alt=""
+            /* Relacion REAL del archivo (1080x1920), no 320x320. Con SVG daba
+             * igual porque `next/image` no los optimiza y los pasaba crudos;
+             * ahora que son WebP, estos numeros definen la caja reservada y los
+             * candidatos del srcset. Con 320 declarados salen 320w y 640w: el
+             * hueco mas grande es el de desktop (`md:h-[min(44dvh,30rem)]` =
+             * 480px de alto -> 270 CSS px de ancho), que a DPR 2 pide 540. */
             width={320}
-            height={320}
+            height={569}
             priority
             className="h-auto w-[min(70vw,13rem)] md:h-[min(44dvh,30rem)] md:w-auto"
           />

@@ -21,23 +21,41 @@ export const jecAssets = {
       "/jec/background/background-960.avif 960w, /jec/background/background-1280.avif 1280w, /jec/background/background.avif 1920w",
   },
   logos: {
-    jecWhiteSvg: "/jec/logos/logoblanco.svg",
+    /** Ver la nota de `personaje`: era un SVG de 151 KB con un PNG adentro. */
+    jecWhite: "/jec/logos/logoblanco.webp",
     jecBlackPng: "/jec/logos/logonegro.png",
     ivsWhite: "/jec/logos/logoVSblanco.png",
     ivsBlack: "/jec/logos/logoVSnegro.png",
     wordmarkWhite: "/jec/recursos/logo-blanco.svg",
     wordmarkBlack: "/jec/recursos/logo-negro.svg",
   },
+  /** Los cinco fueguines eran `.svg` de 453 a 1136 KB: no eran vectores, eran
+   *  PNG de 1080x1080 embebidos en base64 dentro de un `viewBox`. Pesaban
+   *  4,6 MB entre los seis archivos de esta seccion mas el logo.
+   *
+   *  El problema no era solo el peso en disco: **`next/image` no optimiza SVG**,
+   *  los pasa crudos. Asi que el loader del hero, que cicla los cinco frames,
+   *  bajaba los cinco archivos enteros — y Lighthouse marcaba el fueguin como
+   *  elemento del LCP con 76% de render delay.
+   *
+   *  Ahora son WebP rasterizados a la resolucion NATIVA del PNG que tenian
+   *  adentro (1080x1920, el viewBox), asi que no se pierde un pixel de
+   *  resolucion: 4,6 MB -> 378 KB. Error medio por canal contra el render sin
+   *  perdida del SVG: 0,53. En el canal alfa: 0,000 exacto.
+   *
+   *  Los `.svg` SIGUEN en `public/`: `contenido-thumb-assets.ts` ofrece estos
+   *  paths en el selector del admin y el elegido queda guardado en la DB, asi
+   *  que una fila vieja tiene que poder seguir resolviendo su `.svg`. */
   personaje: {
+    /** Vector de verdad (900 bytes), no se toca. */
     llama: "/jec/personaje/llama.svg",
-    alegre: "/jec/personaje/fueguin-alegre.svg",
-    handsUp: "/jec/personaje/fueguin-hands-up.svg",
-    saludo: "/jec/personaje/fueguin-saludo.svg",
-    señalando: "/jec/personaje/fueguin-señalando.svg",
-    sorpresa: "/jec/personaje/fueguin-sorpresa.svg",
+    alegre: "/jec/personaje/fueguin-alegre.webp",
+    handsUp: "/jec/personaje/fueguin-hands-up.webp",
+    saludo: "/jec/personaje/fueguin-saludo.webp",
+    señalando: "/jec/personaje/fueguin-señalando.webp",
+    sorpresa: "/jec/personaje/fueguin-sorpresa.webp",
   },
   hero: {
-    finale: "/jec/hero/hero.png",
     /** Foto de fondo del frame que se expande. */
     background: "/jec/hero/hero-mobile-bg.webp",
     /** Capas sueltas con las que se compone el hero en todos los anchos. */
