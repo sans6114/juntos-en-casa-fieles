@@ -100,8 +100,9 @@ export function InscripcionAside() {
       <Image
         src={jecAssets.personaje.saludo}
         alt=""
+        /* Relacion real del archivo (1080x1920), no 200x267. */
         width={200}
-        height={267}
+        height={356}
         className="hidden w-[200px] self-start lg:block"
       />
     </div>

@@ -273,6 +273,23 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
   /* `fetchPriority="high"`: es el LCP de la home y compite con el resto de la
      cascada. `width`/`height` reservan la caja antes de decodificar. No pasa
      por `next/image` porque el CSS lo escala y recorta por frame de scroll. */
+  /* Estado inicial del media EN EL HTML DEL SERVIDOR, no despues de hidratar.
+   *
+   * `applyProgress(0)` arranca poniendo `scale(mediaZoom)`, pero el CSS de
+   * `.scroll-expand__media` no declaraba ningun transform. O sea que la imagen
+   * pintaba a escala 1 y, recien cuando bajaba y corria el JS, saltaba a 1.35:
+   * un repintado MAS GRANDE, que para Lighthouse es un candidato nuevo de LCP.
+   * Medido: la imagen terminaba de cargar a 1,4s y el LCP caia a 4,9s, con
+   * 3.457 ms (71%) de "render delay" puro esperando la hidratacion.
+   *
+   * `frame` y `scrim` no necesitan esto: su CSS ya coincide con lo que calcula
+   * `applyProgress(0)` —`inset(21% 29% 21% 29% round 24px)` y `opacity: 0`—,
+   * igual que el overlay. El media era el unico desalineado.
+   *
+   * No cambia lo que se ve: es exactamente el valor que el JS ponia un instante
+   * despues. Lo que se saca es el salto de escala en el medio. */
+  const mediaInitialStyle: CSSProperties = { transform: `scale(${mediaZoom})` };
+
   const img = (
     <img
       ref={mediaRef}
@@ -286,6 +303,7 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
       fetchPriority="high"
       decoding="async"
       draggable={false}
+      style={mediaInitialStyle}
     />
   );
 
@@ -300,6 +318,7 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
         muted
         loop
         playsInline
+        style={mediaInitialStyle}
       />
     ) : mediaAvifSrcSet ? (
       <>

@@ -6,6 +6,11 @@ import { jecAssets } from "@/lib/jec-assets"
  * imágenes OG, las capas de composición del hero (`hero.wordmark`,
  * `hero.cinta`, `hero.logo`) y los íconos (`iconos.*`).
  *
+ * También excluye `hero.finale` (`/jec/hero/hero.png`): pesa 6 MB y ninguna
+ * ruta lo optimiza al vuelo si se elige tal cual. Verificado antes de sacarlo
+ * que ninguna fila lo usaba — de hecho las 6 filas de `Contenido` tienen
+ * `imagenSrc` en null, así que ningún valor de esta lista está en uso todavía.
+ *
  * También excluye por ahora `galeria.*`: esas rutas en `jec-assets.ts`
  * todavía apuntan a `.jpg` inexistentes (se corrigen a `.webp` recién en el
  * slice de galería) y no son el tipo de asset de marca que hoy usa
@@ -18,7 +23,7 @@ import { jecAssets } from "@/lib/jec-assets"
  * puedan desincronizarse.
  */
 export const CONTENIDO_THUMB_ASSETS = [
-  { label: "Logos · JEC blanco", value: jecAssets.logos.jecWhiteSvg },
+  { label: "Logos · JEC blanco", value: jecAssets.logos.jecWhite },
   { label: "Logos · JEC negro", value: jecAssets.logos.jecBlackPng },
   { label: "Logos · IVS blanco", value: jecAssets.logos.ivsWhite },
   { label: "Logos · IVS negro", value: jecAssets.logos.ivsBlack },
@@ -30,7 +35,6 @@ export const CONTENIDO_THUMB_ASSETS = [
   { label: "Personaje · saludo", value: jecAssets.personaje.saludo },
   { label: "Personaje · señalando", value: jecAssets.personaje.señalando },
   { label: "Personaje · sorpresa", value: jecAssets.personaje.sorpresa },
-  { label: "Hero · final", value: jecAssets.hero.finale },
   { label: "Frases · esquina", value: jecAssets.frases.esquina },
   { label: "Recursos · huellas", value: jecAssets.recursos.huellas },
   { label: "Recursos · fondo de colores", value: jecAssets.recursos.backgroundColores },
