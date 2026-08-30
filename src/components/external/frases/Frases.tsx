@@ -100,8 +100,13 @@ export function Frases() {
           src={jecAssets.personaje.señalando}
           alt=""
           aria-hidden
-          width={672}
-          height={673}
+          /* 320x569 respeta la relacion real del archivo (1080x1920). Con
+           * 672x673 el srcset pedia el candidato de 1920w —61 KB— para un
+           * hueco que mide 192px en movil y 320 en `sm`. El alto no cambia:
+           * ya lo definia la relacion intrinseca de la imagen cargada, no
+           * estos atributos, que solo reservan la caja antes de cargar. */
+          width={320}
+          height={569}
           className="pointer-events-none absolute bottom-20 right-4 z-20 w-48 translate-x-[50%] translate-y-[50%] sm:w-80"
         />
       </div>
