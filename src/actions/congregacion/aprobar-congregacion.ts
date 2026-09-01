@@ -19,6 +19,10 @@ export async function aprobarCongregacion(id: string) {
     })
 
     revalidatePath("/admin/congregaciones")
+    // `/inscripcion` es estatica (prerender de build, sin revalidate):
+    // sin esta invalidacion el combobox publico sigue mostrando la lista
+    // de congregaciones congelada en el ultimo deploy.
+    revalidatePath("/inscripcion")
     return { ok: true as const }
   } catch (error) {
     console.error("Error aprobando congregación:", error)
