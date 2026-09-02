@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { getDownloadUrl } from "@vercel/blob"
 
-import { CtaButton, DownloadIcon, ImagesIcon, PlaceholderTag } from "@/components/external/shared"
+import { CtaButton, DownloadIcon, ImagesIcon } from "@/components/external/shared"
 import type { ContenidoPublicoDTO } from "@/interfaces/contenido"
 
 type PlacasDownloadProps = {
@@ -10,8 +10,8 @@ type PlacasDownloadProps = {
 
 /**
  * Panel de descarga de los archivos de un contenido. Solo aparece cuando hay
- * algo real que ofrecer; si no, el slot dice que todavía se están armando, así
- * nunca se ofrece una descarga que daría 404.
+ * algo real que ofrecer: sin archivos no se renderiza nada, ni siquiera el
+ * titulo, para no anunciar una seccion vacia.
  *
  * `getDownloadUrl` y no el atributo `download`: la URL de Vercel Blob es
  * cross-origin, y el browser IGNORA `download` en un `<a>` cross-origin —
@@ -20,6 +20,8 @@ type PlacasDownloadProps = {
  */
 export function PlacasDownload({ item }: PlacasDownloadProps) {
   const { placas, placasCount } = item
+
+  if (placas.length === 0) return null
 
   const documentos = placas.filter((archivo) => archivo.mime === "application/pdf")
   const imagenes = placas.filter((archivo) => archivo.mime !== "application/pdf")
@@ -35,16 +37,6 @@ export function PlacasDownload({ item }: PlacasDownloadProps) {
         <p className="mt-3 text-sm leading-relaxed text-[var(--suave)]">
           {placasCount} {placasCount === 1 ? "pieza lista" : "piezas listas"} para compartir.
         </p>
-      ) : null}
-
-      {placas.length === 0 ? (
-        <div className="mt-5 flex flex-col items-start gap-2">
-          <PlaceholderTag>Placas en preparación</PlaceholderTag>
-          <span className="text-[13px] leading-relaxed text-[var(--suave)]">
-            Todavía estamos armando las placas de esta charla. Cuando estén listas, el botón de
-            descarga aparece acá.
-          </span>
-        </div>
       ) : null}
 
       {documentos.map((documento) => (

@@ -1,5 +1,3 @@
-import { ContenidoThumb } from "@/components/external/contenidos"
-import { PlaceholderTag } from "@/components/external/shared"
 import type { ContenidoPublicoDTO } from "@/interfaces/contenido"
 
 type VideoEmbedProps = {
@@ -11,24 +9,11 @@ type VideoEmbedProps = {
  * - `youtube-nocookie.com` so a visitor is not tracked before pressing play.
  * - `loading="lazy"` so the iframe never competes with the page's LCP.
  *
- * With no `youtubeId` the frame falls back to the item's own thumbnail plus a
- * visible marker, rather than an embed pointing at a video that does not exist.
+ * With no `youtubeId` nothing renders at all — no thumbnail, no marker. A
+ * content item without a video simply has no video section.
  */
 export function VideoEmbed({ item }: VideoEmbedProps) {
-  if (!item.youtubeId) {
-    return (
-      <div>
-        <ContenidoThumb item={item} className="rounded-[6px]" />
-        <p className="mt-3 flex flex-wrap items-center gap-3">
-          <PlaceholderTag>Video pendiente</PlaceholderTag>
-          <span className="text-[13px] text-[var(--suave)]">
-            El video de esta charla todavía no está publicado. Cuando lo subamos, se reproduce
-            desde acá.
-          </span>
-        </p>
-      </div>
-    )
-  }
+  if (!item.youtubeId) return null
 
   return (
     <div>
