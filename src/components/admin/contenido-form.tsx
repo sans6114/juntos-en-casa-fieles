@@ -23,10 +23,13 @@ import {
   ActualizarContenidoSchema,
   CAMPO_A_CLASE,
   CrearContenidoSchema,
+  MIMES_ARCHIVO,
   TIPO_A_KIND,
+  contarPlacas,
   kindLabel,
   type CampoThumb,
   type ContenidoAdminDTO,
+  type ContenidoArchivoDTO,
   type ContenidoVista,
   type TipoContenido,
 } from "@/interfaces/contenido"
@@ -47,9 +50,11 @@ type ContenidoFormState = {
   orador: string
   youtubeId: string
   duracion: string
-  placasUrl: string
-  /** Nunca se tipea a mano: se deriva del PDF antes de subirlo. */
-  placasCount: number | undefined
+  /**
+   * Los archivos ya subidos a Blob, en el orden en que los ve el público. El
+   * conteo de placas NO vive acá: se deriva con `contarPlacas`.
+   */
+  archivos: ContenidoArchivoDTO[]
   campo: CampoThumb
   imagenSrc: string
   imagenCover: boolean
@@ -109,6 +114,20 @@ const CAMPO_OPCIONES: { value: CampoThumb; label: string }[] = [
   { value: "CAMPO_FUEGO", label: "Campo fuego" },
 ]
 
+/**
+ * `orden` es la posición en la lista, no un número que alguien elija. Se
+ * recalcula después de cada agregado, quitado o movimiento para que nunca
+ * queden huecos ni empates — el servidor vuelve a hacer lo mismo al guardar.
+ */
+function reordenar(archivos: ContenidoArchivoDTO[]): ContenidoArchivoDTO[] {
+  return archivos.map((archivo, indice) => ({ ...archivo, orden: indice }))
+}
+
+/** Nombre legible de un archivo subido: el último tramo de la URL de Blob. */
+function nombreDeArchivo(url: string): string {
+  return decodeURIComponent(url.split("/").pop() ?? url)
+}
+
 function toFormState(data?: ContenidoAdminDTO): ContenidoFormState {
   return {
     slug: data?.slug ?? "",
@@ -120,8 +139,7 @@ function toFormState(data?: ContenidoAdminDTO): ContenidoFormState {
     orador: data?.orador ?? "",
     youtubeId: data?.youtubeId ?? "",
     duracion: data?.duracion ?? "",
-    placasUrl: data?.placasUrl ?? "",
-    placasCount: data?.placasCount,
+    archivos: data?.archivos ?? [],
     campo: data?.campo ?? "CAMPO_PAPEL",
     imagenSrc: data?.imagenSrc ?? "",
     imagenCover: data?.imagenCover ?? false,
@@ -151,7 +169,7 @@ function formToVista(form: ContenidoFormState): ContenidoVista {
     session: form.sesion || undefined,
     speaker: form.orador || undefined,
     durationLabel: form.duracion || undefined,
-    placasCount: form.placasCount,
+    placasCount: contarPlacas(form.archivos),
   }
 }
 
@@ -181,45 +199,82 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
       sesion: siguientes.sesion === "oculto" ? "" : f.sesion,
       youtubeId: siguientes.youtubeId === "oculto" ? "" : f.youtubeId,
       duracion: siguientes.duracion === "oculto" ? "" : f.duracion,
-      placasUrl: siguientes.placas === "oculto" ? "" : f.placasUrl,
-      placasCount: siguientes.placas === "oculto" ? undefined : f.placasCount,
+      archivos: siguientes.placas === "oculto" ? [] : f.archivos,
     }))
   }
 
   /**
-   * placasCount se deriva acá, en el browser, ANTES de subir — nunca se
-   * tipea a mano (decisión 14). Orden: cuenta primero, upload después, para
-   * que un PDF corrupto avise antes del paso de red lento (design §B5).
-   * Un conteo fallido NO bloquea la subida: `placasUrl` es lo único que
-   * exige `reglasPorTipo` para RECURSOS, no `placasCount`.
+   * Sube N archivos y los AGREGA a los que ya estaban — el admin puede cargar
+   * el PDF en una tanda y los fondos de pantalla en otra.
+   *
+   * Cada archivo se maneja por separado: uno que falla no se lleva puestos a
+   * los que ya subieron. Por eso el `try` está adentro del loop y no afuera.
+   *
+   * Las páginas se cuentan solo para PDF, en el browser y ANTES de subir, para
+   * que un archivo corrupto avise antes del paso de red lento. Un conteo
+   * fallido NO bloquea la subida: `reglasPorTipo` exige que haya archivos, no
+   * que sepamos cuántas páginas tienen.
    */
-  const handlePlacasFile = async (file: File | undefined) => {
-    if (!file) return
+  const handleArchivosFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
 
     setIsUploadingPlacas(true)
-    try {
-      let paginas: number | undefined
-      try {
-        const bytes = await file.arrayBuffer()
-        const { PDFDocument } = await import("pdf-lib")
-        const doc = await PDFDocument.load(bytes, { ignoreEncryption: true })
-        paginas = doc.getPageCount()
-      } catch {
-        toast.error("No pudimos leer la cantidad de páginas del PDF")
+    const subidos: ContenidoArchivoDTO[] = []
+
+    for (const file of Array.from(files)) {
+      if (!(MIMES_ARCHIVO as readonly string[]).includes(file.type)) {
+        toast.error(`"${file.name}" no es un PDF ni una imagen`)
+        continue
       }
+      const mime = file.type as ContenidoArchivoDTO["mime"]
 
-      const { url } = await upload(file.name, file, {
-        access: "public",
-        handleUploadUrl: "/api/contenido/placas-upload",
-      })
+      try {
+        let paginas: number | undefined
+        if (mime === "application/pdf") {
+          try {
+            const bytes = await file.arrayBuffer()
+            const { PDFDocument } = await import("pdf-lib")
+            const doc = await PDFDocument.load(bytes, { ignoreEncryption: true })
+            paginas = doc.getPageCount()
+          } catch {
+            toast.error(`No pudimos leer la cantidad de páginas de "${file.name}"`)
+          }
+        }
 
-      setForm((f) => ({ ...f, placasUrl: url, placasCount: paginas }))
-      toast.success("PDF cargado")
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "No se pudo subir el PDF")
-    } finally {
-      setIsUploadingPlacas(false)
+        const { url } = await upload(file.name, file, {
+          access: "public",
+          handleUploadUrl: "/api/contenido/placas-upload",
+        })
+
+        // `orden` se reasigna al final contra la lista completa.
+        subidos.push({ url, mime, orden: 0, paginas })
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? `"${file.name}": ${error.message}` : `No se pudo subir "${file.name}"`
+        )
+      }
     }
+
+    setIsUploadingPlacas(false)
+    if (subidos.length === 0) return
+
+    setForm((f) => ({ ...f, archivos: reordenar([...f.archivos, ...subidos]) }))
+    toast.success(subidos.length === 1 ? "Archivo cargado" : `${subidos.length} archivos cargados`)
+  }
+
+  const quitarArchivo = (indice: number) => {
+    setForm((f) => ({ ...f, archivos: reordenar(f.archivos.filter((_, i) => i !== indice)) }))
+  }
+
+  const moverArchivo = (indice: number, direccion: -1 | 1) => {
+    const destino = indice + direccion
+    setForm((f) => {
+      if (destino < 0 || destino >= f.archivos.length) return f
+      const siguiente = [...f.archivos]
+      const [movido] = siguiente.splice(indice, 1)
+      siguiente.splice(destino, 0, movido)
+      return { ...f, archivos: reordenar(siguiente) }
+    })
   }
 
   /**
@@ -273,8 +328,7 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
       orador: form.orador,
       youtubeId: form.youtubeId,
       duracion: form.duracion,
-      placasUrl: form.placasUrl,
-      placasCount: form.placasCount,
+      archivos: form.archivos,
       campo: form.campo,
       imagenSrc: form.imagenSrc || undefined,
       imagenCover: form.imagenCover,
@@ -472,27 +526,80 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
         {campos.placas !== "oculto" ? (
           <div className="space-y-2">
             <Label htmlFor="placas">
-              PDF de placas {campos.placas === "opcional" ? "(opcional)" : null}
+              Archivos {campos.placas === "opcional" ? "(opcional)" : null}
             </Label>
             <Input
               id="placas"
               type="file"
-              accept="application/pdf"
+              multiple
+              accept={MIMES_ARCHIVO.join(",")}
               onChange={(e) => {
-                void handlePlacasFile(e.target.files?.[0])
+                void handleArchivosFiles(e.target.files)
+                // El input se limpia para que volver a elegir el mismo archivo
+                // dispare `change` de nuevo: sin esto, quitarlo de la lista y
+                // re-agregarlo no funcionaría.
+                e.target.value = ""
               }}
               disabled={isPending || isUploadingPlacas}
             />
+
             {isUploadingPlacas ? (
-              <p className="text-sm text-muted-foreground">Subiendo PDF...</p>
-            ) : form.placasUrl ? (
+              <p className="text-sm text-muted-foreground">Subiendo archivos...</p>
+            ) : (
               <p className="text-sm text-muted-foreground">
-                Archivo cargado
-                {form.placasCount ? ` — ${form.placasCount} placas` : ""}
+                PDF de placas e imágenes sueltas (fondos de pantalla). Se suben sin recomprimir.
               </p>
+            )}
+
+            {form.archivos.length > 0 ? (
+              <ul className="divide-y rounded-md border">
+                {form.archivos.map((archivo, indice) => (
+                  <li key={archivo.url} className="flex items-center gap-3 px-3 py-2">
+                    <span className="min-w-0 flex-1 truncate text-sm" title={archivo.url}>
+                      {nombreDeArchivo(archivo.url)}
+                    </span>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {archivo.paginas ? `${archivo.paginas} pág.` : "imagen"}
+                    </span>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Subir ${nombreDeArchivo(archivo.url)} un lugar`}
+                        onClick={() => moverArchivo(indice, -1)}
+                        disabled={isPending || indice === 0}
+                      >
+                        ↑
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Bajar ${nombreDeArchivo(archivo.url)} un lugar`}
+                        onClick={() => moverArchivo(indice, 1)}
+                        disabled={isPending || indice === form.archivos.length - 1}
+                      >
+                        ↓
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Quitar ${nombreDeArchivo(archivo.url)}`}
+                        onClick={() => quitarArchivo(indice)}
+                        disabled={isPending}
+                      >
+                        Quitar
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             ) : null}
-            {errores.placasUrl ? (
-              <p className="text-sm text-destructive">{errores.placasUrl}</p>
+
+            {errores.archivos ? (
+              <p className="text-sm text-destructive">{errores.archivos}</p>
             ) : null}
           </div>
         ) : null}
@@ -601,7 +708,12 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
             <li>Edición: {form.edicion || "—"}</li>
             <li>Duración: {form.duracion || "—"}</li>
             <li>YouTube: {form.youtubeId ? "cargado" : "sin cargar"}</li>
-            <li>Placas: {form.placasUrl ? "archivo cargado" : "sin cargar"}</li>
+            <li>
+              Placas:{" "}
+              {form.archivos.length > 0
+                ? `${form.archivos.length} ${form.archivos.length === 1 ? "archivo" : "archivos"}`
+                : "sin cargar"}
+            </li>
           </ul>
         </div>
       </aside>

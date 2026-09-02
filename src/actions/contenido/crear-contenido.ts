@@ -32,8 +32,17 @@ export async function crearContenido(data: CrearContenidoDTO) {
         orador: parsed.data.orador ?? null,
         youtubeId: parsed.data.youtubeId ?? null,
         duracion: parsed.data.duracion ?? null,
-        placasUrl: parsed.data.placasUrl ?? null,
-        placasCount: parsed.data.placasCount ?? null,
+        // Nested create: los archivos nacen junto al contenido, en la misma
+        // escritura, así no puede quedar un RECURSOS sin sus placas si algo
+        // falla en el medio.
+        archivos: {
+          create: parsed.data.archivos.map((archivo, indice) => ({
+            url: archivo.url,
+            mime: archivo.mime,
+            orden: indice,
+            paginas: archivo.paginas ?? null,
+          })),
+        },
         campo: parsed.data.campo,
         imagenSrc: parsed.data.imagenSrc ?? null,
         imagenCover: parsed.data.imagenCover,

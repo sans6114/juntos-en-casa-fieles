@@ -23,8 +23,6 @@ export type ContenidoSeed = {
   orador?: string
   youtubeId?: string
   duracion?: string
-  placasUrl?: string
-  placasCount?: number
   campo: CampoThumb
   imagenSrc?: string
   imagenCover?: boolean

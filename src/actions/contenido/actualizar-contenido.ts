@@ -39,8 +39,19 @@ export async function actualizarContenido(data: ActualizarContenidoDTO) {
         orador: parsed.data.orador ?? null,
         youtubeId: parsed.data.youtubeId ?? null,
         duracion: parsed.data.duracion ?? null,
-        placasUrl: parsed.data.placasUrl ?? null,
-        placasCount: parsed.data.placasCount ?? null,
+        // La lista del form es la fuente completa: se reemplaza entera en vez
+        // de intentar un diff. `deleteMany` + `create` corren dentro del mismo
+        // update, así que Prisma los envuelve en una transacción — nunca queda
+        // un contenido con los archivos viejos borrados y los nuevos sin crear.
+        archivos: {
+          deleteMany: {},
+          create: parsed.data.archivos.map((archivo, indice) => ({
+            url: archivo.url,
+            mime: archivo.mime,
+            orden: indice,
+            paginas: archivo.paginas ?? null,
+          })),
+        },
         campo: parsed.data.campo,
         imagenSrc: parsed.data.imagenSrc ?? null,
         imagenCover: parsed.data.imagenCover,

@@ -1,7 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import { toContenidoPublicoDTO } from "@/lib/data/contenidos"
+import { INCLUIR_ARCHIVOS, toContenidoPublicoDTO } from "@/lib/data/contenidos"
 import type { ContenidoKind, ContenidoPublicoDTO, TipoContenido } from "@/interfaces/contenido"
 
 const KIND_A_TIPO: Record<ContenidoKind, TipoContenido> = {
@@ -18,6 +18,7 @@ export async function obtenerContenidosPublicos(
       publicado: true,
       ...(kind ? { tipo: KIND_A_TIPO[kind] } : {}),
     },
+    include: INCLUIR_ARCHIVOS,
     orderBy: { createdAt: "desc" }, // D16: no existe columna `orden`
   })
 

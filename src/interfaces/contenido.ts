@@ -12,6 +12,35 @@ export type CampoThumb = "CAMPO_PAPEL" | "CAMPO_TINTA" | "CAMPO_FUEGO"
 /** Kind presentacional público, usado por el catálogo y por la vista previa del admin. */
 export type ContenidoKind = "predica" | "video" | "recursos"
 
+/**
+ * Tipos que acepta un archivo de placas. El PDF sigue siendo el caso original;
+ * las imágenes se agregaron para poder subir material suelto (fondos de
+ * pantalla, placas individuales) sin tener que empaquetarlo en un PDF.
+ *
+ * A diferencia de la miniatura, estos archivos NO se optimizan en el browser:
+ * son material de descarga, y bajarles la resolución los arruina.
+ */
+export const MIMES_ARCHIVO = ["application/pdf", "image/jpeg", "image/png"] as const
+export type MimeArchivo = (typeof MIMES_ARCHIVO)[number]
+
+export type ContenidoArchivoDTO = {
+  url: string
+  mime: MimeArchivo
+  orden: number
+  /** Solo PDF: cuántas páginas trae. Se deriva en el browser antes de subir. */
+  paginas?: number
+}
+
+/**
+ * Cuántas placas ofrece una lista de archivos: un PDF aporta sus páginas, una
+ * imagen aporta 1. No se persiste — se deriva acá para que el número que ve el
+ * público y el que muestra la vista previa del admin no puedan divergir.
+ */
+export function contarPlacas(archivos: ContenidoArchivoDTO[]): number | undefined {
+  if (archivos.length === 0) return undefined
+  return archivos.reduce((total, archivo) => total + (archivo.paginas ?? 1), 0)
+}
+
 export type ContenidoThumbVista = {
   field: "campo-papel" | "campo-tinta" | "campo-fuego"
   src?: string
@@ -38,7 +67,8 @@ export type ContenidoPublicoDTO = ContenidoVista & {
   slug: string
   edition: number
   youtubeId?: string
-  placasUrl?: string
+  /** Archivos descargables, ya ordenados. Vacío cuando no hay ninguno. */
+  placas: ContenidoArchivoDTO[]
 }
 
 /** Fila completa tal como la consume el panel de administración. */
@@ -53,8 +83,7 @@ export type ContenidoAdminDTO = {
   orador?: string
   youtubeId?: string
   duracion?: string
-  placasUrl?: string
-  placasCount?: number
+  archivos: ContenidoArchivoDTO[]
   campo: CampoThumb
   imagenSrc?: string
   imagenCover: boolean
@@ -112,6 +141,18 @@ const textoOpcional = z
   .optional()
   .transform((v) => (v ? v : undefined))
 
+/**
+ * Un archivo de placas. La URL siempre la produce `upload()` de Vercel Blob:
+ * no hay forma de tipearla a mano en el panel, y validarla acá evita que un
+ * cliente manipulado guarde un link a cualquier lado.
+ */
+const ArchivoSchema = z.object({
+  url: z.string().regex(URL_BLOB, "El archivo tiene que subirse desde el panel"),
+  mime: z.enum(MIMES_ARCHIVO, "Tipo de archivo no permitido"),
+  orden: z.number().int().nonnegative(),
+  paginas: z.number().int().positive().optional(),
+})
+
 const contenidoBase = z.object({
   slug: z
     .string()
@@ -126,8 +167,7 @@ const contenidoBase = z.object({
   orador: textoOpcional,
   youtubeId: textoOpcional,
   duracion: textoOpcional,
-  placasUrl: textoOpcional,
-  placasCount: z.number().int().optional(),
+  archivos: z.array(ArchivoSchema).default([]),
   campo: z.enum(["CAMPO_PAPEL", "CAMPO_TINTA", "CAMPO_FUEGO"], "Elegí un campo de fondo"),
   imagenSrc: textoOpcional.refine(
     (v) => v === undefined || URL_BLOB.test(v) || RUTA_ASSET_LEGACY.test(v),
@@ -156,11 +196,21 @@ function reglasPorTipo(data: z.infer<typeof contenidoBase>, ctx: z.RefinementCtx
       message: "Pegá solo el id del video, no la URL completa",
     })
   }
-  if (data.tipo === "RECURSOS" && !data.placasUrl) {
+  if (data.tipo === "RECURSOS" && data.archivos.length === 0) {
     ctx.addIssue({
       code: "custom",
-      path: ["placasUrl"],
-      message: "Un recurso necesita el PDF de placas",
+      path: ["archivos"],
+      message: "Un recurso necesita al menos un archivo",
+    })
+  }
+  // La inversa: una prédica o un video no cargan archivos propios. Una prédica
+  // llega a sus placas apuntando a un RECURSOS (`recursoId`); dejarla cargar
+  // los suyos daría dos fuentes para lo mismo.
+  if (data.tipo !== "RECURSOS" && data.archivos.length > 0) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["archivos"],
+      message: "Solo un contenido de tipo Recursos puede tener archivos",
     })
   }
 }
