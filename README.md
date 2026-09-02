@@ -42,7 +42,7 @@ El seed crea el usuario **ADMIN** a partir de `ADMIN_EMAIL` / `ADMIN_PASSWORD`. 
 | `ADMIN_PASSWORD` | Password del admin (solo para el seed; se guarda hasheada) |
 | `AUTH_SECRET` | Secreto de Auth.js para firmar la sesión JWT |
 | `NEXT_PUBLIC_SITE_URL` | URL pública del sitio |
-| `BLOB_READ_WRITE_TOKEN` | Token de Vercel Blob para subir las placas (PDF) de RECURSOS |
+| `BLOB_READ_WRITE_TOKEN` | Token de Vercel Blob para subir miniaturas y archivos de contenido |
 
 ## Roles
 
@@ -105,7 +105,7 @@ flowchart TD
 | `npm run lint` | ESLint |
 | `npx prisma studio` | Explorar la base de datos |
 | `npx prisma db seed` | Poblar admin, congregaciones e inscripciones de prueba |
-nada
+
 ## Estructura de carpetas
 
 ```

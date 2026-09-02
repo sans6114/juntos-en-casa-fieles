@@ -1,5 +1,4 @@
 import { z } from "zod"
-import { CONTENIDO_THUMB_ASSETS } from "@/lib/contenido-thumb-assets"
 
 /**
  * Valores del enum Prisma `TipoContenido`/`CampoThumb`, declarados acá como
@@ -93,14 +92,18 @@ export function kindLabel(kind: ContenidoKind): string {
 }
 
 /**
- * Valores permitidos para `imagenSrc`: exactamente los de `CONTENIDO_THUMB_ASSETS`
- * (`src/lib/contenido-thumb-assets.ts`), la misma fuente que alimenta el
- * `<Select>` del admin. `as [string, ...string[]]` solo afirma no-vaciedad.
+ * `imagenSrc` acepta DOS formas, y las dos son necesarias:
+ *
+ * 1. Una URL de Vercel Blob: lo que sube el admin desde su file system. Es la
+ *    unica forma que el panel puede producir hoy — el `<Select>` de assets
+ *    curados ya no existe.
+ * 2. Una ruta relativa `/jec/...`: filas viejas, anteriores al upload. NO es
+ *    convivencia en la UI (no hay forma de elegir una de esas desde el panel):
+ *    es compatibilidad de datos. Sin esta rama, editar un contenido viejo
+ *    fallaria la validacion aunque nadie haya tocado la imagen.
  */
-const THUMB_VALUES = CONTENIDO_THUMB_ASSETS.map((asset) => asset.value) as [
-  string,
-  ...string[],
-]
+const RUTA_ASSET_LEGACY = /^\/jec\/[\w./-]+$/
+const URL_BLOB = /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/\S+$/i
 
 /** Normaliza un input de texto opcional: "" (sin tocar) llega como `undefined`. */
 const textoOpcional = z
@@ -126,7 +129,10 @@ const contenidoBase = z.object({
   placasUrl: textoOpcional,
   placasCount: z.number().int().optional(),
   campo: z.enum(["CAMPO_PAPEL", "CAMPO_TINTA", "CAMPO_FUEGO"], "Elegí un campo de fondo"),
-  imagenSrc: z.enum(THUMB_VALUES, "El thumbnail debe ser uno de los valores permitidos").optional(),
+  imagenSrc: textoOpcional.refine(
+    (v) => v === undefined || URL_BLOB.test(v) || RUTA_ASSET_LEGACY.test(v),
+    "La miniatura tiene que subirse desde el panel"
+  ),
   imagenCover: z.boolean(),
   imagenAtenuada: z.boolean(),
   publicado: z.boolean(),

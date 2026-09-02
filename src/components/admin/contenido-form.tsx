@@ -30,7 +30,7 @@ import {
   type ContenidoVista,
   type TipoContenido,
 } from "@/interfaces/contenido"
-import { CONTENIDO_THUMB_ASSETS } from "@/lib/contenido-thumb-assets"
+import { optimizarThumb } from "@/lib/image/optimizar-thumb"
 
 type ContenidoFormProps = {
   /** Presente en modo edición; ausente en modo creación. */
@@ -161,6 +161,7 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
   const [errores, setErrores] = useState<Partial<Record<string, string>>>({})
   const [isPending, startTransition] = useTransition()
   const [isUploadingPlacas, setIsUploadingPlacas] = useState(false)
+  const [isUploadingThumb, setIsUploadingThumb] = useState(false)
 
   const campos = CAMPOS_POR_TIPO[form.tipo]
 
@@ -218,6 +219,33 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
       toast.error(error instanceof Error ? error.message : "No se pudo subir el PDF")
     } finally {
       setIsUploadingPlacas(false)
+    }
+  }
+
+  /**
+   * Mismo orden que `handlePlacasFile`: trabajo local primero, red después.
+   * A diferencia de placas, acá un fallo de la etapa local SÍ aborta — sin el
+   * WebP convertido no hay nada que subir, mientras que un conteo de páginas
+   * fallido deja igual un PDF válido.
+   */
+  const handleThumbFile = async (file: File | undefined) => {
+    if (!file) return
+
+    setIsUploadingThumb(true)
+    try {
+      const optimizada = await optimizarThumb(file)
+
+      const { url } = await upload(optimizada.name, optimizada, {
+        access: "public",
+        handleUploadUrl: "/api/contenido/thumb-upload",
+      })
+
+      setForm((f) => ({ ...f, imagenSrc: url }))
+      toast.success("Miniatura cargada")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo subir la miniatura")
+    } finally {
+      setIsUploadingThumb(false)
     }
   }
 
@@ -492,23 +520,27 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="imagenSrc">Thumbnail (opcional)</Label>
-            <Select
-              value={form.imagenSrc || undefined}
-              onValueChange={(value) => set("imagenSrc", (value as string) ?? "")}
-              disabled={isPending}
-            >
-              <SelectTrigger id="imagenSrc" className="w-full">
-                <SelectValue placeholder="Sin imagen" />
-              </SelectTrigger>
-              <SelectContent>
-                {CONTENIDO_THUMB_ASSETS.map((asset) => (
-                  <SelectItem key={asset.value} value={asset.value}>
-                    {asset.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="imagenSrc">Miniatura (opcional)</Label>
+            <Input
+              id="imagenSrc"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => {
+                void handleThumbFile(e.target.files?.[0])
+              }}
+              disabled={isPending || isUploadingThumb}
+            />
+            {isUploadingThumb ? (
+              <p className="text-sm text-muted-foreground">Subiendo miniatura...</p>
+            ) : form.imagenSrc ? (
+              <p className="text-sm text-muted-foreground">
+                Imagen cargada — se ve en la vista previa
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Se reduce a 1280 px antes de subirse. El campo de fondo se usa si no cargás ninguna.
+              </p>
+            )}
             {errores.imagenSrc ? (
               <p className="text-sm text-destructive">{errores.imagenSrc}</p>
             ) : null}
