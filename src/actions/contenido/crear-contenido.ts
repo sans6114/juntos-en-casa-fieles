@@ -70,6 +70,10 @@ export async function crearContenido(data: CrearContenidoDTO) {
 
     revalidatePath("/admin/contenidos")
     revalidatePath("/contenidos")
+    // Con `generateStaticParams`, un 404 negativo de esta URL —de alguien que
+    // la visito antes de que el contenido existiera— queda cacheado. Antes
+    // faltar esta linea era inofensivo; ahora no.
+    revalidatePath(`/contenidos/${parsed.data.slug}`)
     return { ok: true as const, id: creado.id }
   } catch (error) {
     console.error("Error creando contenido:", error)

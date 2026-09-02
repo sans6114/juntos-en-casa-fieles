@@ -2,7 +2,11 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { obtenerContenidoPorSlug, obtenerContenidosRelacionados } from "@/actions"
+import {
+  obtenerContenidoPorSlug,
+  obtenerContenidosPublicos,
+  obtenerContenidosRelacionados,
+} from "@/actions"
 import { ContenidoCard } from "@/components/external/contenidos"
 import {
   ArrowLeftIcon,
@@ -22,6 +26,20 @@ import { VideoEmbed } from "./ui/VideoEmbed"
 
 type ContenidoPageProps = {
   params: Promise<{ slug: string }>
+}
+
+/**
+ * Prerenderiza en el build la pagina de cada contenido publicado, siguiendo el
+ * precedente de `productos/[slug]/page.tsx:28`. `dynamicParams` queda en su
+ * default (`true`): un slug que no estaba en el build se renderiza on-demand y
+ * despues queda cacheado, y `crearContenido` lo revalida al crearlo.
+ *
+ * Devuelve solo los que el catalogo lista: un RECURSOS vinculado a una predica
+ * no entra aca, pero su URL directa sigue funcionando por `dynamicParams`.
+ */
+export async function generateStaticParams() {
+  const contenidos = await obtenerContenidosPublicos()
+  return contenidos.map((contenido) => ({ slug: contenido.slug }))
 }
 
 export async function generateMetadata({ params }: ContenidoPageProps): Promise<Metadata> {
