@@ -105,6 +105,14 @@ flowchart TD
 | `npm run lint` | ESLint |
 | `npx prisma studio` | Explorar la base de datos |
 | `npx prisma db seed` | Poblar admin, congregaciones e inscripciones de prueba |
+| `npm run blobs:huerfanos` | Reportar archivos de Vercel Blob que ya nadie referencia |
+| `npm run blobs:huerfanos -- --borrar` | Borrarlos (el comando sin el flag solo reporta) |
+
+> **Ojo con `blobs:huerfanos`:** cruza el store de Blob contra la base que
+> apunte `DATABASE_URL`. Correrlo con una base local contra el Blob de
+> producción reportaría —y con `--borrar`, eliminaría— todo el store. Ignora
+> los archivos subidos en las últimas 24 h (`--horas N` para cambiarlo), porque
+> pueden pertenecer a un formulario que alguien todavía está completando.
 
 ## Estructura de carpetas
 

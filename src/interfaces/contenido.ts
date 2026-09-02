@@ -140,6 +140,14 @@ export function kindLabel(kind: ContenidoKind): string {
 const RUTA_ASSET_LEGACY = /^\/jec\/[\w./-]+$/
 const URL_BLOB = /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/\S+$/i
 
+/**
+ * Si una URL apunta a nuestro store de Blob. Lo usa la limpieza de huérfanos
+ * para no intentar borrar un asset de `public/jec/`, que no vive en Blob.
+ */
+export function esUrlDeBlob(valor: string): boolean {
+  return URL_BLOB.test(valor)
+}
+
 /** Normaliza un input de texto opcional: "" (sin tocar) llega como `undefined`. */
 const textoOpcional = z
   .string()
