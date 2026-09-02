@@ -24,7 +24,6 @@ import {
   ActualizarContenidoSchema,
   CAMPO_A_CLASE,
   CrearContenidoSchema,
-  MIMES_ARCHIVO,
   TIPO_A_KIND,
   contarPlacas,
   kindLabel,
@@ -35,6 +34,9 @@ import {
   type TipoContenido,
 } from "@/interfaces/contenido"
 import { optimizarThumb } from "@/lib/image/optimizar-thumb"
+
+import { ArchivosUploader } from "./archivos-uploader"
+import { CrearRecursoDialog } from "./crear-recurso-dialog"
 
 type ContenidoFormProps = {
   /** Presente en modo edición; ausente en modo creación. */
@@ -129,20 +131,6 @@ const CAMPO_OPCIONES: { value: CampoThumb; label: string }[] = [
   { value: "CAMPO_FUEGO", label: "Campo fuego" },
 ]
 
-/**
- * `orden` es la posición en la lista, no un número que alguien elija. Se
- * recalcula después de cada agregado, quitado o movimiento para que nunca
- * queden huecos ni empates — el servidor vuelve a hacer lo mismo al guardar.
- */
-function reordenar(archivos: ContenidoArchivoDTO[]): ContenidoArchivoDTO[] {
-  return archivos.map((archivo, indice) => ({ ...archivo, orden: indice }))
-}
-
-/** Nombre legible de un archivo subido: el último tramo de la URL de Blob. */
-function nombreDeArchivo(url: string): string {
-  return decodeURIComponent(url.split("/").pop() ?? url)
-}
-
 function toFormState(data?: ContenidoAdminDTO): ContenidoFormState {
   return {
     slug: data?.slug ?? "",
@@ -194,8 +182,11 @@ export function ContenidoForm({ initialData, recursos }: ContenidoFormProps) {
   const [form, setForm] = useState<ContenidoFormState>(() => toFormState(initialData))
   const [errores, setErrores] = useState<Partial<Record<string, string>>>({})
   const [isPending, startTransition] = useTransition()
-  const [isUploadingPlacas, setIsUploadingPlacas] = useState(false)
+  const [subiendoArchivos, setSubiendoArchivos] = useState(false)
   const [isUploadingThumb, setIsUploadingThumb] = useState(false)
+  // La lista arranca en lo que resolvió la página server, pero crece cuando el
+  // admin crea un recurso desde el diálogo sin recargar.
+  const [recursosDisponibles, setRecursosDisponibles] = useState(recursos)
 
   const campos = CAMPOS_POR_TIPO[form.tipo]
 
@@ -221,82 +212,8 @@ export function ContenidoForm({ initialData, recursos }: ContenidoFormProps) {
   }
 
   /**
-   * Sube N archivos y los AGREGA a los que ya estaban — el admin puede cargar
-   * el PDF en una tanda y los fondos de pantalla en otra.
-   *
-   * Cada archivo se maneja por separado: uno que falla no se lleva puestos a
-   * los que ya subieron. Por eso el `try` está adentro del loop y no afuera.
-   *
-   * Las páginas se cuentan solo para PDF, en el browser y ANTES de subir, para
-   * que un archivo corrupto avise antes del paso de red lento. Un conteo
-   * fallido NO bloquea la subida: `reglasPorTipo` exige que haya archivos, no
-   * que sepamos cuántas páginas tienen.
-   */
-  const handleArchivosFiles = async (files: FileList | null) => {
-    if (!files || files.length === 0) return
-
-    setIsUploadingPlacas(true)
-    const subidos: ContenidoArchivoDTO[] = []
-
-    for (const file of Array.from(files)) {
-      if (!(MIMES_ARCHIVO as readonly string[]).includes(file.type)) {
-        toast.error(`"${file.name}" no es un PDF ni una imagen`)
-        continue
-      }
-      const mime = file.type as ContenidoArchivoDTO["mime"]
-
-      try {
-        let paginas: number | undefined
-        if (mime === "application/pdf") {
-          try {
-            const bytes = await file.arrayBuffer()
-            const { PDFDocument } = await import("pdf-lib")
-            const doc = await PDFDocument.load(bytes, { ignoreEncryption: true })
-            paginas = doc.getPageCount()
-          } catch {
-            toast.error(`No pudimos leer la cantidad de páginas de "${file.name}"`)
-          }
-        }
-
-        const { url } = await upload(file.name, file, {
-          access: "public",
-          handleUploadUrl: "/api/contenido/placas-upload",
-        })
-
-        // `orden` se reasigna al final contra la lista completa.
-        subidos.push({ url, mime, orden: 0, paginas })
-      } catch (error) {
-        toast.error(
-          error instanceof Error ? `"${file.name}": ${error.message}` : `No se pudo subir "${file.name}"`
-        )
-      }
-    }
-
-    setIsUploadingPlacas(false)
-    if (subidos.length === 0) return
-
-    setForm((f) => ({ ...f, archivos: reordenar([...f.archivos, ...subidos]) }))
-    toast.success(subidos.length === 1 ? "Archivo cargado" : `${subidos.length} archivos cargados`)
-  }
-
-  const quitarArchivo = (indice: number) => {
-    setForm((f) => ({ ...f, archivos: reordenar(f.archivos.filter((_, i) => i !== indice)) }))
-  }
-
-  const moverArchivo = (indice: number, direccion: -1 | 1) => {
-    const destino = indice + direccion
-    setForm((f) => {
-      if (destino < 0 || destino >= f.archivos.length) return f
-      const siguiente = [...f.archivos]
-      const [movido] = siguiente.splice(indice, 1)
-      siguiente.splice(destino, 0, movido)
-      return { ...f, archivos: reordenar(siguiente) }
-    })
-  }
-
-  /**
-   * Mismo orden que `handlePlacasFile`: trabajo local primero, red después.
-   * A diferencia de placas, acá un fallo de la etapa local SÍ aborta — sin el
+   * Mismo orden que la subida de archivos: trabajo local primero, red después.
+   * A diferencia de esa, acá un fallo de la etapa local SÍ aborta — sin el
    * WebP convertido no hay nada que subir, mientras que un conteo de páginas
    * fallido deja igual un PDF válido.
    */
@@ -542,84 +459,15 @@ export function ContenidoForm({ initialData, recursos }: ContenidoFormProps) {
         ) : null}
 
         {campos.placas !== "oculto" ? (
-          <div className="space-y-2">
-            <Label htmlFor="placas">
-              Archivos {campos.placas === "opcional" ? "(opcional)" : null}
-            </Label>
-            <Input
-              id="placas"
-              type="file"
-              multiple
-              accept={MIMES_ARCHIVO.join(",")}
-              onChange={(e) => {
-                void handleArchivosFiles(e.target.files)
-                // El input se limpia para que volver a elegir el mismo archivo
-                // dispare `change` de nuevo: sin esto, quitarlo de la lista y
-                // re-agregarlo no funcionaría.
-                e.target.value = ""
-              }}
-              disabled={isPending || isUploadingPlacas}
-            />
-
-            {isUploadingPlacas ? (
-              <p className="text-sm text-muted-foreground">Subiendo archivos...</p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                PDF de placas e imágenes sueltas (fondos de pantalla). Se suben sin recomprimir.
-              </p>
-            )}
-
-            {form.archivos.length > 0 ? (
-              <ul className="divide-y rounded-md border">
-                {form.archivos.map((archivo, indice) => (
-                  <li key={archivo.url} className="flex items-center gap-3 px-3 py-2">
-                    <span className="min-w-0 flex-1 truncate text-sm" title={archivo.url}>
-                      {nombreDeArchivo(archivo.url)}
-                    </span>
-                    <span className="shrink-0 text-xs text-muted-foreground">
-                      {archivo.paginas ? `${archivo.paginas} pág.` : "imagen"}
-                    </span>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        aria-label={`Subir ${nombreDeArchivo(archivo.url)} un lugar`}
-                        onClick={() => moverArchivo(indice, -1)}
-                        disabled={isPending || indice === 0}
-                      >
-                        ↑
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        aria-label={`Bajar ${nombreDeArchivo(archivo.url)} un lugar`}
-                        onClick={() => moverArchivo(indice, 1)}
-                        disabled={isPending || indice === form.archivos.length - 1}
-                      >
-                        ↓
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        aria-label={`Quitar ${nombreDeArchivo(archivo.url)}`}
-                        onClick={() => quitarArchivo(indice)}
-                        disabled={isPending}
-                      >
-                        Quitar
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-
-            {errores.archivos ? (
-              <p className="text-sm text-destructive">{errores.archivos}</p>
-            ) : null}
-          </div>
+          <ArchivosUploader
+            id="placas"
+            label={`Archivos${campos.placas === "opcional" ? " (opcional)" : ""}`}
+            archivos={form.archivos}
+            onChange={(archivos) => set("archivos", archivos)}
+            onUploadingChange={setSubiendoArchivos}
+            disabled={isPending}
+            error={errores.archivos}
+          />
         ) : null}
 
         {campos.recurso !== "oculto" ? (
@@ -627,29 +475,40 @@ export function ContenidoForm({ initialData, recursos }: ContenidoFormProps) {
             <Label htmlFor="recursoId">
               Recurso asociado {campos.recurso === "opcional" ? "(opcional)" : null}
             </Label>
-            <Select
-              value={form.recursoId || SIN_RECURSO}
-              onValueChange={(value) =>
-                set("recursoId", value === SIN_RECURSO ? "" : ((value as string) ?? ""))
-              }
-              disabled={isPending}
-            >
-              <SelectTrigger id="recursoId" className="w-full">
-                <SelectValue placeholder="Sin recurso" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={SIN_RECURSO}>Sin recurso</SelectItem>
-                {recursos.map((recurso) => (
-                  <SelectItem key={recurso.id} value={recurso.id}>
-                    {recurso.titulo}
-                    {recurso.publicado ? "" : " (borrador)"}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-wrap items-center gap-2">
+              <Select
+                value={form.recursoId || SIN_RECURSO}
+                onValueChange={(value) =>
+                  set("recursoId", value === SIN_RECURSO ? "" : ((value as string) ?? ""))
+                }
+                disabled={isPending}
+              >
+                <SelectTrigger id="recursoId" className="min-w-0 flex-1">
+                  <SelectValue placeholder="Sin recurso" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={SIN_RECURSO}>Sin recurso</SelectItem>
+                  {recursosDisponibles.map((recurso) => (
+                    <SelectItem key={recurso.id} value={recurso.id}>
+                      {recurso.titulo}
+                      {recurso.publicado ? "" : " (borrador)"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <CrearRecursoDialog
+                edicion={form.edicion}
+                disabled={isPending}
+                onCreado={(recurso) => {
+                  setRecursosDisponibles((actuales) => [recurso, ...actuales])
+                  set("recursoId", recurso.id)
+                }}
+              />
+            </div>
             <p className="text-sm text-muted-foreground">
               Las placas de esta prédica salen del recurso que elijas. Al vincularlo, deja de
-              aparecer como card propia en el catálogo.
+              aparecer como card propia en el catálogo. Si todavía no existe, crealo acá sin
+              perder lo que llevás cargado.
             </p>
             {errores.recursoId ? (
               <p className="text-sm text-destructive">{errores.recursoId}</p>
@@ -734,7 +593,9 @@ export function ContenidoForm({ initialData, recursos }: ContenidoFormProps) {
           </Label>
         </div>
 
-        <Button type="submit" disabled={isPending}>
+        {/* Bloqueado tambien durante las subidas: guardar con un upload en vuelo
+            descartaba el archivo, porque su URL todavia no habia entrado al estado. */}
+          <Button type="submit" disabled={isPending || subiendoArchivos || isUploadingThumb}>
           {isPending ? "Guardando..." : initialData ? "Guardar cambios" : "Crear contenido"}
         </Button>
       </div>
