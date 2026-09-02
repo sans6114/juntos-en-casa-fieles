@@ -123,6 +123,14 @@ model Contenido {
   /// placas ya no se persiste: se DERIVA de esta lista en los mappers de
   /// `src/lib/data/contenidos.ts`, para que no se pueda desincronizar.
   archivos       ContenidoArchivo[]
+  /// Solo PREDICA: apunta al RECURSOS que tiene sus placas. Un mismo recurso
+  /// puede servir a varias predicas, por eso es una FK y no una relacion 1-1.
+  /// Un recurso apuntado deja de listarse como card propia en el catalogo
+  /// publico (`predicas: { none: {} }` en `obtenerContenidosPublicos`), para no
+  /// mostrar la predica y sus placas como dos entradas casi identicas.
+  recursoId      String?
+  recurso        Contenido?         @relation("PredicaRecurso", fields: [recursoId], references: [id], onDelete: SetNull)
+  predicas       Contenido[]        @relation("PredicaRecurso")
   campo          CampoThumb
   imagenSrc      String?
   imagenCover    Boolean            @default(false)
@@ -130,6 +138,8 @@ model Contenido {
   publicado      Boolean            @default(true)
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
+
+  @@index([recursoId])
 }
 
 /// Un archivo descargable de un contenido RECURSOS: el PDF de placas, o cada

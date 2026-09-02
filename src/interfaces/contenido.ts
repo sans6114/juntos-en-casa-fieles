@@ -67,7 +67,11 @@ export type ContenidoPublicoDTO = ContenidoVista & {
   slug: string
   edition: number
   youtubeId?: string
-  /** Archivos descargables, ya ordenados. Vacío cuando no hay ninguno. */
+  /**
+   * Archivos descargables, ya ordenados. Un RECURSOS trae los suyos; una
+   * PREDICA trae los del recurso que tiene asociado. El front no necesita
+   * saber de dónde salieron.
+   */
   placas: ContenidoArchivoDTO[]
 }
 
@@ -84,6 +88,8 @@ export type ContenidoAdminDTO = {
   youtubeId?: string
   duracion?: string
   archivos: ContenidoArchivoDTO[]
+  /** Solo PREDICA: el RECURSOS asociado, si tiene uno. */
+  recursoId?: string
   campo: CampoThumb
   imagenSrc?: string
   imagenCover: boolean
@@ -168,6 +174,7 @@ const contenidoBase = z.object({
   youtubeId: textoOpcional,
   duracion: textoOpcional,
   archivos: z.array(ArchivoSchema).default([]),
+  recursoId: textoOpcional,
   campo: z.enum(["CAMPO_PAPEL", "CAMPO_TINTA", "CAMPO_FUEGO"], "Elegí un campo de fondo"),
   imagenSrc: textoOpcional.refine(
     (v) => v === undefined || URL_BLOB.test(v) || RUTA_ASSET_LEGACY.test(v),
@@ -201,6 +208,15 @@ function reglasPorTipo(data: z.infer<typeof contenidoBase>, ctx: z.RefinementCtx
       code: "custom",
       path: ["archivos"],
       message: "Un recurso necesita al menos un archivo",
+    })
+  }
+  // Solo una prédica apunta a un recurso. Un video no tiene placas, y un
+  // recurso que apuntara a otro recurso abriría una cadena sin sentido.
+  if (data.recursoId && data.tipo !== "PREDICA") {
+    ctx.addIssue({
+      code: "custom",
+      path: ["recursoId"],
+      message: "Solo una prédica puede tener un recurso asociado",
     })
   }
   // La inversa: una prédica o un video no cargan archivos propios. Una prédica

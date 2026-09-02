@@ -27,6 +27,22 @@ export async function actualizarContenido(data: ActualizarContenidoDTO) {
       }
     }
 
+    // El tipo del recurso apuntado solo se puede chequear contra la base, asi
+    // que no puede vivir en `reglasPorTipo` (Zod, sin I/O). Gemelo del bloque
+    // en `crear-contenido.ts`: si cambia uno, cambia el otro.
+    if (parsed.data.recursoId) {
+      const recurso = await prisma.contenido.findUnique({
+        where: { id: parsed.data.recursoId },
+        select: { tipo: true },
+      })
+      if (!recurso) {
+        return { ok: false as const, message: "El recurso asociado no existe." }
+      }
+      if (recurso.tipo !== "RECURSOS") {
+        return { ok: false as const, message: "El contenido asociado no es un recurso." }
+      }
+    }
+
     await prisma.contenido.update({
       where: { id: parsed.data.id },
       data: {
@@ -52,6 +68,7 @@ export async function actualizarContenido(data: ActualizarContenidoDTO) {
             paginas: archivo.paginas ?? null,
           })),
         },
+        recursoId: parsed.data.recursoId ?? null,
         campo: parsed.data.campo,
         imagenSrc: parsed.data.imagenSrc ?? null,
         imagenCover: parsed.data.imagenCover,
@@ -65,6 +82,35 @@ export async function actualizarContenido(data: ActualizarContenidoDTO) {
     revalidatePath(`/contenidos/${existing.slug}`)
     if (slugCambio) {
       revalidatePath(`/contenidos/${parsed.data.slug}`)
+    }
+
+    // Vincular o desvincular un recurso lo saca del catálogo o se lo devuelve,
+    // así que las dos páginas involucradas (la que dejó de estar y la que
+    // entró) quedaron viejas.
+    const recursoNuevo = parsed.data.recursoId ?? null
+    if (recursoNuevo !== existing.recursoId) {
+      const afectados = [existing.recursoId, recursoNuevo].filter(
+        (id): id is string => id !== null
+      )
+      const recursos = await prisma.contenido.findMany({
+        where: { id: { in: afectados } },
+        select: { slug: true },
+      })
+      for (const recurso of recursos) {
+        revalidatePath(`/contenidos/${recurso.slug}`)
+      }
+    }
+
+    // Si lo editado ES un recurso, sus archivos son las placas que muestran
+    // todas las prédicas que lo apuntan: esas páginas también cambiaron.
+    if (existing.tipo === "RECURSOS") {
+      const predicas = await prisma.contenido.findMany({
+        where: { recursoId: existing.id },
+        select: { slug: true },
+      })
+      for (const predica of predicas) {
+        revalidatePath(`/contenidos/${predica.slug}`)
+      }
     }
 
     return { ok: true as const }

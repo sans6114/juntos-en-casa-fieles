@@ -11,7 +11,11 @@ import type {
  * La fila tal como la leen las acciones: siempre con sus archivos incluidos y
  * ya ordenados (`include: { archivos: { orderBy: { orden: "asc" } } }`).
  */
-export type ContenidoConArchivos = Contenido & { archivos: ContenidoArchivo[] }
+export type ContenidoConArchivos = Contenido & {
+  archivos: ContenidoArchivo[]
+  /** Solo viene poblado en una PREDICA que tenga un recurso asociado. */
+  recurso: (Contenido & { archivos: ContenidoArchivo[] }) | null
+}
 
 /**
  * Include acotado —y no un `include` general— que exigen los dos mappers. Se
@@ -20,6 +24,10 @@ export type ContenidoConArchivos = Contenido & { archivos: ContenidoArchivo[] }
  */
 export const INCLUIR_ARCHIVOS = {
   archivos: { orderBy: { orden: "asc" } },
+  // Una PREDICA no tiene archivos propios: sus placas son las del recurso que
+  // apunta. Sin este nivel, `toContenidoPublicoDTO` no tendria de donde
+  // sacarlas y la pagina de la predica quedaria sin descargas.
+  recurso: { include: { archivos: { orderBy: { orden: "asc" } } } },
 } as const
 
 function esMimeConocido(mime: string): mime is MimeArchivo {
@@ -51,7 +59,11 @@ function toArchivoDTO(archivos: ContenidoArchivo[]): ContenidoArchivoDTO[] {
  * `src/lib/data/`: `getInscripcionesMetrics` (`inscripciones.ts:23`).
  */
 export function toContenidoPublicoDTO(row: ContenidoConArchivos): ContenidoPublicoDTO {
-  const placas = toArchivoDTO(row.archivos)
+  // Explicito y no `propios.length > 0 ? propios : heredados`: que un RECURSOS
+  // nunca tenga `recurso` y una PREDICA nunca tenga archivos propios lo
+  // garantiza `reglasPorTipo`, pero apoyarse en eso lo volveria implicito.
+  const placas =
+    row.tipo === "RECURSOS" ? toArchivoDTO(row.archivos) : toArchivoDTO(row.recurso?.archivos ?? [])
 
   return {
     id: row.id,
@@ -88,6 +100,7 @@ export function toContenidoAdminDTO(row: ContenidoConArchivos): ContenidoAdminDT
     youtubeId: row.youtubeId ?? undefined,
     duracion: row.duracion ?? undefined,
     archivos: toArchivoDTO(row.archivos),
+    recursoId: row.recursoId ?? undefined,
     campo: row.campo,
     imagenSrc: row.imagenSrc ?? undefined,
     imagenCover: row.imagenCover,

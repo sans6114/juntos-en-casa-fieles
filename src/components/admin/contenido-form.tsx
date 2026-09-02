@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { upload } from "@vercel/blob/client"
 import { toast } from "sonner"
 import { crearContenido, actualizarContenido } from "@/actions"
+import type { RecursoVinculable } from "@/actions/contenido/obtener-recursos-vinculables"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -38,7 +39,15 @@ import { optimizarThumb } from "@/lib/image/optimizar-thumb"
 type ContenidoFormProps = {
   /** Presente en modo edición; ausente en modo creación. */
   initialData?: ContenidoAdminDTO
+  /** RECURSOS que una prédica puede apuntar, resueltos por la página server. */
+  recursos: RecursoVinculable[]
 }
+
+/**
+ * `<Select>` no distingue "sin elegir" de "" con un valor vacío, así que la
+ * opción de desvincular necesita un valor propio que nunca sea un id real.
+ */
+const SIN_RECURSO = "__sin_recurso__"
 
 type ContenidoFormState = {
   slug: string
@@ -55,6 +64,8 @@ type ContenidoFormState = {
    * conteo de placas NO vive acá: se deriva con `contarPlacas`.
    */
   archivos: ContenidoArchivoDTO[]
+  /** Solo PREDICA: id del RECURSOS asociado. "" es "ninguno". */
+  recursoId: string
   campo: CampoThumb
   imagenSrc: string
   imagenCover: boolean
@@ -77,6 +88,7 @@ const CAMPOS_POR_TIPO: Record<
     youtubeId: Visibilidad
     duracion: Visibilidad
     placas: Visibilidad
+    recurso: Visibilidad
   }
 > = {
   PREDICA: {
@@ -85,6 +97,7 @@ const CAMPOS_POR_TIPO: Record<
     youtubeId: "opcional",
     duracion: "opcional",
     placas: "oculto",
+    recurso: "opcional",
   },
   VIDEO: {
     orador: "opcional",
@@ -92,6 +105,7 @@ const CAMPOS_POR_TIPO: Record<
     youtubeId: "requerido",
     duracion: "opcional",
     placas: "oculto",
+    recurso: "oculto",
   },
   RECURSOS: {
     orador: "oculto",
@@ -99,6 +113,7 @@ const CAMPOS_POR_TIPO: Record<
     youtubeId: "oculto",
     duracion: "oculto",
     placas: "requerido",
+    recurso: "oculto",
   },
 }
 
@@ -140,6 +155,7 @@ function toFormState(data?: ContenidoAdminDTO): ContenidoFormState {
     youtubeId: data?.youtubeId ?? "",
     duracion: data?.duracion ?? "",
     archivos: data?.archivos ?? [],
+    recursoId: data?.recursoId ?? "",
     campo: data?.campo ?? "CAMPO_PAPEL",
     imagenSrc: data?.imagenSrc ?? "",
     imagenCover: data?.imagenCover ?? false,
@@ -173,7 +189,7 @@ function formToVista(form: ContenidoFormState): ContenidoVista {
   }
 }
 
-export function ContenidoForm({ initialData }: ContenidoFormProps) {
+export function ContenidoForm({ initialData, recursos }: ContenidoFormProps) {
   const router = useRouter()
   const [form, setForm] = useState<ContenidoFormState>(() => toFormState(initialData))
   const [errores, setErrores] = useState<Partial<Record<string, string>>>({})
@@ -200,6 +216,7 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
       youtubeId: siguientes.youtubeId === "oculto" ? "" : f.youtubeId,
       duracion: siguientes.duracion === "oculto" ? "" : f.duracion,
       archivos: siguientes.placas === "oculto" ? [] : f.archivos,
+      recursoId: siguientes.recurso === "oculto" ? "" : f.recursoId,
     }))
   }
 
@@ -329,6 +346,7 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
       youtubeId: form.youtubeId,
       duracion: form.duracion,
       archivos: form.archivos,
+      recursoId: form.recursoId || undefined,
       campo: form.campo,
       imagenSrc: form.imagenSrc || undefined,
       imagenCover: form.imagenCover,
@@ -600,6 +618,41 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
 
             {errores.archivos ? (
               <p className="text-sm text-destructive">{errores.archivos}</p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {campos.recurso !== "oculto" ? (
+          <div className="space-y-2">
+            <Label htmlFor="recursoId">
+              Recurso asociado {campos.recurso === "opcional" ? "(opcional)" : null}
+            </Label>
+            <Select
+              value={form.recursoId || SIN_RECURSO}
+              onValueChange={(value) =>
+                set("recursoId", value === SIN_RECURSO ? "" : ((value as string) ?? ""))
+              }
+              disabled={isPending}
+            >
+              <SelectTrigger id="recursoId" className="w-full">
+                <SelectValue placeholder="Sin recurso" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={SIN_RECURSO}>Sin recurso</SelectItem>
+                {recursos.map((recurso) => (
+                  <SelectItem key={recurso.id} value={recurso.id}>
+                    {recurso.titulo}
+                    {recurso.publicado ? "" : " (borrador)"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-muted-foreground">
+              Las placas de esta prédica salen del recurso que elijas. Al vincularlo, deja de
+              aparecer como card propia en el catálogo.
+            </p>
+            {errores.recursoId ? (
+              <p className="text-sm text-destructive">{errores.recursoId}</p>
             ) : null}
           </div>
         ) : null}

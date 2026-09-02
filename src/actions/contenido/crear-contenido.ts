@@ -21,7 +21,23 @@ export async function crearContenido(data: CrearContenidoDTO) {
       return { ok: false as const, message: "Ya existe un contenido con ese slug." }
     }
 
-    await prisma.contenido.create({
+    // El tipo del recurso apuntado solo se puede chequear contra la base, asi
+    // que no puede vivir en `reglasPorTipo` (Zod, sin I/O). Gemelo del bloque
+    // en `actualizar-contenido.ts`: si cambia uno, cambia el otro.
+    if (parsed.data.recursoId) {
+      const recurso = await prisma.contenido.findUnique({
+        where: { id: parsed.data.recursoId },
+        select: { tipo: true },
+      })
+      if (!recurso) {
+        return { ok: false as const, message: "El recurso asociado no existe." }
+      }
+      if (recurso.tipo !== "RECURSOS") {
+        return { ok: false as const, message: "El contenido asociado no es un recurso." }
+      }
+    }
+
+    const creado = await prisma.contenido.create({
       data: {
         slug: parsed.data.slug,
         titulo: parsed.data.titulo,
@@ -43,6 +59,7 @@ export async function crearContenido(data: CrearContenidoDTO) {
             paginas: archivo.paginas ?? null,
           })),
         },
+        recursoId: parsed.data.recursoId ?? null,
         campo: parsed.data.campo,
         imagenSrc: parsed.data.imagenSrc ?? null,
         imagenCover: parsed.data.imagenCover,
@@ -53,7 +70,7 @@ export async function crearContenido(data: CrearContenidoDTO) {
 
     revalidatePath("/admin/contenidos")
     revalidatePath("/contenidos")
-    return { ok: true as const }
+    return { ok: true as const, id: creado.id }
   } catch (error) {
     console.error("Error creando contenido:", error)
     return { ok: false as const, message: "No se pudo crear el contenido." }
