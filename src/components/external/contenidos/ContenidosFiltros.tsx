@@ -17,9 +17,13 @@ type ContenidosFiltrosProps = {
 }
 
 /**
- * Filtering happens through the URL, not client state: each chip is a plain link
- * and the page re-renders on the server. Keeps the catalog a Server Component,
- * works without JavaScript, and every filtered view is shareable.
+ * Filtering happens through the URL, not component state: each chip is a plain
+ * link, so every filtered view stays shareable and bookmarkable.
+ *
+ * The page itself is prerendered at build time, so the filter is applied
+ * client-side by `ContenidosCatalogo` reading `?tipo=` — the chips no longer
+ * trigger a server render. Without JavaScript the whole catalog stays readable,
+ * but the chips do not filter.
  */
 export function ContenidosFiltros({ active, total }: ContenidosFiltrosProps) {
   return (

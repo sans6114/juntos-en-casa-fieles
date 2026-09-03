@@ -30,14 +30,14 @@
  * durationLabel -> duracion · thumb.field ("campo-papel"|"campo-tinta"|
  * "campo-fuego") -> campo (CAMPO_PAPEL|CAMPO_TINTA|CAMPO_FUEGO) ·
  * thumb.src -> imagenSrc · thumb.fit === "cover" -> imagenCover: true ·
- * thumb.dim -> imagenAtenuada. `slug`/`youtubeId`/`placasUrl`/`placasCount`
+ * thumb.dim -> imagenAtenuada. `slug`/`youtubeId`/`archivos`
  * no cambian. El `id` NO se traslada — Prisma genera un cuid nuevo; el `slug`
  * es la identidad de la fila (y la clave del `upsert`).
  *
  * LA COLISIÓN DECISIÓN 11 <-> DECISIÓN 13 (design §OQ-A)
  * Ninguno de los seis items originales tiene el campo que su tipo exige bajo
  * `CrearContenidoSchema` (PREDICA necesita `orador`, VIDEO necesita
- * `youtubeId`, RECURSOS necesita `placasUrl`). Por eso este script escribe
+ * `youtubeId`, RECURSOS necesita archivos). Por eso este script escribe
  * directo a Prisma —sin pasar por Zod— e inserta los seis con
  * `publicado: false`. Después de correrlo, entrá a /admin/contenidos,
  * completá el campo que le falte a cada uno (Zod lo va a exigir ahí
@@ -154,8 +154,9 @@ const contenidosIniciales: ContenidoSeed[] = [
     descripcion: "TODO: descripción real",
     tipo: "RECURSOS",
     edicion: 2025,
-    placasUrl: undefined, // TODO: falta para publicar (RECURSOS requiere placasUrl) — subilo desde el form
-    placasCount: undefined, // se deriva solo del PDF al subirlo, no lo completes a mano
+    // TODO: falta para publicar. Un RECURSOS necesita al menos un archivo, y
+    // los archivos se suben desde el form: no se pueden sembrar desde acá
+    // porque tienen que existir primero en Vercel Blob.
     campo: "CAMPO_PAPEL",
     imagenCover: false,
     imagenAtenuada: false,

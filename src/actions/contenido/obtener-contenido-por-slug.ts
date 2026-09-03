@@ -1,11 +1,14 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import { toContenidoPublicoDTO } from "@/lib/data/contenidos"
+import { INCLUIR_ARCHIVOS, toContenidoPublicoDTO } from "@/lib/data/contenidos"
 import type { ContenidoPublicoDTO } from "@/interfaces/contenido"
 
 export async function obtenerContenidoPorSlug(slug: string): Promise<ContenidoPublicoDTO | null> {
-  const contenido = await prisma.contenido.findUnique({ where: { slug } })
+  const contenido = await prisma.contenido.findUnique({
+    where: { slug },
+    include: INCLUIR_ARCHIVOS,
+  })
   if (!contenido || !contenido.publicado) {
     return null
   }
@@ -20,7 +23,10 @@ export async function obtenerContenidosRelacionados(
     where: {
       publicado: true,
       slug: { not: slug },
+      // Misma regla que el catálogo: un recurso vinculado no se ofrece suelto.
+      predicas: { none: {} },
     },
+    include: INCLUIR_ARCHIVOS,
     orderBy: { createdAt: "desc" }, // D16: no existe columna `orden`
     take: limit,
   })
