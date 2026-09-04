@@ -162,3 +162,50 @@ model ContenidoArchivo {
 
   @@index([contenidoId])
 }
+
+/// Categoria de producto. Es una TABLA y no un enum a proposito: el admin
+/// necesita poder agregar una categoria nueva desde el panel, sin deploy.
+/// Se crean unicamente desde el dialogo del form de producto — no hay una
+/// seccion de categorias en el admin.
+model CategoriaProducto {
+  id        String     @id @default(cuid())
+  /// Se DERIVA de `nombre` en `crearCategoriaProducto`, no la tipea nadie.
+  /// Todavia no la consume ninguna ruta publica: existe para que una futura
+  /// `/productos/categoria/{slug}` no necesite migracion, y porque `@unique`
+  /// sobre el nombre normalizado es lo que evita categorias duplicadas
+  /// —mismo rol que `Congregacion.nombreNormalizado`.
+  slug      String     @unique
+  nombre    String
+  productos Producto[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Producto {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  titulo      String
+  descripcion String
+  /// Requerida: todo producto pertenece a una categoria. El borrado queda en
+  /// `Restrict` (default de Prisma para una relacion requerida): borrar una
+  /// categoria con productos adentro no puede llevarselos puestos.
+  categoriaId String
+  categoria   CategoriaProducto @relation(fields: [categoriaId], references: [id])
+  /// Rotulo del overlay sobre el marco. Distinto de la categoria: vale
+  /// "Remera"/"Stickers" (el objeto), no "Indumentaria" (la categoria).
+  badge       String
+  /// Mismo enum que `Contenido.campo`. NO es un fondo tapado: la foto se
+  /// renderiza `object-contain` y este color queda VISIBLE como passepartout
+  /// alrededor (decision Δ5). Por eso sigue siendo obligatorio y elegible.
+  campo       CampoThumb
+  /// OBLIGATORIA. Un producto sin foto no existe: ya no hay pieza dibujada de
+  /// fallback. Siempre es una URL de Vercel Blob subida desde el panel.
+  imagenSrc   String
+  /// Arranca en false — un producto nuevo nace borrador. Diverge a proposito
+  /// de `Contenido.publicado`, que default a true.
+  publicado   Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([categoriaId])
+}
