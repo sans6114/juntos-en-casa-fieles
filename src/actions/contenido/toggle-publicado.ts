@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
-import { requireAdmin } from "@/lib/auth-guards"
+import { requireCatalogo } from "@/lib/auth-guards"
 
 export async function toggleContenidoPublicado(id: string) {
   try {
-    await requireAdmin()
+    await requireCatalogo()
 
     const contenido = await prisma.contenido.findUnique({ where: { id } })
     if (!contenido) {

@@ -2,12 +2,12 @@
 
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
-import { requireAdmin } from "@/lib/auth-guards"
+import { requireCatalogo } from "@/lib/auth-guards"
 import { CrearContenidoSchema, type CrearContenidoDTO } from "@/interfaces/contenido"
 
 export async function crearContenido(data: CrearContenidoDTO) {
   try {
-    await requireAdmin()
+    await requireCatalogo()
 
     const parsed = CrearContenidoSchema.safeParse(data)
     if (!parsed.success) {

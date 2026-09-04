@@ -12,7 +12,7 @@
  */
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client"
 import { NextResponse } from "next/server"
-import { requireAdminApi } from "@/lib/auth-guards"
+import { requireCatalogoApi } from "@/lib/auth-guards"
 
 export async function POST(request: Request): Promise<NextResponse> {
   const body = (await request.json()) as HandleUploadBody
@@ -24,8 +24,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       onBeforeGenerateToken: async () => {
         // NUNCA requireAdmin(): llama redirect(), que TIRA NEXT_REDIRECT, y
         // dentro de este callback ese throw queda silenciado y termina en un
-        // 400 generico. `requireAdminApi` aplica la misma regla tirando error.
-        await requireAdminApi()
+        // 400 generico. `requireCatalogoApi` aplica la misma regla tirando error.
+        await requireCatalogoApi()
 
         return {
           // `image/png` es el fallback de `canvas.toBlob` en los browsers sin

@@ -1,7 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import { requireAdmin } from "@/lib/auth-guards"
+import { requireCatalogo } from "@/lib/auth-guards"
 
 export type RecursoVinculable = {
   id: string
@@ -20,7 +20,7 @@ export type RecursoVinculable = {
  * `select` acotado y no la fila entera: el panel solo necesita el rótulo.
  */
 export async function obtenerRecursosVinculables(): Promise<RecursoVinculable[]> {
-  await requireAdmin()
+  await requireCatalogo()
 
   return prisma.contenido.findMany({
     where: { tipo: "RECURSOS" },

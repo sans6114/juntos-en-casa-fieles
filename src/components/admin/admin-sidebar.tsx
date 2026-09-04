@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LogOut,
   MessageCircle,
+  Package,
   ScanLine,
   Shield,
   Table2,
@@ -61,6 +62,14 @@ const inscripcionesItems = [
   },
 ]
 
+const administracionItems = [
+  { title: "Contacto", href: ADMIN_PATHS.contacto, icon: MessageCircle, adminOnly: true },
+  { title: "Usuarios", href: ADMIN_PATHS.usuarios, icon: Users, adminOnly: true },
+  { title: "Congregaciones", href: ADMIN_PATHS.congregaciones, icon: Church, adminOnly: true },
+  { title: "Contenidos", href: ADMIN_PATHS.contenidos, icon: FileText, adminOnly: false },
+  { title: "Productos", href: ADMIN_PATHS.productos, icon: Package, adminOnly: false },
+]
+
 type AdminSidebarProps = {
   user: {
     nombre: string
@@ -103,6 +112,9 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   }
 
   const visibleInscripciones = inscripcionesItems.filter(
+    (item) => isAdmin || !item.adminOnly
+  )
+  const visibleAdministracion = administracionItems.filter(
     (item) => isAdmin || !item.adminOnly
   )
 
@@ -191,64 +203,26 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isAdmin ? (
+        {visibleAdministracion.length > 0 ? (
           <SidebarGroup>
-            <SidebarGroupLabel className="flex items-center gap-1.5">
-              Administración
-              <span className="rounded bg-[var(--jec-admin-accent)] px-1.5 py-0.5 text-[10px] font-medium text-white">
-                Admin
-              </span>
-            </SidebarGroupLabel>
+            <SidebarGroupLabel>Administración</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    isActive={pathname.startsWith(ADMIN_PATHS.contacto)}
-                    tooltip="Contacto"
-                    render={
-                      <Link href={ADMIN_PATHS.contacto} onClick={closeSidebar} />
-                    }
-                  >
-                    <MessageCircle />
-                    <span>Contacto</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    isActive={pathname.startsWith(ADMIN_PATHS.usuarios)}
-                    tooltip="Usuarios"
-                    render={
-                      <Link href={ADMIN_PATHS.usuarios} onClick={closeSidebar} />
-                    }
-                  >
-                    <Users />
-                    <span>Usuarios</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    isActive={pathname.startsWith(ADMIN_PATHS.contenidos)}
-                    tooltip="Contenidos"
-                    render={
-                      <Link href={ADMIN_PATHS.contenidos} onClick={closeSidebar} />
-                    }
-                  >
-                    <FileText />
-                    <span>Contenidos</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    isActive={pathname.startsWith(ADMIN_PATHS.congregaciones)}
-                    tooltip="Congregaciones"
-                    render={
-                      <Link href={ADMIN_PATHS.congregaciones} onClick={closeSidebar} />
-                    }
-                  >
-                    <Church />
-                    <span>Congregaciones</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                {visibleAdministracion.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      isActive={pathname.startsWith(item.href)}
+                      tooltip={item.title}
+                      render={<Link href={item.href} onClick={closeSidebar} />}
+                    >
+                      <item.icon />
+                      <span>{item.title}</span>
+                      {item.adminOnly ? (
+                        <Shield className="ml-auto size-3 opacity-50" />
+                      ) : null}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

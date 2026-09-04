@@ -2,13 +2,13 @@
 
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
-import { requireAdmin } from "@/lib/auth-guards"
+import { requireCatalogo } from "@/lib/auth-guards"
 import { ActualizarContenidoSchema, type ActualizarContenidoDTO } from "@/interfaces/contenido"
 import { borrarBlobsSinReferencia } from "@/lib/blob/referencias"
 
 export async function actualizarContenido(data: ActualizarContenidoDTO) {
   try {
-    await requireAdmin()
+    await requireCatalogo()
 
     const parsed = ActualizarContenidoSchema.safeParse(data)
     if (!parsed.success) {
