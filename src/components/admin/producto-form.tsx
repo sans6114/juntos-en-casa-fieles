@@ -19,7 +19,6 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { ProductoCardBody } from "@/components/external/productos"
 import { cayento, helveticaNeue, helveticaNeueCondensed } from "@/config/fonts"
-import type { CampoThumb } from "@/interfaces/contenido"
 import {
   ActualizarProductoSchema,
   CrearProductoSchema,
@@ -44,16 +43,9 @@ type ProductoFormState = {
   descripcion: string
   categoriaId: string
   badge: string
-  campo: CampoThumb
   imagenSrc: string
   publicado: boolean
 }
-
-const CAMPO_OPCIONES: { value: CampoThumb; label: string }[] = [
-  { value: "CAMPO_PAPEL", label: "Campo papel" },
-  { value: "CAMPO_TINTA", label: "Campo tinta" },
-  { value: "CAMPO_FUEGO", label: "Campo fuego" },
-]
 
 function toFormState(data?: ProductoAdminDTO): ProductoFormState {
   return {
@@ -62,7 +54,6 @@ function toFormState(data?: ProductoAdminDTO): ProductoFormState {
     descripcion: data?.descripcion ?? "",
     categoriaId: data?.categoriaId ?? "",
     badge: data?.badge ?? "",
-    campo: data?.campo ?? "CAMPO_PAPEL",
     imagenSrc: data?.imagenSrc ?? "",
     publicado: data?.publicado ?? false,
   }
@@ -84,7 +75,6 @@ function formToVista(form: ProductoFormState, categorias: CategoriaProductoDTO[]
     categoriaId: form.categoriaId,
     categoriaNombre: categoria?.nombre ?? "Categoría",
     badge: form.badge,
-    campo: form.campo,
     imagenSrc: form.imagenSrc,
   }
 }
@@ -144,7 +134,6 @@ export function ProductoForm({ initialData, categorias }: ProductoFormProps) {
       descripcion: form.descripcion,
       categoriaId: form.categoriaId,
       badge: form.badge,
-      campo: form.campo,
       imagenSrc: form.imagenSrc,
       publicado: form.publicado,
     }
@@ -285,55 +274,32 @@ export function ProductoForm({ initialData, categorias }: ProductoFormProps) {
           {errores.badge ? <p className="text-sm text-destructive">{errores.badge}</p> : null}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="campo">Campo de fondo</Label>
-            <Select
-              value={form.campo}
-              onValueChange={(value) => set("campo", value as CampoThumb)}
-              disabled={isPending}
-            >
-              <SelectTrigger id="campo" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CAMPO_OPCIONES.map((opcion) => (
-                  <SelectItem key={opcion.value} value={opcion.value}>
-                    {opcion.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errores.campo ? <p className="text-sm text-destructive">{errores.campo}</p> : null}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="imagenSrc">Foto</Label>
-            <Input
-              id="imagenSrc"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={(e) => {
-                void handleFotoFile(e.target.files?.[0])
-              }}
-              disabled={isPending || isUploadingFoto}
-              required={!form.imagenSrc}
-            />
-            {isUploadingFoto ? (
-              <p className="text-sm text-muted-foreground">Subiendo foto...</p>
-            ) : form.imagenSrc ? (
-              <p className="text-sm text-muted-foreground">
-                Foto cargada — se ve en la vista previa
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Obligatoria. Se reduce a 1280 px antes de subirse.
-              </p>
-            )}
-            {errores.imagenSrc ? (
-              <p className="text-sm text-destructive">{errores.imagenSrc}</p>
-            ) : null}
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="imagenSrc">Foto</Label>
+          <Input
+            id="imagenSrc"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => {
+              void handleFotoFile(e.target.files?.[0])
+            }}
+            disabled={isPending || isUploadingFoto}
+            required={!form.imagenSrc}
+          />
+          {isUploadingFoto ? (
+            <p className="text-sm text-muted-foreground">Subiendo foto...</p>
+          ) : form.imagenSrc ? (
+            <p className="text-sm text-muted-foreground">
+              Foto cargada — se ve en la vista previa
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Obligatoria. Se reduce a 1280 px antes de subirse.
+            </p>
+          )}
+          {errores.imagenSrc ? (
+            <p className="text-sm text-destructive">{errores.imagenSrc}</p>
+          ) : null}
         </div>
 
         <Label className="flex items-center gap-2 font-normal">

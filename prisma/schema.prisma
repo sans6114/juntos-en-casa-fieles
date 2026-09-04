@@ -194,10 +194,6 @@ model Producto {
   /// Rotulo del overlay sobre el marco. Distinto de la categoria: vale
   /// "Remera"/"Stickers" (el objeto), no "Indumentaria" (la categoria).
   badge       String
-  /// Mismo enum que `Contenido.campo`. NO es un fondo tapado: la foto se
-  /// renderiza `object-contain` y este color queda VISIBLE como passepartout
-  /// alrededor (decision Δ5). Por eso sigue siendo obligatorio y elegible.
-  campo       CampoThumb
   /// OBLIGATORIA. Un producto sin foto no existe: ya no hay pieza dibujada de
   /// fallback. Siempre es una URL de Vercel Blob subida desde el panel.
   imagenSrc   String

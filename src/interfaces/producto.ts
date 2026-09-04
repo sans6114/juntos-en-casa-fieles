@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { esUrlDeBlob, type CampoThumb } from "@/interfaces/contenido"
+import { esUrlDeBlob } from "@/interfaces/contenido"
 
 export type CategoriaProductoDTO = { id: string; slug: string; nombre: string }
 
@@ -13,8 +13,6 @@ export type ProductoPublicoDTO = {
    *  front no vuelve a consultar para pintar el kicker. */
   categoriaNombre: string
   badge: string
-  /** VISIBLE: es el passepartout alrededor de la foto, no un fondo tapado. */
-  campo: CampoThumb
   /** Obligatoria: no hay producto sin foto. */
   imagenSrc: string
 }
@@ -42,7 +40,6 @@ const productoBase = z.object({
   descripcion: z.string().trim().min(1, "La descripción es obligatoria"),
   categoriaId: z.string().min(1, "Elegí una categoría"),
   badge: z.string().trim().min(1, "El badge es obligatorio"),
-  campo: z.enum(["CAMPO_PAPEL", "CAMPO_TINTA", "CAMPO_FUEGO"], "Elegí un campo de fondo"),
   imagenSrc: z
     .string()
     .trim()

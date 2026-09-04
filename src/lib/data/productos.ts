@@ -13,7 +13,6 @@ export function toProductoPublicoDTO(row: ProductoConCategoria): ProductoPublico
     categoriaId: row.categoriaId,
     categoriaNombre: row.categoria.nombre,
     badge: row.badge,
-    campo: row.campo,
     imagenSrc: row.imagenSrc,
   }
 }

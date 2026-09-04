@@ -44,7 +44,6 @@ export async function actualizarProducto(data: ActualizarProductoDTO) {
         descripcion: parsed.data.descripcion,
         categoriaId: parsed.data.categoriaId,
         badge: parsed.data.badge,
-        campo: parsed.data.campo,
         imagenSrc: parsed.data.imagenSrc,
         publicado: parsed.data.publicado,
       },
