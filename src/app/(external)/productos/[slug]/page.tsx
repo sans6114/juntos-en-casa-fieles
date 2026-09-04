@@ -12,7 +12,6 @@ import {
   ArrowLeftIcon,
   BrandName,
   CtaButton,
-  PlaceholderTag,
   SectionHeading,
   SiteFooter,
   SiteHeader,
@@ -81,8 +80,6 @@ export default async function ProductoPage({ params }: ProductoPageProps) {
               <BrandName>{kickerDeProducto(item.categoriaNombre)}</BrandName>
             </span>
 
-            <PlaceholderTag>Precio a confirmar</PlaceholderTag>
-
             <span className="jec-mono text-sm font-bold uppercase tracking-[0.14em] text-[var(--suave)]">
               Stand del evento
             </span>
@@ -94,6 +91,10 @@ export default async function ProductoPage({ params }: ProductoPageProps) {
         <div className="mx-auto grid max-w-6xl items-start gap-10 lg:grid-cols-[minmax(0,1fr)_368px]">
           <div className="flex min-w-0 flex-col gap-10">
             <ProductoFoto item={item} className="rounded-[6px]" />
+
+            <p className="max-w-2xl text-pretty text-base leading-relaxed text-[var(--suave)] md:text-lg">
+              {item.descripcion}
+            </p>
           </div>
 
           <aside className="flex min-w-0 flex-col gap-5">
