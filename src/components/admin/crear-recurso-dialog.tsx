@@ -70,6 +70,12 @@ export function CrearRecursoDialog({ edicion, onCreado, disabled }: CrearRecurso
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
+    // El Dialog vive dentro del <form> del contenido. Aunque su contenido se
+    // portalea, el submit sintetico de React sigue burbujeando por el arbol de
+    // React hasta el form de arriba: sin este stopPropagation, crear un recurso
+    // dispara el submit del contenido y pinta los errores de sus campos encima
+    // del error del dialogo.
+    event.stopPropagation()
     setError(undefined)
 
     // Un RECURSOS no usa orador, sesión, youtubeId ni duración: el diálogo solo

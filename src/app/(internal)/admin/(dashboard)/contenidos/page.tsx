@@ -1,10 +1,10 @@
 import { AdminHeader } from "@/components/admin/admin-sidebar"
 import { ContenidosPanel } from "@/components/admin/contenidos-panel"
 import { obtenerContenidos } from "@/actions"
-import { requireAdmin } from "@/lib/auth-guards"
+import { requireCatalogo } from "@/lib/auth-guards"
 
 export default async function ContenidosPage() {
-  await requireAdmin()
+  await requireCatalogo()
   const contenidos = await obtenerContenidos()
 
   return (

@@ -1,6 +1,6 @@
 import { requireCatalogo } from "@/lib/auth-guards"
 
-export default async function ContenidosLayout({
+export default async function ProductosLayout({
   children,
 }: {
   children: React.ReactNode

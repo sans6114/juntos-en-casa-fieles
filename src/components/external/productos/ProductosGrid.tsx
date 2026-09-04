@@ -1,20 +1,21 @@
-import { PlaceholderTag } from '@/components/external/shared';
+import { PlaceholderTag } from "@/components/external/shared"
+import type { ProductoPublicoDTO } from "@/interfaces/producto"
 
-import {
-  productos,
-  PRODUCTOS_RESUELTO,
-} from './data';
-import { ProductoCard } from './ProductoCard';
+import { ProductoCard } from "./ProductoCard"
 
-export function ProductosGrid() {
+type ProductosGridProps = {
+  items: ProductoPublicoDTO[]
+}
+
+export function ProductosGrid({ items }: ProductosGridProps) {
   return (
     <section aria-label="Catálogo de productos" className="campo-papel px-6 pb-24 md:px-10 md:pb-28 lg:px-16">
       <div className="mx-auto max-w-6xl">
         <h2 className="sr-only">Productos</h2>
 
-        {PRODUCTOS_RESUELTO ? (
+        {items.length > 0 ? (
           <div className="grid gap-5 md:grid-cols-2">
-            {productos.map((item) => (
+            {items.map((item) => (
               <ProductoCard key={item.id} item={item} />
             ))}
           </div>
