@@ -25,8 +25,9 @@ export function ProductoFoto({ item, className }: ProductoFotoProps) {
       {/* El passepartout: sin este wrapper, `fill` resuelve a inset-0 contra el
           marco y una foto 4/3 lo taparía entero — que es justo el bug que la
           decisión Δ5 viene a arreglar. El inset en % escala con el marco: la
-          card chica y el hero de detalle muestran el mismo margen relativo. */}
-      <div className="absolute inset-[6%]">
+          card chica y el hero de detalle muestran el mismo margen relativo. Es
+          chico a proposito — el color es un borde, la foto es lo principal. */}
+      <div className="absolute inset-[3%]">
         <Image
           src={item.imagenSrc}
           alt=""
