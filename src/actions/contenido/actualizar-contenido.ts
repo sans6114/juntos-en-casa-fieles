@@ -1,14 +1,10 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { del } from "@vercel/blob"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/auth-guards"
-import {
-  ActualizarContenidoSchema,
-  esUrlDeBlob,
-  type ActualizarContenidoDTO,
-} from "@/interfaces/contenido"
+import { ActualizarContenidoSchema, type ActualizarContenidoDTO } from "@/interfaces/contenido"
+import { borrarBlobsSinReferencia } from "@/lib/blob/referencias"
 
 export async function actualizarContenido(data: ActualizarContenidoDTO) {
   try {
@@ -132,42 +128,5 @@ export async function actualizarContenido(data: ActualizarContenidoDTO) {
   } catch (error) {
     console.error("Error actualizando contenido:", error)
     return { ok: false as const, message: "No se pudo actualizar el contenido." }
-  }
-}
-
-/**
- * Borra de Vercel Blob los archivos que el update dejó sin referencia.
- *
- * `upload()` sube el archivo en el momento en que el admin lo elige, mucho
- * antes del submit, así que reemplazar la miniatura o quitar un archivo de la
- * lista dejaba el blob viejo pagando storage para siempre.
- *
- * Corre DESPUÉS del update a propósito: así la consulta de referencias ve el
- * estado final, y una URL que otra fila todavía usa se salva sola. Eso cubre
- * el caso raro de un cliente manipulado que mandó la URL de otro contenido.
- *
- * Nunca tira: el contenido ya se guardó bien, y un fallo de Blob no puede
- * convertir un update exitoso en un error para el admin. Peor caso, queda un
- * huérfano que junta el barrido de `prisma/scripts/limpiar-blobs-huerfanos.ts`.
- */
-async function borrarBlobsSinReferencia(candidatas: string[]) {
-  const urls = [...new Set(candidatas.filter((url) => url && esUrlDeBlob(url)))]
-  if (urls.length === 0) return
-
-  const huerfanas: string[] = []
-  for (const url of urls) {
-    const [enArchivos, enMiniaturas] = await Promise.all([
-      prisma.contenidoArchivo.count({ where: { url } }),
-      prisma.contenido.count({ where: { imagenSrc: url } }),
-    ])
-    if (enArchivos === 0 && enMiniaturas === 0) huerfanas.push(url)
-  }
-
-  if (huerfanas.length === 0) return
-
-  try {
-    await del(huerfanas)
-  } catch (error) {
-    console.error("No se pudieron borrar blobs huérfanos:", huerfanas, error)
   }
 }

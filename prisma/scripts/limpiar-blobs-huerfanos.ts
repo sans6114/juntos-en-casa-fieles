@@ -45,17 +45,22 @@ function leerArgumentos() {
 }
 
 async function urlsReferenciadas(prisma: PrismaClient): Promise<Set<string>> {
-  const [archivos, miniaturas] = await Promise.all([
+  const [archivos, miniaturas, productos] = await Promise.all([
     prisma.contenidoArchivo.findMany({ select: { url: true } }),
     prisma.contenido.findMany({
       where: { imagenSrc: { not: null } },
       select: { imagenSrc: true },
     }),
+    // D6/D16: consulta propia y no compartida con `src/lib/blob/referencias.ts`
+    // — este script arma su propio PrismaClient (`main()` más abajo) y no
+    // puede importar el singleton `@/lib/prisma` de la app.
+    prisma.producto.findMany({ select: { imagenSrc: true } }),
   ])
 
   return new Set([
     ...archivos.map((archivo) => archivo.url),
     ...miniaturas.flatMap((fila) => (fila.imagenSrc ? [fila.imagenSrc] : [])),
+    ...productos.map((producto) => producto.imagenSrc),
   ])
 }
 
