@@ -241,7 +241,15 @@ export function ProductoForm({ initialData, categorias }: ProductoFormProps) {
               disabled={isPending}
             >
               <SelectTrigger id="categoriaId" className="min-w-0 flex-1">
-                <SelectValue placeholder="Elegí una categoría" />
+                {/* Sin children, `Select.Value` de Base UI renderiza el valor
+                    crudo — o sea el cuid de la categoria. El label se resuelve
+                    con la forma de funcion. */}
+                <SelectValue placeholder="Elegí una categoría">
+                  {(value) =>
+                    categoriasDisponibles.find((categoria) => categoria.id === value)?.nombre ??
+                    "Elegí una categoría"
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {categoriasDisponibles.map((categoria) => (
