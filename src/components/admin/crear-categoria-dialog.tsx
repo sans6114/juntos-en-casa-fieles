@@ -51,6 +51,12 @@ export function CrearCategoriaDialog({ onCreado, disabled }: CrearCategoriaDialo
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
+    // El Dialog vive dentro del <form> del producto. Aunque su contenido se
+    // portalea, el submit sintetico de React sigue burbujeando por el arbol de
+    // React hasta el form de arriba: sin este stopPropagation, crear una
+    // categoria dispara el submit del producto y pinta los errores de sus
+    // campos encima del error del dialogo.
+    event.stopPropagation()
     setError(undefined)
 
     const parsed = CrearCategoriaProductoSchema.safeParse(campos)
