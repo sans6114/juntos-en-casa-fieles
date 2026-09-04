@@ -360,7 +360,11 @@ export function ContenidoForm({ initialData, recursos }: ContenidoFormProps) {
               disabled={isPending}
             >
               <SelectTrigger id="tipo" className="w-full">
-                <SelectValue />
+                {/* Sin children, `Select.Value` de Base UI renderiza el valor
+                    crudo: mostraria `PREDICA` en vez de "Predica". */}
+                <SelectValue>
+                  {(value) => TIPO_OPCIONES.find((opcion) => opcion.value === value)?.label ?? ""}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {TIPO_OPCIONES.map((opcion) => (
@@ -484,7 +488,16 @@ export function ContenidoForm({ initialData, recursos }: ContenidoFormProps) {
                 disabled={isPending}
               >
                 <SelectTrigger id="recursoId" className="min-w-0 flex-1">
-                  <SelectValue placeholder="Sin recurso" />
+                  {/* Idem: los valores son cuids, asi que sin children el
+                      trigger mostraria el id del recurso en vez de su titulo. */}
+                  <SelectValue placeholder="Sin recurso">
+                    {(value) => {
+                      if (!value || value === SIN_RECURSO) return "Sin recurso"
+                      const recurso = recursosDisponibles.find((item) => item.id === value)
+                      if (!recurso) return "Sin recurso"
+                      return `${recurso.titulo}${recurso.publicado ? "" : " (borrador)"}`
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={SIN_RECURSO}>Sin recurso</SelectItem>
@@ -525,7 +538,10 @@ export function ContenidoForm({ initialData, recursos }: ContenidoFormProps) {
               disabled={isPending}
             >
               <SelectTrigger id="campo" className="w-full">
-                <SelectValue />
+                {/* Idem `tipo`: sin children mostraria `CAMPO_PAPEL`. */}
+                <SelectValue>
+                  {(value) => CAMPO_OPCIONES.find((opcion) => opcion.value === value)?.label ?? ""}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {CAMPO_OPCIONES.map((opcion) => (
