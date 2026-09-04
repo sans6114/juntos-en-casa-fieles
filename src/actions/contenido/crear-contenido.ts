@@ -2,12 +2,12 @@
 
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
-import { requireAdmin } from "@/lib/auth-guards"
+import { requireCatalogo } from "@/lib/auth-guards"
 import { CrearContenidoSchema, type CrearContenidoDTO } from "@/interfaces/contenido"
 
 export async function crearContenido(data: CrearContenidoDTO) {
   try {
-    await requireAdmin()
+    await requireCatalogo()
 
     const parsed = CrearContenidoSchema.safeParse(data)
     if (!parsed.success) {
@@ -21,7 +21,23 @@ export async function crearContenido(data: CrearContenidoDTO) {
       return { ok: false as const, message: "Ya existe un contenido con ese slug." }
     }
 
-    await prisma.contenido.create({
+    // El tipo del recurso apuntado solo se puede chequear contra la base, asi
+    // que no puede vivir en `reglasPorTipo` (Zod, sin I/O). Gemelo del bloque
+    // en `actualizar-contenido.ts`: si cambia uno, cambia el otro.
+    if (parsed.data.recursoId) {
+      const recurso = await prisma.contenido.findUnique({
+        where: { id: parsed.data.recursoId },
+        select: { tipo: true },
+      })
+      if (!recurso) {
+        return { ok: false as const, message: "El recurso asociado no existe." }
+      }
+      if (recurso.tipo !== "RECURSOS") {
+        return { ok: false as const, message: "El contenido asociado no es un recurso." }
+      }
+    }
+
+    const creado = await prisma.contenido.create({
       data: {
         slug: parsed.data.slug,
         titulo: parsed.data.titulo,
@@ -32,8 +48,18 @@ export async function crearContenido(data: CrearContenidoDTO) {
         orador: parsed.data.orador ?? null,
         youtubeId: parsed.data.youtubeId ?? null,
         duracion: parsed.data.duracion ?? null,
-        placasUrl: parsed.data.placasUrl ?? null,
-        placasCount: parsed.data.placasCount ?? null,
+        // Nested create: los archivos nacen junto al contenido, en la misma
+        // escritura, así no puede quedar un RECURSOS sin sus placas si algo
+        // falla en el medio.
+        archivos: {
+          create: parsed.data.archivos.map((archivo, indice) => ({
+            url: archivo.url,
+            mime: archivo.mime,
+            orden: indice,
+            paginas: archivo.paginas ?? null,
+          })),
+        },
+        recursoId: parsed.data.recursoId ?? null,
         campo: parsed.data.campo,
         imagenSrc: parsed.data.imagenSrc ?? null,
         imagenCover: parsed.data.imagenCover,
@@ -44,7 +70,11 @@ export async function crearContenido(data: CrearContenidoDTO) {
 
     revalidatePath("/admin/contenidos")
     revalidatePath("/contenidos")
-    return { ok: true as const }
+    // Con `generateStaticParams`, un 404 negativo de esta URL —de alguien que
+    // la visito antes de que el contenido existiera— queda cacheado. Antes
+    // faltar esta linea era inofensivo; ahora no.
+    revalidatePath(`/contenidos/${parsed.data.slug}`)
+    return { ok: true as const, id: creado.id }
   } catch (error) {
     console.error("Error creando contenido:", error)
     return { ok: false as const, message: "No se pudo crear el contenido." }

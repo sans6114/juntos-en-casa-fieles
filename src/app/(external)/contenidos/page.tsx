@@ -1,10 +1,14 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 
 import { obtenerContenidosPublicos } from "@/actions"
-import { ContenidosGrid, ContenidosIntro } from "@/components/external/contenidos"
+import {
+  ContenidosCatalogo,
+  ContenidosGrid,
+  ContenidosIntro,
+} from "@/components/external/contenidos"
 import { Galeria } from "@/components/external/galeria"
 import { BrandName, CtaButton, SiteFooter, SiteHeader } from "@/components/external/shared"
-import type { ContenidoKind } from "@/interfaces/contenido"
 import { createPageMetadata } from "@/lib/seo/site"
 
 export const metadata: Metadata = createPageMetadata({
@@ -12,31 +16,22 @@ export const metadata: Metadata = createPageMetadata({
   title: "Contenidos",
 })
 
-const KINDS: ContenidoKind[] = ["predica", "video", "recursos"]
-
-function parseTipo(value: string | string[] | undefined): ContenidoKind | undefined {
-  return KINDS.find((kind) => kind === value)
-}
-
-type ContenidosPageProps = {
-  searchParams: Promise<{ tipo?: string | string[] }>
-}
-
-export default async function ContenidosPage({ searchParams }: ContenidosPageProps) {
-  const { tipo: tipoParam } = await searchParams
-  const tipo = parseTipo(tipoParam)
-
-  const items = await obtenerContenidosPublicos(tipo)
-  /**
-   * Distingue las dos vacías posibles (nueva, no cubierta por el diseño):
-   * catálogo entero sin publicar todavía (D15: la migración inicial deja los
-   * seis rescatados en `publicado: false`) vs. un filtro de tipo que
-   * simplemente no tiene coincidencias. Solo se hace una segunda consulta
-   * cuando el filtro activo devolvió cero — el caso común (hay contenidos)
-   * queda en una sola query.
-   */
-  const catalogoVacio =
-    items.length === 0 && (tipo ? (await obtenerContenidosPublicos()).length === 0 : true)
+/**
+ * Sin `searchParams` ni ninguna otra API dinámica, esta página se prerenderiza
+ * en el build y se sirve como HTML estático: los contenidos cambian poco, y el
+ * `revalidatePath("/contenidos")` que ya llamaban las acciones mutadoras recién
+ * ahora sirve de algo.
+ *
+ * El filtro `?tipo=` pasó a `ContenidosCatalogo` (client): leerlo acá volvería
+ * la página dinámica otra vez. El `<Suspense>` es obligatorio alrededor de un
+ * `useSearchParams`, y su fallback —el catálogo entero, sin filtrar— es
+ * exactamente el HTML que se congela en el build.
+ */
+export default async function ContenidosPage() {
+  const items = await obtenerContenidosPublicos()
+  // Ya no hace falta la segunda consulta que distinguía "catálogo vacío" de
+  // "filtro sin coincidencias": con la lista completa en mano, la primera es
+  // simplemente `items.length === 0`.
 
   return (
     <>
@@ -44,7 +39,11 @@ export default async function ContenidosPage({ searchParams }: ContenidosPagePro
 
       <main id="contenido" tabIndex={-1}>
         <ContenidosIntro />
-        <ContenidosGrid tipo={tipo} items={items} catalogoVacio={catalogoVacio} />
+        <Suspense
+          fallback={<ContenidosGrid items={items} catalogoVacio={items.length === 0} />}
+        >
+          <ContenidosCatalogo items={items} />
+        </Suspense>
         <Galeria />
 
         <section className="campo-fuego px-6 py-20 md:px-10 md:py-24 lg:px-16">

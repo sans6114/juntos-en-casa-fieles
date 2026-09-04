@@ -12,9 +12,9 @@
  *    el browser necesita un bearer token en una respuesta HTTP antes de
  *    poder hablar con el origen de terceros (Vercel Blob).
  * 3. No cae en la columna prohibida del skill ("CRUD mirror of actions"):
- *    esta ruta nunca lee ni escribe `Contenido`. `placasUrl` llega a la base
- *    de datos a través de `crearContenido`/`actualizarContenido`, como
- *    cualquier otro campo string.
+ *    esta ruta nunca lee ni escribe `Contenido`. Las URLs que devuelve llegan
+ *    a la base a través de `crearContenido`/`actualizarContenido`, como
+ *    cualquier otro campo del form.
  *
  * `onUploadCompleted` se deja como no-op: no tiene trabajo que hacer (la URL
  * viaja con el resto del form hasta el server action) y en desarrollo local
@@ -23,7 +23,7 @@
  */
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client"
 import { NextResponse } from "next/server"
-import { requireAdminApi } from "@/lib/auth-guards"
+import { requireCatalogoApi } from "@/lib/auth-guards"
 
 export async function POST(request: Request): Promise<NextResponse> {
   const body = (await request.json()) as HandleUploadBody
@@ -35,12 +35,16 @@ export async function POST(request: Request): Promise<NextResponse> {
       onBeforeGenerateToken: async () => {
         // NUNCA requireAdmin(): llama redirect(), que TIRA NEXT_REDIRECT, y
         // dentro de este callback ese throw queda silenciado y termina en un
-        // 400 genérico. `requireAdminApi` aplica la misma regla tirando error.
-        await requireAdminApi()
+        // 400 genérico. `requireCatalogoApi` aplica la misma regla tirando error.
+        await requireCatalogoApi()
 
         return {
-          allowedContentTypes: ["application/pdf"],
-          maximumSizeInBytes: 20 * 1024 * 1024, // 20 MB (decisión 10)
+          // Las imágenes se agregaron al PDF, no lo reemplazaron: un recurso
+          // puede ser un PDF de placas, un puñado de fondos de pantalla, o
+          // ambos. A diferencia de la miniatura, NO se optimizan en el
+          // browser — son material de descarga.
+          allowedContentTypes: ["application/pdf", "image/jpeg", "image/png"],
+          maximumSizeInBytes: 20 * 1024 * 1024, // 20 MB por archivo (decisión 10)
           addRandomSuffix: true,
         }
       },

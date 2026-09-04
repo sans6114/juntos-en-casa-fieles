@@ -9,8 +9,9 @@ import type { CampoThumb, TipoContenido } from "../../generated/client"
  *   TipoContenido: "PREDICA" | "VIDEO" | "RECURSOS"
  *   CampoThumb:    "CAMPO_PAPEL" | "CAMPO_TINTA" | "CAMPO_FUEGO"
  *
- * `imagenSrc` debe ser uno de los valores curados en
- * `src/lib/contenido-thumb-assets.ts` (`CONTENIDO_THUMB_ASSETS`).
+ * `imagenSrc` es una URL de Vercel Blob subida desde el panel, o una ruta
+ * relativa `/jec/...` de las filas anteriores al upload — las dos ramas del
+ * validador en `src/interfaces/contenido.ts`.
  */
 export type ContenidoSeed = {
   slug: string
@@ -22,8 +23,6 @@ export type ContenidoSeed = {
   orador?: string
   youtubeId?: string
   duracion?: string
-  placasUrl?: string
-  placasCount?: number
   campo: CampoThumb
   imagenSrc?: string
   imagenCover?: boolean

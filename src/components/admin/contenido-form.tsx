@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { upload } from "@vercel/blob/client"
 import { toast } from "sonner"
 import { crearContenido, actualizarContenido } from "@/actions"
+import type { RecursoVinculable } from "@/actions/contenido/obtener-recursos-vinculables"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -24,18 +25,31 @@ import {
   CAMPO_A_CLASE,
   CrearContenidoSchema,
   TIPO_A_KIND,
+  contarPlacas,
   kindLabel,
   type CampoThumb,
   type ContenidoAdminDTO,
+  type ContenidoArchivoDTO,
   type ContenidoVista,
   type TipoContenido,
 } from "@/interfaces/contenido"
-import { CONTENIDO_THUMB_ASSETS } from "@/lib/contenido-thumb-assets"
+import { optimizarThumb } from "@/lib/image/optimizar-thumb"
+
+import { ArchivosUploader } from "./archivos-uploader"
+import { CrearRecursoDialog } from "./crear-recurso-dialog"
 
 type ContenidoFormProps = {
   /** Presente en modo edición; ausente en modo creación. */
   initialData?: ContenidoAdminDTO
+  /** RECURSOS que una prédica puede apuntar, resueltos por la página server. */
+  recursos: RecursoVinculable[]
 }
+
+/**
+ * `<Select>` no distingue "sin elegir" de "" con un valor vacío, así que la
+ * opción de desvincular necesita un valor propio que nunca sea un id real.
+ */
+const SIN_RECURSO = "__sin_recurso__"
 
 type ContenidoFormState = {
   slug: string
@@ -47,9 +61,13 @@ type ContenidoFormState = {
   orador: string
   youtubeId: string
   duracion: string
-  placasUrl: string
-  /** Nunca se tipea a mano: se deriva del PDF antes de subirlo. */
-  placasCount: number | undefined
+  /**
+   * Los archivos ya subidos a Blob, en el orden en que los ve el público. El
+   * conteo de placas NO vive acá: se deriva con `contarPlacas`.
+   */
+  archivos: ContenidoArchivoDTO[]
+  /** Solo PREDICA: id del RECURSOS asociado. "" es "ninguno". */
+  recursoId: string
   campo: CampoThumb
   imagenSrc: string
   imagenCover: boolean
@@ -72,6 +90,7 @@ const CAMPOS_POR_TIPO: Record<
     youtubeId: Visibilidad
     duracion: Visibilidad
     placas: Visibilidad
+    recurso: Visibilidad
   }
 > = {
   PREDICA: {
@@ -80,6 +99,7 @@ const CAMPOS_POR_TIPO: Record<
     youtubeId: "opcional",
     duracion: "opcional",
     placas: "oculto",
+    recurso: "opcional",
   },
   VIDEO: {
     orador: "opcional",
@@ -87,6 +107,7 @@ const CAMPOS_POR_TIPO: Record<
     youtubeId: "requerido",
     duracion: "opcional",
     placas: "oculto",
+    recurso: "oculto",
   },
   RECURSOS: {
     orador: "oculto",
@@ -94,6 +115,7 @@ const CAMPOS_POR_TIPO: Record<
     youtubeId: "oculto",
     duracion: "oculto",
     placas: "requerido",
+    recurso: "oculto",
   },
 }
 
@@ -120,8 +142,8 @@ function toFormState(data?: ContenidoAdminDTO): ContenidoFormState {
     orador: data?.orador ?? "",
     youtubeId: data?.youtubeId ?? "",
     duracion: data?.duracion ?? "",
-    placasUrl: data?.placasUrl ?? "",
-    placasCount: data?.placasCount,
+    archivos: data?.archivos ?? [],
+    recursoId: data?.recursoId ?? "",
     campo: data?.campo ?? "CAMPO_PAPEL",
     imagenSrc: data?.imagenSrc ?? "",
     imagenCover: data?.imagenCover ?? false,
@@ -151,16 +173,20 @@ function formToVista(form: ContenidoFormState): ContenidoVista {
     session: form.sesion || undefined,
     speaker: form.orador || undefined,
     durationLabel: form.duracion || undefined,
-    placasCount: form.placasCount,
+    placasCount: contarPlacas(form.archivos),
   }
 }
 
-export function ContenidoForm({ initialData }: ContenidoFormProps) {
+export function ContenidoForm({ initialData, recursos }: ContenidoFormProps) {
   const router = useRouter()
   const [form, setForm] = useState<ContenidoFormState>(() => toFormState(initialData))
   const [errores, setErrores] = useState<Partial<Record<string, string>>>({})
   const [isPending, startTransition] = useTransition()
-  const [isUploadingPlacas, setIsUploadingPlacas] = useState(false)
+  const [subiendoArchivos, setSubiendoArchivos] = useState(false)
+  const [isUploadingThumb, setIsUploadingThumb] = useState(false)
+  // La lista arranca en lo que resolvió la página server, pero crece cuando el
+  // admin crea un recurso desde el diálogo sin recargar.
+  const [recursosDisponibles, setRecursosDisponibles] = useState(recursos)
 
   const campos = CAMPOS_POR_TIPO[form.tipo]
 
@@ -180,44 +206,35 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
       sesion: siguientes.sesion === "oculto" ? "" : f.sesion,
       youtubeId: siguientes.youtubeId === "oculto" ? "" : f.youtubeId,
       duracion: siguientes.duracion === "oculto" ? "" : f.duracion,
-      placasUrl: siguientes.placas === "oculto" ? "" : f.placasUrl,
-      placasCount: siguientes.placas === "oculto" ? undefined : f.placasCount,
+      archivos: siguientes.placas === "oculto" ? [] : f.archivos,
+      recursoId: siguientes.recurso === "oculto" ? "" : f.recursoId,
     }))
   }
 
   /**
-   * placasCount se deriva acá, en el browser, ANTES de subir — nunca se
-   * tipea a mano (decisión 14). Orden: cuenta primero, upload después, para
-   * que un PDF corrupto avise antes del paso de red lento (design §B5).
-   * Un conteo fallido NO bloquea la subida: `placasUrl` es lo único que
-   * exige `reglasPorTipo` para RECURSOS, no `placasCount`.
+   * Mismo orden que la subida de archivos: trabajo local primero, red después.
+   * A diferencia de esa, acá un fallo de la etapa local SÍ aborta — sin el
+   * WebP convertido no hay nada que subir, mientras que un conteo de páginas
+   * fallido deja igual un PDF válido.
    */
-  const handlePlacasFile = async (file: File | undefined) => {
+  const handleThumbFile = async (file: File | undefined) => {
     if (!file) return
 
-    setIsUploadingPlacas(true)
+    setIsUploadingThumb(true)
     try {
-      let paginas: number | undefined
-      try {
-        const bytes = await file.arrayBuffer()
-        const { PDFDocument } = await import("pdf-lib")
-        const doc = await PDFDocument.load(bytes, { ignoreEncryption: true })
-        paginas = doc.getPageCount()
-      } catch {
-        toast.error("No pudimos leer la cantidad de páginas del PDF")
-      }
+      const optimizada = await optimizarThumb(file)
 
-      const { url } = await upload(file.name, file, {
+      const { url } = await upload(optimizada.name, optimizada, {
         access: "public",
-        handleUploadUrl: "/api/contenido/placas-upload",
+        handleUploadUrl: "/api/contenido/thumb-upload",
       })
 
-      setForm((f) => ({ ...f, placasUrl: url, placasCount: paginas }))
-      toast.success("PDF cargado")
+      setForm((f) => ({ ...f, imagenSrc: url }))
+      toast.success("Miniatura cargada")
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "No se pudo subir el PDF")
+      toast.error(error instanceof Error ? error.message : "No se pudo subir la miniatura")
     } finally {
-      setIsUploadingPlacas(false)
+      setIsUploadingThumb(false)
     }
   }
 
@@ -245,8 +262,8 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
       orador: form.orador,
       youtubeId: form.youtubeId,
       duracion: form.duracion,
-      placasUrl: form.placasUrl,
-      placasCount: form.placasCount,
+      archivos: form.archivos,
+      recursoId: form.recursoId || undefined,
       campo: form.campo,
       imagenSrc: form.imagenSrc || undefined,
       imagenCover: form.imagenCover,
@@ -343,7 +360,11 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
               disabled={isPending}
             >
               <SelectTrigger id="tipo" className="w-full">
-                <SelectValue />
+                {/* Sin children, `Select.Value` de Base UI renderiza el valor
+                    crudo: mostraria `PREDICA` en vez de "Predica". */}
+                <SelectValue>
+                  {(value) => TIPO_OPCIONES.find((opcion) => opcion.value === value)?.label ?? ""}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {TIPO_OPCIONES.map((opcion) => (
@@ -442,29 +463,68 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
         ) : null}
 
         {campos.placas !== "oculto" ? (
+          <ArchivosUploader
+            id="placas"
+            label={`Archivos${campos.placas === "opcional" ? " (opcional)" : ""}`}
+            archivos={form.archivos}
+            onChange={(archivos) => set("archivos", archivos)}
+            onUploadingChange={setSubiendoArchivos}
+            disabled={isPending}
+            error={errores.archivos}
+          />
+        ) : null}
+
+        {campos.recurso !== "oculto" ? (
           <div className="space-y-2">
-            <Label htmlFor="placas">
-              PDF de placas {campos.placas === "opcional" ? "(opcional)" : null}
+            <Label htmlFor="recursoId">
+              Recurso asociado {campos.recurso === "opcional" ? "(opcional)" : null}
             </Label>
-            <Input
-              id="placas"
-              type="file"
-              accept="application/pdf"
-              onChange={(e) => {
-                void handlePlacasFile(e.target.files?.[0])
-              }}
-              disabled={isPending || isUploadingPlacas}
-            />
-            {isUploadingPlacas ? (
-              <p className="text-sm text-muted-foreground">Subiendo PDF...</p>
-            ) : form.placasUrl ? (
-              <p className="text-sm text-muted-foreground">
-                Archivo cargado
-                {form.placasCount ? ` — ${form.placasCount} placas` : ""}
-              </p>
-            ) : null}
-            {errores.placasUrl ? (
-              <p className="text-sm text-destructive">{errores.placasUrl}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Select
+                value={form.recursoId || SIN_RECURSO}
+                onValueChange={(value) =>
+                  set("recursoId", value === SIN_RECURSO ? "" : ((value as string) ?? ""))
+                }
+                disabled={isPending}
+              >
+                <SelectTrigger id="recursoId" className="min-w-0 flex-1">
+                  {/* Idem: los valores son cuids, asi que sin children el
+                      trigger mostraria el id del recurso en vez de su titulo. */}
+                  <SelectValue placeholder="Sin recurso">
+                    {(value) => {
+                      if (!value || value === SIN_RECURSO) return "Sin recurso"
+                      const recurso = recursosDisponibles.find((item) => item.id === value)
+                      if (!recurso) return "Sin recurso"
+                      return `${recurso.titulo}${recurso.publicado ? "" : " (borrador)"}`
+                    }}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={SIN_RECURSO}>Sin recurso</SelectItem>
+                  {recursosDisponibles.map((recurso) => (
+                    <SelectItem key={recurso.id} value={recurso.id}>
+                      {recurso.titulo}
+                      {recurso.publicado ? "" : " (borrador)"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <CrearRecursoDialog
+                edicion={form.edicion}
+                disabled={isPending}
+                onCreado={(recurso) => {
+                  setRecursosDisponibles((actuales) => [recurso, ...actuales])
+                  set("recursoId", recurso.id)
+                }}
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Las placas de esta prédica salen del recurso que elijas. Al vincularlo, deja de
+              aparecer como card propia en el catálogo. Si todavía no existe, crealo acá sin
+              perder lo que llevás cargado.
+            </p>
+            {errores.recursoId ? (
+              <p className="text-sm text-destructive">{errores.recursoId}</p>
             ) : null}
           </div>
         ) : null}
@@ -478,7 +538,10 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
               disabled={isPending}
             >
               <SelectTrigger id="campo" className="w-full">
-                <SelectValue />
+                {/* Idem `tipo`: sin children mostraria `CAMPO_PAPEL`. */}
+                <SelectValue>
+                  {(value) => CAMPO_OPCIONES.find((opcion) => opcion.value === value)?.label ?? ""}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {CAMPO_OPCIONES.map((opcion) => (
@@ -492,23 +555,27 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="imagenSrc">Thumbnail (opcional)</Label>
-            <Select
-              value={form.imagenSrc || undefined}
-              onValueChange={(value) => set("imagenSrc", (value as string) ?? "")}
-              disabled={isPending}
-            >
-              <SelectTrigger id="imagenSrc" className="w-full">
-                <SelectValue placeholder="Sin imagen" />
-              </SelectTrigger>
-              <SelectContent>
-                {CONTENIDO_THUMB_ASSETS.map((asset) => (
-                  <SelectItem key={asset.value} value={asset.value}>
-                    {asset.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="imagenSrc">Miniatura (opcional)</Label>
+            <Input
+              id="imagenSrc"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => {
+                void handleThumbFile(e.target.files?.[0])
+              }}
+              disabled={isPending || isUploadingThumb}
+            />
+            {isUploadingThumb ? (
+              <p className="text-sm text-muted-foreground">Subiendo miniatura...</p>
+            ) : form.imagenSrc ? (
+              <p className="text-sm text-muted-foreground">
+                Imagen cargada — se ve en la vista previa
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Se reduce a 1280 px antes de subirse. El campo de fondo se usa si no cargás ninguna.
+              </p>
+            )}
             {errores.imagenSrc ? (
               <p className="text-sm text-destructive">{errores.imagenSrc}</p>
             ) : null}
@@ -542,7 +609,9 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
           </Label>
         </div>
 
-        <Button type="submit" disabled={isPending}>
+        {/* Bloqueado tambien durante las subidas: guardar con un upload en vuelo
+            descartaba el archivo, porque su URL todavia no habia entrado al estado. */}
+          <Button type="submit" disabled={isPending || subiendoArchivos || isUploadingThumb}>
           {isPending ? "Guardando..." : initialData ? "Guardar cambios" : "Crear contenido"}
         </Button>
       </div>
@@ -569,7 +638,12 @@ export function ContenidoForm({ initialData }: ContenidoFormProps) {
             <li>Edición: {form.edicion || "—"}</li>
             <li>Duración: {form.duracion || "—"}</li>
             <li>YouTube: {form.youtubeId ? "cargado" : "sin cargar"}</li>
-            <li>Placas: {form.placasUrl ? "archivo cargado" : "sin cargar"}</li>
+            <li>
+              Placas:{" "}
+              {form.archivos.length > 0
+                ? `${form.archivos.length} ${form.archivos.length === 1 ? "archivo" : "archivos"}`
+                : "sin cargar"}
+            </li>
           </ul>
         </div>
       </aside>

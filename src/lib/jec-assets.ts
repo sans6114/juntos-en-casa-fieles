@@ -43,9 +43,9 @@ export const jecAssets = {
    *  resolucion: 4,6 MB -> 378 KB. Error medio por canal contra el render sin
    *  perdida del SVG: 0,53. En el canal alfa: 0,000 exacto.
    *
-   *  Los `.svg` SIGUEN en `public/`: `contenido-thumb-assets.ts` ofrece estos
-   *  paths en el selector del admin y el elegido queda guardado en la DB, asi
-   *  que una fila vieja tiene que poder seguir resolviendo su `.svg`. */
+   *  Los `.svg` SIGUEN en `public/`: el selector de assets del admin ya no
+   *  existe, pero las filas creadas cuando existia guardaron estos paths en
+   *  la DB, asi que tienen que poder seguir resolviendo su `.svg`. */
   personaje: {
     /** Vector de verdad (900 bytes), no se toca. */
     llama: "/jec/personaje/llama.svg",

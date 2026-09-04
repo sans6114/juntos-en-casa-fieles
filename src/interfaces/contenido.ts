@@ -1,5 +1,4 @@
 import { z } from "zod"
-import { CONTENIDO_THUMB_ASSETS } from "@/lib/contenido-thumb-assets"
 
 /**
  * Valores del enum Prisma `TipoContenido`/`CampoThumb`, declarados acá como
@@ -12,6 +11,35 @@ export type CampoThumb = "CAMPO_PAPEL" | "CAMPO_TINTA" | "CAMPO_FUEGO"
 
 /** Kind presentacional público, usado por el catálogo y por la vista previa del admin. */
 export type ContenidoKind = "predica" | "video" | "recursos"
+
+/**
+ * Tipos que acepta un archivo de placas. El PDF sigue siendo el caso original;
+ * las imágenes se agregaron para poder subir material suelto (fondos de
+ * pantalla, placas individuales) sin tener que empaquetarlo en un PDF.
+ *
+ * A diferencia de la miniatura, estos archivos NO se optimizan en el browser:
+ * son material de descarga, y bajarles la resolución los arruina.
+ */
+export const MIMES_ARCHIVO = ["application/pdf", "image/jpeg", "image/png"] as const
+export type MimeArchivo = (typeof MIMES_ARCHIVO)[number]
+
+export type ContenidoArchivoDTO = {
+  url: string
+  mime: MimeArchivo
+  orden: number
+  /** Solo PDF: cuántas páginas trae. Se deriva en el browser antes de subir. */
+  paginas?: number
+}
+
+/**
+ * Cuántas placas ofrece una lista de archivos: un PDF aporta sus páginas, una
+ * imagen aporta 1. No se persiste — se deriva acá para que el número que ve el
+ * público y el que muestra la vista previa del admin no puedan divergir.
+ */
+export function contarPlacas(archivos: ContenidoArchivoDTO[]): number | undefined {
+  if (archivos.length === 0) return undefined
+  return archivos.reduce((total, archivo) => total + (archivo.paginas ?? 1), 0)
+}
 
 export type ContenidoThumbVista = {
   field: "campo-papel" | "campo-tinta" | "campo-fuego"
@@ -39,7 +67,12 @@ export type ContenidoPublicoDTO = ContenidoVista & {
   slug: string
   edition: number
   youtubeId?: string
-  placasUrl?: string
+  /**
+   * Archivos descargables, ya ordenados. Un RECURSOS trae los suyos; una
+   * PREDICA trae los del recurso que tiene asociado. El front no necesita
+   * saber de dónde salieron.
+   */
+  placas: ContenidoArchivoDTO[]
 }
 
 /** Fila completa tal como la consume el panel de administración. */
@@ -54,8 +87,9 @@ export type ContenidoAdminDTO = {
   orador?: string
   youtubeId?: string
   duracion?: string
-  placasUrl?: string
-  placasCount?: number
+  archivos: ContenidoArchivoDTO[]
+  /** Solo PREDICA: el RECURSOS asociado, si tiene uno. */
+  recursoId?: string
   campo: CampoThumb
   imagenSrc?: string
   imagenCover: boolean
@@ -93,14 +127,26 @@ export function kindLabel(kind: ContenidoKind): string {
 }
 
 /**
- * Valores permitidos para `imagenSrc`: exactamente los de `CONTENIDO_THUMB_ASSETS`
- * (`src/lib/contenido-thumb-assets.ts`), la misma fuente que alimenta el
- * `<Select>` del admin. `as [string, ...string[]]` solo afirma no-vaciedad.
+ * `imagenSrc` acepta DOS formas, y las dos son necesarias:
+ *
+ * 1. Una URL de Vercel Blob: lo que sube el admin desde su file system. Es la
+ *    unica forma que el panel puede producir hoy — el `<Select>` de assets
+ *    curados ya no existe.
+ * 2. Una ruta relativa `/jec/...`: filas viejas, anteriores al upload. NO es
+ *    convivencia en la UI (no hay forma de elegir una de esas desde el panel):
+ *    es compatibilidad de datos. Sin esta rama, editar un contenido viejo
+ *    fallaria la validacion aunque nadie haya tocado la imagen.
  */
-const THUMB_VALUES = CONTENIDO_THUMB_ASSETS.map((asset) => asset.value) as [
-  string,
-  ...string[],
-]
+const RUTA_ASSET_LEGACY = /^\/jec\/[\w./-]+$/
+const URL_BLOB = /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/\S+$/i
+
+/**
+ * Si una URL apunta a nuestro store de Blob. Lo usa la limpieza de huérfanos
+ * para no intentar borrar un asset de `public/jec/`, que no vive en Blob.
+ */
+export function esUrlDeBlob(valor: string): boolean {
+  return URL_BLOB.test(valor)
+}
 
 /** Normaliza un input de texto opcional: "" (sin tocar) llega como `undefined`. */
 const textoOpcional = z
@@ -108,6 +154,18 @@ const textoOpcional = z
   .trim()
   .optional()
   .transform((v) => (v ? v : undefined))
+
+/**
+ * Un archivo de placas. La URL siempre la produce `upload()` de Vercel Blob:
+ * no hay forma de tipearla a mano en el panel, y validarla acá evita que un
+ * cliente manipulado guarde un link a cualquier lado.
+ */
+const ArchivoSchema = z.object({
+  url: z.string().regex(URL_BLOB, "El archivo tiene que subirse desde el panel"),
+  mime: z.enum(MIMES_ARCHIVO, "Tipo de archivo no permitido"),
+  orden: z.number().int().nonnegative(),
+  paginas: z.number().int().positive().optional(),
+})
 
 const contenidoBase = z.object({
   slug: z
@@ -123,10 +181,13 @@ const contenidoBase = z.object({
   orador: textoOpcional,
   youtubeId: textoOpcional,
   duracion: textoOpcional,
-  placasUrl: textoOpcional,
-  placasCount: z.number().int().optional(),
+  archivos: z.array(ArchivoSchema).default([]),
+  recursoId: textoOpcional,
   campo: z.enum(["CAMPO_PAPEL", "CAMPO_TINTA", "CAMPO_FUEGO"], "Elegí un campo de fondo"),
-  imagenSrc: z.enum(THUMB_VALUES, "El thumbnail debe ser uno de los valores permitidos").optional(),
+  imagenSrc: textoOpcional.refine(
+    (v) => v === undefined || URL_BLOB.test(v) || RUTA_ASSET_LEGACY.test(v),
+    "La miniatura tiene que subirse desde el panel"
+  ),
   imagenCover: z.boolean(),
   imagenAtenuada: z.boolean(),
   publicado: z.boolean(),
@@ -150,11 +211,30 @@ function reglasPorTipo(data: z.infer<typeof contenidoBase>, ctx: z.RefinementCtx
       message: "Pegá solo el id del video, no la URL completa",
     })
   }
-  if (data.tipo === "RECURSOS" && !data.placasUrl) {
+  if (data.tipo === "RECURSOS" && data.archivos.length === 0) {
     ctx.addIssue({
       code: "custom",
-      path: ["placasUrl"],
-      message: "Un recurso necesita el PDF de placas",
+      path: ["archivos"],
+      message: "Un recurso necesita al menos un archivo",
+    })
+  }
+  // Solo una prédica apunta a un recurso. Un video no tiene placas, y un
+  // recurso que apuntara a otro recurso abriría una cadena sin sentido.
+  if (data.recursoId && data.tipo !== "PREDICA") {
+    ctx.addIssue({
+      code: "custom",
+      path: ["recursoId"],
+      message: "Solo una prédica puede tener un recurso asociado",
+    })
+  }
+  // La inversa: una prédica o un video no cargan archivos propios. Una prédica
+  // llega a sus placas apuntando a un RECURSOS (`recursoId`); dejarla cargar
+  // los suyos daría dos fuentes para lo mismo.
+  if (data.tipo !== "RECURSOS" && data.archivos.length > 0) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["archivos"],
+      message: "Solo un contenido de tipo Recursos puede tener archivos",
     })
   }
 }

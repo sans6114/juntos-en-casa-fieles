@@ -108,8 +108,8 @@ enum CampoThumb {
 }
 
 model Contenido {
-  id             String         @id @default(cuid())
-  slug           String         @unique
+  id             String             @id @default(cuid())
+  slug           String             @unique
   titulo         String
   descripcion    String
   tipo           TipoContenido
@@ -118,13 +118,90 @@ model Contenido {
   orador         String?
   youtubeId      String?
   duracion       String?
-  placasUrl      String?
-  placasCount    Int?
+  /// Solo RECURSOS: los archivos descargables. Reemplaza al par
+  /// `placasUrl`/`placasCount`, que solo admitia un PDF unico. La cantidad de
+  /// placas ya no se persiste: se DERIVA de esta lista en los mappers de
+  /// `src/lib/data/contenidos.ts`, para que no se pueda desincronizar.
+  archivos       ContenidoArchivo[]
+  /// Solo PREDICA: apunta al RECURSOS que tiene sus placas. Un mismo recurso
+  /// puede servir a varias predicas, por eso es una FK y no una relacion 1-1.
+  /// Un recurso apuntado deja de listarse como card propia en el catalogo
+  /// publico (`predicas: { none: {} }` en `obtenerContenidosPublicos`), para no
+  /// mostrar la predica y sus placas como dos entradas casi identicas.
+  recursoId      String?
+  recurso        Contenido?         @relation("PredicaRecurso", fields: [recursoId], references: [id], onDelete: SetNull)
+  predicas       Contenido[]        @relation("PredicaRecurso")
   campo          CampoThumb
   imagenSrc      String?
-  imagenCover    Boolean        @default(false)
-  imagenAtenuada Boolean        @default(false)
-  publicado      Boolean        @default(true)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  imagenCover    Boolean            @default(false)
+  imagenAtenuada Boolean            @default(false)
+  publicado      Boolean            @default(true)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([recursoId])
+}
+
+/// Un archivo descargable de un contenido RECURSOS: el PDF de placas, o cada
+/// imagen suelta (fondos de pantalla, placas individuales). Tabla propia y no
+/// un `String[]` en `Contenido` porque hace falta saber el tipo de cada
+/// archivo sin parsear su URL, ordenarlos, y poder borrar uno solo.
+model ContenidoArchivo {
+  id          String    @id @default(cuid())
+  contenidoId String
+  contenido   Contenido @relation(fields: [contenidoId], references: [id], onDelete: Cascade)
+  url         String
+  /// `application/pdf` | `image/jpeg` | `image/png`. Decide como se ofrece la
+  /// descarga y cuanto aporta al conteo derivado: un PDF suma sus `paginas`,
+  /// una imagen suma 1.
+  mime        String
+  orden       Int       @default(0)
+  /// Solo PDF: se deriva con pdf-lib en el browser antes de subir el archivo.
+  paginas     Int?
+  createdAt   DateTime  @default(now())
+
+  @@index([contenidoId])
+}
+
+/// Categoria de producto. Es una TABLA y no un enum a proposito: el admin
+/// necesita poder agregar una categoria nueva desde el panel, sin deploy.
+/// Se crean unicamente desde el dialogo del form de producto — no hay una
+/// seccion de categorias en el admin.
+model CategoriaProducto {
+  id        String     @id @default(cuid())
+  /// Se DERIVA de `nombre` en `crearCategoriaProducto`, no la tipea nadie.
+  /// Todavia no la consume ninguna ruta publica: existe para que una futura
+  /// `/productos/categoria/{slug}` no necesite migracion, y porque `@unique`
+  /// sobre el nombre normalizado es lo que evita categorias duplicadas
+  /// —mismo rol que `Congregacion.nombreNormalizado`.
+  slug      String     @unique
+  nombre    String
+  productos Producto[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Producto {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  titulo      String
+  descripcion String
+  /// Requerida: todo producto pertenece a una categoria. El borrado queda en
+  /// `Restrict` (default de Prisma para una relacion requerida): borrar una
+  /// categoria con productos adentro no puede llevarselos puestos.
+  categoriaId String
+  categoria   CategoriaProducto @relation(fields: [categoriaId], references: [id])
+  /// Rotulo del overlay sobre el marco. Distinto de la categoria: vale
+  /// "Remera"/"Stickers" (el objeto), no "Indumentaria" (la categoria).
+  badge       String
+  /// OBLIGATORIA. Un producto sin foto no existe: ya no hay pieza dibujada de
+  /// fallback. Siempre es una URL de Vercel Blob subida desde el panel.
+  imagenSrc   String
+  /// Arranca en false — un producto nuevo nace borrador. Diverge a proposito
+  /// de `Contenido.publicado`, que default a true.
+  publicado   Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([categoriaId])
 }

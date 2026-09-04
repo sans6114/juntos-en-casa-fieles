@@ -248,7 +248,16 @@ export function CongregacionesPanel({ data }: CongregacionesPanelProps) {
             <Label htmlFor="fusionar-destino">Fusionar con</Label>
             <Select value={mergeCanonicaId} onValueChange={(value) => setMergeCanonicaId(value ?? "")}>
               <SelectTrigger id="fusionar-destino" className="w-full">
-                <SelectValue placeholder="Elegí la congregación destino" />
+                {/* Sin children, `Select.Value` de Base UI renderiza el valor
+                    crudo: el cuid de la congregacion. Es una fusion
+                    irreversible — quien la confirma tiene que poder leer el
+                    destino que eligio. */}
+                <SelectValue placeholder="Elegí la congregación destino">
+                  {(value) =>
+                    data.find((congregacion) => congregacion.id === value)?.nombre ??
+                    "Elegí la congregación destino"
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {data
