@@ -39,6 +39,7 @@ export async function crearProducto(data: CrearProductoDTO) {
         categoriaId: parsed.data.categoriaId,
         badge: parsed.data.badge,
         imagenSrc: parsed.data.imagenSrc,
+        imagenDorsoSrc: parsed.data.imagenDorsoSrc,
         publicado: parsed.data.publicado,
       },
     })

@@ -57,25 +57,25 @@ model Congregacion {
 }
 
 model Inscripcion {
-  id                String        @id @default(cuid())
-  nombre            String
-  email             String        @unique
-  telefono          String?
-  edad              Int
-  congregacionId    String?
-  congregacion      Congregacion? @relation(fields: [congregacionId], references: [id])
+  id              String        @id @default(cuid())
+  nombre          String
+  email           String        @unique
+  telefono        String?
+  edad            Int
+  congregacionId  String?
+  congregacion    Congregacion? @relation(fields: [congregacionId], references: [id])
   /// Se marca `true` unicamente cuando el visitante declara que no tiene
   /// congregacion al inscribirse (checkbox "Soy nuevo", ver
   /// `crear-inscripcion.ts`). Rechazar una congregacion NO lo escribe: eso
   /// invalida un nombre cargado, no niega que la persona tenga iglesia.
   /// Invariante: `sinCongregacion = true` implica `congregacionId = null`.
-  sinCongregacion   Boolean       @default(false)
-  contacto          Contacto?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  asistenciaDia1    DateTime?
-  asistenciaDia2    DateTime?
-  asistenciaDia3    DateTime?
+  sinCongregacion Boolean       @default(false)
+  contacto        Contacto?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  asistenciaDia1  DateTime?
+  asistenciaDia2  DateTime?
+  asistenciaDia3  DateTime?
 
   @@index([congregacionId])
 }
@@ -182,26 +182,31 @@ model CategoriaProducto {
 }
 
 model Producto {
-  id          String            @id @default(cuid())
-  slug        String            @unique
-  titulo      String
-  descripcion String
+  id             String            @id @default(cuid())
+  slug           String            @unique
+  titulo         String
+  descripcion    String
   /// Requerida: todo producto pertenece a una categoria. El borrado queda en
   /// `Restrict` (default de Prisma para una relacion requerida): borrar una
   /// categoria con productos adentro no puede llevarselos puestos.
-  categoriaId String
-  categoria   CategoriaProducto @relation(fields: [categoriaId], references: [id])
+  categoriaId    String
+  categoria      CategoriaProducto @relation(fields: [categoriaId], references: [id])
   /// Rotulo del overlay sobre el marco. Distinto de la categoria: vale
   /// "Remera"/"Stickers" (el objeto), no "Indumentaria" (la categoria).
-  badge       String
+  badge          String
   /// OBLIGATORIA. Un producto sin foto no existe: ya no hay pieza dibujada de
   /// fallback. Siempre es una URL de Vercel Blob subida desde el panel.
-  imagenSrc   String
+  /// Es la foto principal: la que va en la card del catalogo y en la vista previa.
+  imagenSrc      String
+  /// OPCIONAL. Segunda foto, el dorso de la prenda o del objeto. Nullable a
+  /// proposito: los productos que ya existen no tienen dorso y no pueden
+  /// romperse por eso. Cuando esta, tambien es una URL de Vercel Blob.
+  imagenDorsoSrc String?
   /// Arranca en false — un producto nuevo nace borrador. Diverge a proposito
   /// de `Contenido.publicado`, que default a true.
-  publicado   Boolean           @default(false)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  publicado      Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 
   @@index([categoriaId])
 }
