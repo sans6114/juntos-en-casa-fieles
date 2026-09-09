@@ -7,7 +7,7 @@ import {
   obtenerProductosPublicos,
   obtenerProductosRelacionados,
 } from "@/actions"
-import { ProductoCard, ProductoFoto } from "@/components/external/productos"
+import { ProductoCard, ProductoFoto, ProductoVisor } from "@/components/external/productos"
 import {
   ArrowLeftIcon,
   BrandName,
@@ -90,7 +90,20 @@ export default async function ProductoPage({ params }: ProductoPageProps) {
       <section className="campo-papel px-6 pb-24 md:px-10 md:pb-28 lg:px-16">
         <div className="mx-auto grid max-w-6xl items-start gap-10 lg:grid-cols-[minmax(0,1fr)_368px]">
           <div className="flex min-w-0 flex-col gap-10">
-            <ProductoFoto item={item} className="rounded-[6px]" />
+            {/* Solo el producto con dorso monta el visor: el de una sola foto
+                no renderiza markup de cliente ni paga hidratación.
+
+                Ojo, el chunk del visor viaja igual. Medido sobre el build: el
+                `<script>` sale en el HTML prerenderizado de un producto SIN
+                dorso, y sigue saliendo con `next/dynamic` y con el visor fuera
+                del barril. Next preloadea los client components de la ruta por
+                el grafo de módulos, no por la rama que se renderiza. Lo que
+                ahorra este ternario es hidratación, no bytes. */}
+            {item.imagenDorsoSrc ? (
+              <ProductoVisor item={item} />
+            ) : (
+              <ProductoFoto item={item} className="rounded-[6px]" />
+            )}
 
             <p className="max-w-2xl text-pretty text-base leading-relaxed text-[var(--suave)] md:text-lg">
               {item.descripcion}

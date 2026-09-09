@@ -54,13 +54,17 @@ async function urlsReferenciadas(prisma: PrismaClient): Promise<Set<string>> {
     // D6/D16: consulta propia y no compartida con `src/lib/blob/referencias.ts`
     // — este script arma su propio PrismaClient (`main()` más abajo) y no
     // puede importar el singleton `@/lib/prisma` de la app.
-    prisma.producto.findMany({ select: { imagenSrc: true } }),
+    prisma.producto.findMany({ select: { imagenSrc: true, imagenDorsoSrc: true } }),
   ])
 
   return new Set([
     ...archivos.map((archivo) => archivo.url),
     ...miniaturas.flatMap((fila) => (fila.imagenSrc ? [fila.imagenSrc] : [])),
-    ...productos.map((producto) => producto.imagenSrc),
+    // Las dos fotos del producto cuentan como referencia. Omitir el dorso acá
+    // hacía que el barrido borrara una foto que la fila todavía apunta.
+    ...productos.flatMap((producto) =>
+      producto.imagenDorsoSrc ? [producto.imagenSrc, producto.imagenDorsoSrc] : [producto.imagenSrc],
+    ),
   ])
 }
 

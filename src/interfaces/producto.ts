@@ -13,8 +13,10 @@ export type ProductoPublicoDTO = {
    *  front no vuelve a consultar para pintar el kicker. */
   categoriaNombre: string
   badge: string
-  /** Obligatoria: no hay producto sin foto. */
+  /** Obligatoria: no hay producto sin foto. Es la principal. */
   imagenSrc: string
+  /** Opcional: la foto del dorso. `null` cuando el producto solo tiene frente. */
+  imagenDorsoSrc: string | null
 }
 
 /** Fila completa tal como la consume el panel de administración. */
@@ -45,6 +47,18 @@ const productoBase = z.object({
     .trim()
     .min(1, "Subí una foto del producto")
     .refine(esUrlDeBlob, "La foto tiene que subirse desde el panel"),
+  /** Opcional, pero con la misma regla de origen que la principal cuando está:
+   *  el string vacío del form se normaliza a `null` antes de validar el origen,
+   *  para que "no cargué dorso" no dispare el error de "subila desde el panel". */
+  imagenDorsoSrc: z
+    .string()
+    .trim()
+    .transform((valor) => (valor === "" ? null : valor))
+    .nullable()
+    .refine(
+      (valor) => valor === null || esUrlDeBlob(valor),
+      "La foto del dorso tiene que subirse desde el panel",
+    ),
   publicado: z.boolean(),
 })
 

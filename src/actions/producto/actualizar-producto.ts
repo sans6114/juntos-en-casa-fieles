@@ -45,11 +45,15 @@ export async function actualizarProducto(data: ActualizarProductoDTO) {
         categoriaId: parsed.data.categoriaId,
         badge: parsed.data.badge,
         imagenSrc: parsed.data.imagenSrc,
+        imagenDorsoSrc: parsed.data.imagenDorsoSrc,
         publicado: parsed.data.publicado,
       },
     })
 
-    await borrarBlobsSinReferencia([existing.imagenSrc])
+    // Las dos fotos viejas entran al barrido: reemplazar el frente, reemplazar
+    // el dorso o quitar el dorso dejan un blob sin dueño. `existing.imagenDorsoSrc`
+    // puede ser null y el filtro de `borrarBlobsSinReferencia` lo descarta solo.
+    await borrarBlobsSinReferencia([existing.imagenSrc, existing.imagenDorsoSrc ?? ""])
 
     revalidatePath("/admin/productos")
     revalidatePath("/productos")
