@@ -31,7 +31,10 @@ export async function borrarBlobsSinReferencia(candidatas: string[]) {
     const [enArchivos, enContenidos, enProductos] = await Promise.all([
       prisma.contenidoArchivo.count({ where: { url } }),
       prisma.contenido.count({ where: { imagenSrc: url } }),
-      prisma.producto.count({ where: { imagenSrc: url } }),
+      // `OR` y no solo `imagenSrc`: desde que un producto puede tener dorso, una
+      // URL referenciada únicamente por `imagenDorsoSrc` daba 0 acá y se borraba
+      // con la foto todavía en uso.
+      prisma.producto.count({ where: { OR: [{ imagenSrc: url }, { imagenDorsoSrc: url }] } }),
     ])
     if (enArchivos === 0 && enContenidos === 0 && enProductos === 0) huerfanas.push(url)
   }

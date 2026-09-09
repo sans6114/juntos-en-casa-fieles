@@ -44,8 +44,14 @@ type ProductoFormState = {
   categoriaId: string
   badge: string
   imagenSrc: string
+  /** El form lo maneja como string: `""` es "sin dorso". El schema lo normaliza
+   *  a `null` antes de llegar a la acción. */
+  imagenDorsoSrc: string
   publicado: boolean
 }
+
+/** Las dos fotos comparten uploader; esto distingue cuál está en vuelo. */
+type RanuraFoto = "imagenSrc" | "imagenDorsoSrc"
 
 function toFormState(data?: ProductoAdminDTO): ProductoFormState {
   return {
@@ -55,6 +61,7 @@ function toFormState(data?: ProductoAdminDTO): ProductoFormState {
     categoriaId: data?.categoriaId ?? "",
     badge: data?.badge ?? "",
     imagenSrc: data?.imagenSrc ?? "",
+    imagenDorsoSrc: data?.imagenDorsoSrc ?? "",
     publicado: data?.publicado ?? false,
   }
 }
@@ -76,6 +83,7 @@ function formToVista(form: ProductoFormState, categorias: CategoriaProductoDTO[]
     categoriaNombre: categoria?.nombre ?? "Categoría",
     badge: form.badge,
     imagenSrc: form.imagenSrc,
+    imagenDorsoSrc: form.imagenDorsoSrc || null,
   }
 }
 
@@ -84,7 +92,8 @@ export function ProductoForm({ initialData, categorias }: ProductoFormProps) {
   const [form, setForm] = useState<ProductoFormState>(() => toFormState(initialData))
   const [errores, setErrores] = useState<Partial<Record<string, string>>>({})
   const [isPending, startTransition] = useTransition()
-  const [isUploadingFoto, setIsUploadingFoto] = useState(false)
+  // Cuál de las dos fotos está subiendo, o `null` si no hay ninguna en vuelo.
+  const [fotoEnVuelo, setFotoEnVuelo] = useState<RanuraFoto | null>(null)
   // La lista arranca en lo que resolvió la página server, pero crece cuando el
   // admin crea una categoría desde el diálogo sin recargar.
   const [categoriasDisponibles, setCategoriasDisponibles] = useState(categorias)
@@ -93,10 +102,10 @@ export function ProductoForm({ initialData, categorias }: ProductoFormProps) {
     setForm((f) => ({ ...f, [key]: value }))
   }
 
-  const handleFotoFile = async (file: File | undefined) => {
+  const handleFotoFile = async (ranura: RanuraFoto, file: File | undefined) => {
     if (!file) return
 
-    setIsUploadingFoto(true)
+    setFotoEnVuelo(ranura)
     try {
       const optimizada = await optimizarThumb(file)
 
@@ -105,12 +114,12 @@ export function ProductoForm({ initialData, categorias }: ProductoFormProps) {
         handleUploadUrl: "/api/producto/thumb-upload",
       })
 
-      setForm((f) => ({ ...f, imagenSrc: url }))
-      toast.success("Foto cargada")
+      setForm((f) => ({ ...f, [ranura]: url }))
+      toast.success(ranura === "imagenSrc" ? "Foto cargada" : "Foto del dorso cargada")
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "No se pudo subir la foto")
     } finally {
-      setIsUploadingFoto(false)
+      setFotoEnVuelo(null)
     }
   }
 
@@ -135,6 +144,7 @@ export function ProductoForm({ initialData, categorias }: ProductoFormProps) {
       categoriaId: form.categoriaId,
       badge: form.badge,
       imagenSrc: form.imagenSrc,
+      imagenDorsoSrc: form.imagenDorsoSrc,
       publicado: form.publicado,
     }
 
@@ -177,7 +187,7 @@ export function ProductoForm({ initialData, categorias }: ProductoFormProps) {
   }
 
   const submitDeshabilitado =
-    isPending || isUploadingFoto || !form.categoriaId || !form.imagenSrc
+    isPending || fotoEnVuelo !== null || !form.categoriaId || !form.imagenSrc
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
@@ -275,18 +285,18 @@ export function ProductoForm({ initialData, categorias }: ProductoFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="imagenSrc">Foto</Label>
+          <Label htmlFor="imagenSrc">Foto principal</Label>
           <Input
             id="imagenSrc"
             type="file"
             accept="image/jpeg,image/png,image/webp"
             onChange={(e) => {
-              void handleFotoFile(e.target.files?.[0])
+              void handleFotoFile("imagenSrc", e.target.files?.[0])
             }}
-            disabled={isPending || isUploadingFoto}
+            disabled={isPending || fotoEnVuelo !== null}
             required={!form.imagenSrc}
           />
-          {isUploadingFoto ? (
+          {fotoEnVuelo === "imagenSrc" ? (
             <p className="text-sm text-muted-foreground">Subiendo foto...</p>
           ) : form.imagenSrc ? (
             <p className="text-sm text-muted-foreground">
@@ -299,6 +309,45 @@ export function ProductoForm({ initialData, categorias }: ProductoFormProps) {
           )}
           {errores.imagenSrc ? (
             <p className="text-sm text-destructive">{errores.imagenSrc}</p>
+          ) : null}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="imagenDorsoSrc">Foto del dorso</Label>
+          <Input
+            id="imagenDorsoSrc"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => {
+              void handleFotoFile("imagenDorsoSrc", e.target.files?.[0])
+            }}
+            disabled={isPending || fotoEnVuelo !== null}
+          />
+          {fotoEnVuelo === "imagenDorsoSrc" ? (
+            <p className="text-sm text-muted-foreground">Subiendo foto del dorso...</p>
+          ) : form.imagenDorsoSrc ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm text-muted-foreground">Foto del dorso cargada</p>
+              {/* Sin este botón, una vez subido el dorso no había forma de
+                  volver a dejar el producto con una sola foto: el input de
+                  archivo no puede vaciarse a sí mismo. */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => set("imagenDorsoSrc", "")}
+                disabled={isPending}
+              >
+                Quitar
+              </Button>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Opcional. Se reduce a 1280 px antes de subirse.
+            </p>
+          )}
+          {errores.imagenDorsoSrc ? (
+            <p className="text-sm text-destructive">{errores.imagenDorsoSrc}</p>
           ) : null}
         </div>
 

@@ -14,6 +14,7 @@ export function toProductoPublicoDTO(row: ProductoConCategoria): ProductoPublico
     categoriaNombre: row.categoria.nombre,
     badge: row.badge,
     imagenSrc: row.imagenSrc,
+    imagenDorsoSrc: row.imagenDorsoSrc,
   }
 }
 
