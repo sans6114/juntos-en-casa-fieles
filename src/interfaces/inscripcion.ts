@@ -121,6 +121,31 @@ export type AltaManualResult =
       yaInscripto?: { id: string; nombre: string }
     }
 
+export const RecuperarQrSchema = z.object({
+  // Misma normalización que el alta: la búsqueda tiene que encontrar a quien se
+  // anotó con mayúsculas aunque escriba su mail en minúscula.
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.string().email("Escribí un email válido")),
+})
+
+/**
+ * Los estados posibles de una recuperación. Se modelan explícitos —y no como un
+ * `{ ok, message }`— porque la página tiene que pintar cinco cosas distintas, y
+ * dos de ellas piden acciones opuestas: ante un límite de intentos hay que
+ * esperar, ante un fallo real hay que reintentar. Con el mismo texto, la gente
+ * reintenta cuando no debe.
+ */
+export type RecuperarQrResult =
+  /** `qrValue` es el `id`: el mismo código que ya está en su mail, no uno nuevo. */
+  | { estado: "encontrado"; qrValue: string }
+  | { estado: "no-encontrado"; email: string }
+  | { estado: "invalido"; message: string }
+  | { estado: "limitado"; message: string }
+  | { estado: "error"; message: string }
+
 export type AsistenciaDTO = {
   id: string
   nombre: string
