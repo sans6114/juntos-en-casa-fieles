@@ -116,7 +116,7 @@ export async function crearInscripcion(
 
     // El email con el QR sale DESPUES de la respuesta. `sendQrEmail` se traga sus
     // propios errores y nunca lanza, asi que esperarlo no garantizaba nada: solo
-    // dejaba al visitante mirando el boton "Enviando…" mientras Resend respondia.
+    // dejaba al visitante mirando el boton "Enviando…" mientras el SMTP respondia.
     after(() =>
       sendQrEmail({
         to: nuevaInscripcion.email,

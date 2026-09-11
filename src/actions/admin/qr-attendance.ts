@@ -1,5 +1,10 @@
 "use server"
 
+import {
+  campoAsistencia,
+  diaEventoDeHoy,
+  FechasEventoNoConfiguradas,
+} from "@/lib/asistencia/dia-evento"
 import { requireSession } from "@/lib/auth-guards"
 import { prisma } from "@/lib/prisma"
 
@@ -18,31 +23,28 @@ export async function processQrScan(uuid: string) {
     return { ok: false, message: "Error QR inválido" }
   }
 
-  // 3. Obtener fecha actual en Argentina
+  // 3. Resolver qué día de evento es hoy (misma lógica que el check manual)
   const now = new Date()
-  const argDateString = now.toLocaleDateString("es-AR", {
-    timeZone: "America/Argentina/Buenos_Aires",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }) 
-  // Formato: DD/MM/YYYY
-  const [day, month, year] = argDateString.split("/")
-  const todayStr = `${year}-${month}-${day}` // YYYY-MM-DD
 
-  const eventDay1 = process.env.EVENT_DAY_1 || "2026-09-18"
-  const eventDay2 = process.env.EVENT_DAY_2 || "2026-09-19"
-  const eventDay3 = process.env.EVENT_DAY_3 || "2026-09-20"
-
-  let asistenciaField: "asistenciaDia1" | "asistenciaDia2" | "asistenciaDia3" | null = null
-
-  if (todayStr === eventDay1) asistenciaField = "asistenciaDia1"
-  else if (todayStr === eventDay2) asistenciaField = "asistenciaDia2"
-  else if (todayStr === eventDay3) asistenciaField = "asistenciaDia3"
-
-  if (!asistenciaField) {
-    return { ok: false, message: "Hoy no es un día oficial del evento. No se permiten acreditaciones. " }
+  let dia
+  try {
+    dia = diaEventoDeHoy(now)
+  } catch (error) {
+    // Mensaje distinto al de "hoy no es día de evento" a propósito: quien está
+    // en la puerta tiene que poder distinguir un problema de configuración de
+    // un escaneo fuera de fecha, porque piden acciones opuestas.
+    if (error instanceof FechasEventoNoConfiguradas) {
+      console.error(error)
+      return { ok: false, message: "Configuración del evento incompleta. Avisá al administrador." }
+    }
+    throw error
   }
+
+  if (!dia) {
+    return { ok: false, message: "Hoy no es un día oficial del evento. No se permiten acreditaciones." }
+  }
+
+  const asistenciaField = campoAsistencia(dia)
 
   // 4. Verificar si ya asistió
   const asistenciaActual = inscripcion[asistenciaField]

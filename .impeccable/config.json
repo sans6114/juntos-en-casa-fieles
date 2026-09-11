@@ -8,6 +8,24 @@
         "value": "#fff",
         "createdAt": "2026-08-21T00:19:37.862Z",
         "reason": "pre-existing @media print fallback (body background), unrelated to landing-tokens-b field kit; not touched by this change"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "arial",
+        "createdAt": "2026-09-11T20:21:56.131Z",
+        "reason": "email HTML: mail clients strip CSS variables and webfonts, so inline literals and a web-safe font stack are required. Domain constraint, not design drift."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#171717",
+        "createdAt": "2026-09-11T20:21:56.190Z",
+        "reason": "email HTML: mail clients strip CSS variables and webfonts, so inline literals and a web-safe font stack are required. Domain constraint, not design drift."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#e5e5e5",
+        "createdAt": "2026-09-11T20:21:56.241Z",
+        "reason": "email HTML: mail clients strip CSS variables and webfonts, so inline literals and a web-safe font stack are required. Domain constraint, not design drift."
       }
     ]
   }

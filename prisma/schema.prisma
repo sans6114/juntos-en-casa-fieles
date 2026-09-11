@@ -73,8 +73,15 @@ model Inscripcion {
   contacto        Contacto?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+  /// Viernes y sabado. La resolucion de que dia es hoy vive en
+  /// `src/lib/asistencia/dia-evento.ts`, fuente unica para el escaner de QR y
+  /// para el check manual de la puerta.
   asistenciaDia1  DateTime?
   asistenciaDia2  DateTime?
+  /// FUERA DE ALCANCE: el domingo no hay acreditacion. La columna se conserva
+  /// —nullable, sin escritores, 0 filas— porque dropearla no aporta nada y
+  /// habria que recrearla si el domingo vuelve al cronograma. No agregar
+  /// lectores: `DiaEvento` es `1 | 2`.
   asistenciaDia3  DateTime?
 
   @@index([congregacionId])

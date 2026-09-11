@@ -25,10 +25,9 @@ function formatTime(isoString: string) {
 type AsistenciasClientProps = {
   dia1: AsistenciaDTO[]
   dia2: AsistenciaDTO[]
-  dia3: AsistenciaDTO[]
 }
 
-export function AsistenciasClient({ dia1, dia2, dia3 }: AsistenciasClientProps) {
+export function AsistenciasClient({ dia1, dia2 }: AsistenciasClientProps) {
   const [query, setQuery] = useState("")
 
   const filterData = (data: AsistenciaDTO[]) => {
@@ -44,7 +43,6 @@ export function AsistenciasClient({ dia1, dia2, dia3 }: AsistenciasClientProps) 
 
   const filteredDia1 = useMemo(() => filterData(dia1), [dia1, query])
   const filteredDia2 = useMemo(() => filterData(dia2), [dia2, query])
-  const filteredDia3 = useMemo(() => filterData(dia3), [dia3, query])
 
   const renderTable = (data: AsistenciaDTO[]) => (
     <div className="rounded-lg border bg-card">
@@ -95,12 +93,10 @@ export function AsistenciasClient({ dia1, dia2, dia3 }: AsistenciasClientProps) 
         <TabsList>
           <TabsTrigger value="dia1">Día 1 ({dia1.length})</TabsTrigger>
           <TabsTrigger value="dia2">Día 2 ({dia2.length})</TabsTrigger>
-          <TabsTrigger value="dia3">Día 3 ({dia3.length})</TabsTrigger>
         </TabsList>
         <div className="mt-4">
           <TabsContent value="dia1">{renderTable(filteredDia1)}</TabsContent>
           <TabsContent value="dia2">{renderTable(filteredDia2)}</TabsContent>
-          <TabsContent value="dia3">{renderTable(filteredDia3)}</TabsContent>
         </div>
       </Tabs>
     </div>

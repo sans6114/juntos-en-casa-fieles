@@ -1,7 +1,5 @@
 import { transporter } from "./nodemailer"
 import QRCode from "qrcode"
-import fs from "fs"
-import path from "path"
 
 type SendQrEmailParams = {
   to: string
@@ -21,10 +19,6 @@ export async function sendQrEmail({ to, nombre, uuid }: SendQrEmailParams) {
     const qrDataUrl = await QRCode.toDataURL(uuid, { width: 300, margin: 2 })
     const base64Data = qrDataUrl.split(',')[1]
     const buffer = Buffer.from(base64Data, 'base64')
-
-    // Cargar el logo localmente para enviarlo embebido (CID)
-    const logoPath = path.join(process.cwd(), 'public/jec/logos/logoblanco.png')
-    const logoBuffer = fs.readFileSync(logoPath)
 
     await transporter.sendMail({
       from,
