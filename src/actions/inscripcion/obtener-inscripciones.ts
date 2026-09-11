@@ -38,6 +38,8 @@ export async function obtenerInscripciones(): Promise<InscripcionDTO[]> {
       createdAt: ins.createdAt.toISOString(),
       contactado: ins.contacto?.contactado ?? false,
       contactoUsuarioNombre: ins.contacto?.usuario.nombre ?? null,
+      asistenciaDia1: ins.asistenciaDia1?.toISOString() ?? null,
+      asistenciaDia2: ins.asistenciaDia2?.toISOString() ?? null,
     }))
   } catch (error) {
     console.error("Error obteniendo inscripciones:", error)

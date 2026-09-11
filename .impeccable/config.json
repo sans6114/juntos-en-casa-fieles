@@ -26,6 +26,12 @@
         "value": "#e5e5e5",
         "createdAt": "2026-09-11T20:21:56.241Z",
         "reason": "email HTML: mail clients strip CSS variables and webfonts, so inline literals and a web-safe font stack are required. Domain constraint, not design drift."
+      },
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-09-11T20:25:44.246Z",
+        "reason": "email HTML: mail clients drop webfonts and fall back anyway, so a web-safe stack is the only one that renders. Domain constraint, not a design choice."
       }
     ]
   }

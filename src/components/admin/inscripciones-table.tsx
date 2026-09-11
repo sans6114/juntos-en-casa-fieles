@@ -14,6 +14,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { AsistenciaCell } from '@/components/admin/asistencia-cell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,11 +26,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import type { DiaEvento } from '@/interfaces/asistencia';
 import type { InscripcionDTO } from '@/interfaces/inscripcion';
 
 type InscripcionesTableProps = {
   data: InscripcionDTO[]
   isAdmin?: boolean
+  /**
+   * Qué día de evento es hoy, resuelto en el servidor. `null` cuando hoy no se
+   * acredita. Llega como prop porque depende de variables de entorno.
+   */
+  diaDeHoy?: DiaEvento | null
 }
 
 const PAGE_SIZE = 10
@@ -42,7 +49,22 @@ function formatDate(date: string) {
   }).format(new Date(date))
 }
 
-export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTableProps) {
+/** Hora de acreditación para la lista impresa, o una casilla para tildar a mano. */
+function formatHoraCorta(iso: string | null) {
+  if (!iso) return "☐"
+
+  return new Intl.DateTimeFormat("es-AR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Argentina/Buenos_Aires",
+  }).format(new Date(iso))
+}
+
+export function InscripcionesTable({
+  data,
+  isAdmin = false,
+  diaDeHoy = null,
+}: InscripcionesTableProps) {
   const [query, setQuery] = useState("")
   const [page, setPage] = useState(1)
 
@@ -94,6 +116,7 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>
+              <TableHead>Acreditación</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Teléfono</TableHead>
               <TableHead>Edad</TableHead>
@@ -105,7 +128,7 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
           <TableBody>
             {pageItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                   No se encontraron inscripciones.
                 </TableCell>
               </TableRow>
@@ -130,6 +153,18 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
                       ) : (
                         item.nombre
                       )}
+                    </TableCell>
+                    {/* Inline en la fila, NO detrás de la ficha: un COLABORADOR
+                        solo puede abrir el detalle de candidatos pastorales, asi
+                        que desde la ficha no podria acreditar a casi nadie. */}
+                    <TableCell>
+                      <AsistenciaCell
+                        inscripcionId={item.id}
+                        nombre={item.nombre}
+                        asistenciaDia1={item.asistenciaDia1}
+                        asistenciaDia2={item.asistenciaDia2}
+                        diaDeHoy={diaDeHoy}
+                      />
                     </TableCell>
                     <TableCell>{item.email}</TableCell>
                     <TableCell>{item.telefono ?? "—"}</TableCell>
@@ -218,6 +253,10 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
           <thead>
             <tr className="border-b border-black">
               <th className="py-1.5 pr-2 font-semibold">Nombre</th>
+              {/* La lista impresa es el ultimo recurso si el dia del evento se
+                  cae internet o la app: las casillas vacias se tildan a mano. */}
+              <th className="py-1.5 pr-2 font-semibold">Día 1</th>
+              <th className="py-1.5 pr-2 font-semibold">Día 2</th>
               <th className="py-1.5 pr-2 font-semibold">Email</th>
               <th className="py-1.5 pr-2 font-semibold">Teléfono</th>
               <th className="py-1.5 pr-2 font-semibold">Edad</th>
@@ -230,6 +269,8 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
             {filtered.map((item) => (
               <tr key={item.id} className="border-b border-gray-300">
                 <td className="py-1.5 pr-2">{item.nombre}</td>
+                <td className="py-1.5 pr-2">{formatHoraCorta(item.asistenciaDia1)}</td>
+                <td className="py-1.5 pr-2">{formatHoraCorta(item.asistenciaDia2)}</td>
                 <td className="py-1.5 pr-2">{item.email}</td>
                 <td className="py-1.5 pr-2">{item.telefono ?? "—"}</td>
                 <td className="py-1.5 pr-2">{item.edad}</td>

@@ -6,7 +6,9 @@
  * El evento acredita SOLO viernes y sábado. El domingo no hay acreditación.
  */
 
-export type DiaEvento = 1 | 2
+import type { DiaEvento } from "@/interfaces/asistencia"
+
+export type { DiaEvento }
 
 export type CampoAsistencia = "asistenciaDia1" | "asistenciaDia2"
 
@@ -30,6 +32,15 @@ export function fechaHoyArgentina(ahora: Date = new Date()): string {
     .split("/")
 
   return `${anio}-${mes}-${dia}`
+}
+
+/** Hora local de Argentina, para los avisos de "ya acreditado". */
+export function formatearHoraArgentina(fecha: Date): string {
+  return fecha.toLocaleTimeString("es-AR", {
+    timeZone: "America/Argentina/Buenos_Aires",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
 }
 
 export class FechasEventoNoConfiguradas extends Error {

@@ -76,6 +76,14 @@ export type InscripcionDTO = {
   createdAt: string
   contactado?: boolean
   contactoUsuarioNombre?: string | null
+  /**
+   * Hora de acreditacion de cada dia, en ISO, o `null` si todavia no llego.
+   * Viaja en la grilla porque el check manual de la puerta se hace inline en la
+   * fila: mandarlo a la ficha dejaria al COLABORADOR sin poder acreditar al
+   * 92% de la gente, porque solo puede abrir la ficha de candidatos pastorales.
+   */
+  asistenciaDia1: string | null
+  asistenciaDia2: string | null
 }
 
 export type AsistenciaDTO = {
