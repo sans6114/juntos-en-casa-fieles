@@ -14,7 +14,20 @@ export type TipoCongregacion = z.infer<typeof TipoCongregacionSchema>
 
 export const CrearInscripcionSchema = z.object({
   nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  email: z.string().email("Debe ser un email válido"),
+  // Se normaliza ANTES de validar, y es la unica forma en que el email entra a
+  // la base. `Inscripcion.email` es `@unique` con indice sensible a mayusculas:
+  // sin esto, "Ana@Mail.com" y "ana@mail.com" conviven como dos filas, y quien
+  // se anoto con mayusculas escribe su mail en minuscula en /mi-qr (que es lo
+  // que hace el teclado del celular), no aparece, intenta inscribirse de nuevo y
+  // choca contra el unique. Queda sin QR y sin salida, en la pagina que existe
+  // justamente para darle una. La migracion
+  // 20260911120000_add_inscripcion_qr_token_y_estado_email normalizo las filas
+  // que ya estaban.
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.string().email("Debe ser un email válido")),
   telefono: z
     .string()
     .min(8, "El teléfono debe tener al menos 8 dígitos")
