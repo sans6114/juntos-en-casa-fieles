@@ -7,6 +7,7 @@ import { AlertCircle, CheckCircle2, Clock, Loader2 } from "lucide-react"
 
 import { processQrScan } from "@/actions/admin/qr-attendance"
 import { Badge } from "@/components/ui/badge"
+import { desbloquearAudio, reproducirTono } from "@/utils/tono-escaneo"
 import type { EscaneoResultado } from "@/interfaces/asistencia"
 
 export function QrScanner() {
@@ -32,17 +33,29 @@ export function QrScanner() {
     setLastScanned(qrValue)
 
     try {
-      setResultado(await processQrScan(qrValue))
+      const respuesta = await processQrScan(qrValue)
+      setResultado(respuesta)
+      // Tres tonos distinguibles para que el colaborador pueda acreditar
+      // mirando a la gente y no a la pantalla. "Ya había pasado" suena distinto
+      // de un error: no es culpa suya y se resuelve de otra forma.
+      reproducirTono(respuesta.ok ? "ok" : respuesta.yaAcreditado ? "aviso" : "error")
     } catch (error) {
       console.error("Error procesando el QR:", error)
       setResultado({ ok: false, message: "Ocurrió un error al procesar el QR" })
+      reproducirTono("error")
     } finally {
       setIsProcessing(false)
     }
   }
 
   return (
-    <div className="mx-auto w-full max-w-md space-y-6">
+    // Safari mantiene el audio suspendido hasta que hay un gesto real del
+    // usuario. Cualquier toque sobre el escáner lo habilita, así el primer
+    // escaneo del día no sale mudo en iPhone.
+    <div
+      className="mx-auto w-full max-w-md space-y-6"
+      onPointerDown={desbloquearAudio}
+    >
       <div className="overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow">
         <div className="relative aspect-[4/3] bg-black">
           <Scanner
@@ -73,6 +86,10 @@ export function QrScanner() {
           <li>Apuntá la cámara al código QR, esté en papel o en la pantalla del celular.</li>
           <li>Comprobá que el nombre que aparece sea el de la persona que tenés enfrente.</li>
           <li>El resultado queda en pantalla hasta el siguiente escaneo.</li>
+          <li>
+            Suena distinto según el caso: agudo si pasa, dos pulsos si ya había pasado, grave si
+            hay un problema. Subí el volumen y no hace falta mirar la pantalla en cada persona.
+          </li>
         </ul>
       </div>
     </div>
