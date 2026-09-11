@@ -206,7 +206,10 @@ export function InscripcionesTable({
                     <TableCell>
                       <QrEnvioCell
                         inscripcionId={item.id}
+                        nombre={item.nombre}
                         email={item.email}
+                        telefono={item.telefono}
+                        qrUrl={item.qrUrl}
                         emailEnviadoAt={item.emailEnviadoAt}
                         emailError={item.emailError}
                       />

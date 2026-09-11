@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth-guards"
 import { esCandidatoPastoral } from "@/lib/contacto/es-candidato-pastoral"
+import { urlDelQr } from "@/lib/inscripcion/enviar-qr"
 import type { InscripcionDTO } from "@/interfaces/inscripcion"
 
 export async function obtenerInscripciones(): Promise<InscripcionDTO[]> {
@@ -40,6 +41,7 @@ export async function obtenerInscripciones(): Promise<InscripcionDTO[]> {
       contactoUsuarioNombre: ins.contacto?.usuario.nombre ?? null,
       asistenciaDia1: ins.asistenciaDia1?.toISOString() ?? null,
       asistenciaDia2: ins.asistenciaDia2?.toISOString() ?? null,
+      qrUrl: urlDelQr(ins.qrToken),
       emailEnviadoAt: ins.emailEnviadoAt?.toISOString() ?? null,
       emailError: ins.emailError,
     }))

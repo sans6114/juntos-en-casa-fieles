@@ -2,17 +2,23 @@
 
 import { useTransition } from "react"
 
-import { AlertTriangle, Check, Send } from "lucide-react"
+import { AlertTriangle, Check, MessageCircle, Send } from "lucide-react"
 import { toast } from "sonner"
 
 import { reenviarQr } from "@/actions"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { buildWhatsAppUrl } from "@/utils/whatsapp"
 
 type QrEnvioCellProps = {
   inscripcionId: string
+  nombre: string
   /** `null` en las altas de puerta: no hay a dónde mandar el QR. */
   email: string | null
+  telefono: string | null
+  /** URL permanente del QR, armada en el servidor. */
+  qrUrl: string
   emailEnviadoAt: string | null
   emailError: string | null
 }
@@ -34,11 +40,21 @@ function formatFechaHora(iso: string) {
 
 export function QrEnvioCell({
   inscripcionId,
+  nombre,
   email,
+  telefono,
+  qrUrl,
   emailEnviadoAt,
   emailError,
 }: QrEnvioCellProps) {
   const [isPending, startTransition] = useTransition()
+
+  // `wa.me` solo admite TEXTO: no se puede adjuntar el QR como imagen. Por eso
+  // el mensaje lleva el link permanente, que abre el código de un toque.
+  const urlWhatsApp = buildWhatsAppUrl(
+    telefono,
+    `Hola ${nombre}, te dejamos tu QR para Juntos en Casa. Mostralo en la puerta: ${qrUrl}`
+  )
 
   function reenviar() {
     startTransition(async () => {
@@ -48,14 +64,36 @@ export function QrEnvioCell({
     })
   }
 
-  // Alta de puerta sin mail: no está pendiente de nada, no hay a dónde enviar y
-  // no debe ofrecer un botón que siempre va a fallar. Se muestra el estado y
-  // nada más, para que no se confunda con un envío que quedó a medias.
+  // El botón de WhatsApp vale para todos y se arma aparte del bloque de mail:
+  // justamente a quien se anotó en la puerta SIN mail, WhatsApp le queda como
+  // único canal para hacerle llegar su QR.
+  const botonWhatsApp = urlWhatsApp ? (
+    <a
+      href={urlWhatsApp}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={`Mandarle el QR a ${nombre} por WhatsApp`}
+      className={cn(
+        buttonVariants({ variant: "ghost", size: "icon-sm" }),
+        "text-[#128C7E] hover:text-[#0e7368]"
+      )}
+    >
+      <MessageCircle className="size-4" />
+      <span className="sr-only">Mandar el QR a {nombre} por WhatsApp</span>
+    </a>
+  ) : null
+
+  // Alta de puerta sin mail: no está pendiente de nada y no debe ofrecer un
+  // reenvío que siempre fallaría. Se muestra el estado y, si hay teléfono
+  // utilizable, el camino que sí sirve.
   if (!email) {
     return (
-      <span className="text-sm text-muted-foreground" title="Se inscribió en la puerta, sin email">
-        Sin email
-      </span>
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-muted-foreground" title="Se inscribió en la puerta, sin email">
+          Sin email
+        </span>
+        {botonWhatsApp}
+      </div>
     )
   }
 
@@ -99,6 +137,8 @@ export function QrEnvioCell({
         <Send className="size-4" />
         <span className="sr-only">Reenviar QR a {email}</span>
       </Button>
+
+      {botonWhatsApp}
     </div>
   )
 }

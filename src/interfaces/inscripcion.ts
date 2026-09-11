@@ -131,6 +131,12 @@ export type InscripcionDTO = {
    */
   asistenciaDia1: string | null
   asistenciaDia2: string | null
+  /**
+   * URL permanente del QR de esta persona. Se arma en el servidor con
+   * `urlDelQr()` en vez de mandar el token suelto, para que el cliente no tenga
+   * que conocer la base del sitio ni rearmarla.
+   */
+  qrUrl: string
   /** Último envío exitoso del QR, en ISO. `null` = nunca llegó a destino. */
   emailEnviadoAt: string | null
   /** Último error de envío. Se limpia cuando un envío sale bien. */
