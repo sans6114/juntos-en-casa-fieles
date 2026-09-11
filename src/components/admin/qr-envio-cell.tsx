@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button"
 
 type QrEnvioCellProps = {
   inscripcionId: string
-  email: string
+  /** `null` en las altas de puerta: no hay a dónde mandar el QR. */
+  email: string | null
   emailEnviadoAt: string | null
   emailError: string | null
 }
@@ -45,6 +46,17 @@ export function QrEnvioCell({
       if (resultado.ok) toast.success(resultado.message)
       else toast.error(resultado.message)
     })
+  }
+
+  // Alta de puerta sin mail: no está pendiente de nada, no hay a dónde enviar y
+  // no debe ofrecer un botón que siempre va a fallar. Se muestra el estado y
+  // nada más, para que no se confunda con un envío que quedó a medias.
+  if (!email) {
+    return (
+      <span className="text-sm text-muted-foreground" title="Se inscribió en la puerta, sin email">
+        Sin email
+      </span>
+    )
   }
 
   return (

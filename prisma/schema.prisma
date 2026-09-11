@@ -59,7 +59,12 @@ model Congregacion {
 model Inscripcion {
   id              String        @id @default(cuid())
   nombre          String
-  email           String        @unique
+  /// Opcional SOLO para el alta de puerta: quien carga a alguien que esta
+  /// entrando no tiene por que pedirle un mail que en ese flujo no se usa.
+  /// El formulario publico lo sigue exigiendo desde `CrearInscripcionSchema`,
+  /// porque ahi es el unico canal por el que llega el QR.
+  /// El unique sigue valiendo: Postgres trata cada NULL como distinto.
+  email           String?       @unique
   telefono        String?
   edad            Int
   congregacionId  String?

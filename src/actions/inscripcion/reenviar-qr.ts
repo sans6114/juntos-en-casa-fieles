@@ -25,8 +25,13 @@ const DATOS_DE_ENVIO = { id: true, email: true, nombre: true, qrToken: true } as
  * A quien ya recibió su QR no se le reenvía en una tanda masiva aunque un
  * reintento posterior haya fallado: ya lo tiene, y mandarle un duplicado a días
  * del evento es peor que el problema que se quiere resolver.
+ *
+ * Las altas de puerta SIN email quedan fuera: no tienen a dónde mandar nada, así
+ * que nunca van a tener `emailEnviadoAt`. Sin esta condición se acumularían para
+ * siempre en la lista de trabajo y fallarían en cada tanda, convirtiendo el
+ * contador en ruido justo el día que tiene que servir para decidir.
  */
-const PENDIENTES = { emailEnviadoAt: null }
+const PENDIENTES = { emailEnviadoAt: null, NOT: { email: null } }
 
 function esperar(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -44,7 +49,14 @@ export async function reenviarQr(inscripcionId: string) {
 
     if (!inscripcion) return { ok: false as const, message: "No encontramos esa inscripción." }
 
-    const enviado = await enviarQrYRegistrar(inscripcion)
+    if (!inscripcion.email) {
+      return {
+        ok: false as const,
+        message: "Esta persona se anotó en la puerta y no dejó email. No hay a dónde enviarlo.",
+      }
+    }
+
+    const enviado = await enviarQrYRegistrar({ ...inscripcion, email: inscripcion.email })
     revalidatePath("/admin/inscripciones", "layout")
 
     return enviado
@@ -85,7 +97,10 @@ export async function reenviarQrPendientes() {
 
     // Secuencial y con pausa: en paralelo se abren 25 conexiones SMTP a la vez.
     for (const inscripcion of pendientes) {
-      const salio = await enviarQrYRegistrar(inscripcion)
+      // `PENDIENTES` ya excluye los email nulos; el guard es para el tipo.
+      if (!inscripcion.email) continue
+
+      const salio = await enviarQrYRegistrar({ ...inscripcion, email: inscripcion.email })
       if (salio) enviados++
       else fallidos++
       await esperar(PAUSA_MS)

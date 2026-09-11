@@ -15,7 +15,8 @@ import { buttonVariants } from "@/components/ui/button"
 export type ContactoRow = {
   id: string
   nombre: string
-  email: string
+  /** `null` en las altas de puerta, donde el mail no se pide. */
+  email: string | null
   telefono: string | null
   edad: number
   createdAt: string
@@ -207,7 +208,7 @@ export function ContactoBoard({ rows }: { rows: ContactoRow[] }) {
                       </div>
                       <div className="flex items-center gap-2 sm:col-span-1">
                         <dt className="sr-only">Email</dt>
-                        <dd className="truncate text-lg">{row.email}</dd>
+                        <dd className="truncate text-lg">{row.email ?? "Sin email"}</dd>
                       </div>
                       <div className="flex items-center gap-2 sm:col-span-2">
                         <UserRound className="size-4 shrink-0 opacity-70" aria-hidden />

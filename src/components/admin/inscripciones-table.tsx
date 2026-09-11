@@ -77,18 +77,24 @@ export function InscripcionesTable({
   // "Pendiente" es NUNCA enviado con éxito, no "el último intento falló": quien
   // ya recibió su QR no entra en la lista de trabajo aunque un reintento
   // posterior haya fallado. Ya lo tiene.
-  const qrPendientes = useMemo(() => data.filter((item) => !item.emailEnviadoAt).length, [data])
+  // Las altas de puerta sin email quedan fuera: no hay a dónde mandarles nada,
+  // así que nunca van a tener `emailEnviadoAt` y se acumularían para siempre
+  // inflando un contador que tiene que servir para decidir.
+  const qrPendientes = useMemo(
+    () => data.filter((item) => item.email && !item.emailEnviadoAt).length,
+    [data]
+  )
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase()
 
     return data.filter((item) => {
-      if (soloQrPendiente && item.emailEnviadoAt) return false
+      if (soloQrPendiente && (item.emailEnviadoAt || !item.email)) return false
       if (!normalized) return true
 
       return (
         item.nombre.toLowerCase().includes(normalized) ||
-        item.email.toLowerCase().includes(normalized) ||
+        (item.email?.toLowerCase().includes(normalized) ?? false) ||
         (item.telefono?.toLowerCase().includes(normalized) ?? false) ||
         (item.congregacionNombre?.toLowerCase().includes(normalized) ?? false)
       )
@@ -205,7 +211,7 @@ export function InscripcionesTable({
                         emailError={item.emailError}
                       />
                     </TableCell>
-                    <TableCell>{item.email}</TableCell>
+                    <TableCell>{item.email ?? "—"}</TableCell>
                     <TableCell>{item.telefono ?? "—"}</TableCell>
                     <TableCell>{item.edad}</TableCell>
                     <TableCell>
@@ -310,7 +316,7 @@ export function InscripcionesTable({
                 <td className="py-1.5 pr-2">{item.nombre}</td>
                 <td className="py-1.5 pr-2">{formatHoraCorta(item.asistenciaDia1)}</td>
                 <td className="py-1.5 pr-2">{formatHoraCorta(item.asistenciaDia2)}</td>
-                <td className="py-1.5 pr-2">{item.email}</td>
+                <td className="py-1.5 pr-2">{item.email ?? "—"}</td>
                 <td className="py-1.5 pr-2">{item.telefono ?? "—"}</td>
                 <td className="py-1.5 pr-2">{item.edad}</td>
                 <td className="py-1.5 pr-2">

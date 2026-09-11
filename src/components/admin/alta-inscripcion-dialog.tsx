@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { CrearInscripcionDTO, TipoCongregacion } from "@/interfaces/inscripcion"
+import type { CrearInscripcionManualDTO, TipoCongregacion } from "@/interfaces/inscripcion"
 
 type Congregacion = { id: string; nombre: string }
 
@@ -35,7 +35,7 @@ type AltaInscripcionDialogProps = {
   esDiaDeEvento: boolean
 }
 
-type FieldErrors = Partial<Record<keyof CrearInscripcionDTO, string>>
+type FieldErrors = Partial<Record<keyof CrearInscripcionManualDTO, string>>
 
 const VALORES_INICIALES = {
   nombre: "",
@@ -157,10 +157,16 @@ export function AltaInscripcionDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="alta-email">Email</Label>
+            <Label htmlFor="alta-email">
+              Email <span className="font-normal text-muted-foreground">(opcional)</span>
+            </Label>
+            {/* Opcional a propósito: la persona está entrando ahora y se acredita
+                en el acto, así que el mail no cumple ninguna función acá.
+                Exigirlo solo lograba que se inventaran direcciones. */}
             <Input
               id="alta-email"
               type="email"
+              placeholder="Dejalo vacío si no lo tenés"
               value={valores.email}
               onChange={(e) => set("email", e.target.value)}
               disabled={isPending}

@@ -12,7 +12,7 @@ export const TipoCongregacionSchema = z.enum(["vsn", "nuevo", "otra"], {
 
 export type TipoCongregacion = z.infer<typeof TipoCongregacionSchema>
 
-export const CrearInscripcionSchema = z.object({
+const CamposInscripcion = z.object({
   nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
   // Se normaliza ANTES de validar, y es la unica forma en que el email entra a
   // la base. `Inscripcion.email` es `@unique` con indice sensible a mayusculas:
@@ -43,23 +43,56 @@ export const CrearInscripcionSchema = z.object({
   // ambiguedad es la que ensuciaba las metricas del panel. Ademas es la unica
   // via por la que una inscripcion nace con `sinCongregacion = true`.
   tipoCongregacion: TipoCongregacionSchema,
-}).superRefine((data, ctx) => {
-  // Marcar "otra congregacion" y dejar el campo vacio deja una fila en el limbo:
-  // sin FK y sin el flag, invisible en el chart del panel. Se corta en el borde.
-  if (
-    data.tipoCongregacion === "otra" &&
-    !data.congregacionId &&
-    !data.congregacionQuery?.trim()
-  ) {
+})
+
+// Marcar "otra congregacion" y dejar el campo vacio deja una fila en el limbo:
+// sin FK y sin el flag, invisible en el chart del panel. Se corta en el borde.
+// Se define aparte para que las dos variantes del formulario compartan la regla
+// en vez de tener cada una su copia.
+function exigirCongregacionCuandoEsOtra(
+  data: { tipoCongregacion: TipoCongregacion; congregacionId?: string | null; congregacionQuery?: string },
+  ctx: z.RefinementCtx
+) {
+  if (data.tipoCongregacion === "otra" && !data.congregacionId && !data.congregacionQuery?.trim()) {
     ctx.addIssue({
       code: "custom",
       message: "Escribí o elegí tu congregación.",
       path: ["congregacionQuery"],
     })
   }
-})
+}
+
+export const CrearInscripcionSchema = CamposInscripcion.superRefine(exigirCongregacionCuandoEsOtra)
 
 export type CrearInscripcionDTO = z.infer<typeof CrearInscripcionSchema>
+
+/**
+ * Variante para el alta que hace el colaborador en la puerta.
+ *
+ * La ÚNICA diferencia es que el email no se pide: la persona ya está entrando y
+ * se la acredita en el acto, así que el mail no cumple ninguna función en ese
+ * flujo. Exigirlo obligaba a inventar una dirección con gente esperando, que
+ * ensucia los datos peor que dejarlo vacío.
+ *
+ * Vacío se guarda como `null` y no como cadena vacía: dos altas sin mail con `""`
+ * chocarían contra el índice único, mientras que Postgres trata cada NULL como
+ * distinto. Si escriben algo, se valida y normaliza igual que en el público.
+ */
+export const CrearInscripcionManualSchema = CamposInscripcion.extend({
+  email: z
+    .preprocess(
+      (valor) => (typeof valor === "string" ? valor.trim().toLowerCase() : valor),
+      z
+        .union([
+          z.literal(""),
+          z.string().email("Escribí un email válido o dejá el campo vacío."),
+        ])
+        .optional()
+    )
+    .transform((valor) => valor || null),
+}).superRefine(exigirCongregacionCuandoEsOtra)
+
+export type CrearInscripcionManualDTO = z.infer<typeof CrearInscripcionManualSchema>
 
 export type InscripcionActionState = {
   ok: boolean
@@ -70,7 +103,8 @@ export type InscripcionActionState = {
 export type InscripcionDTO = {
   id: string
   nombre: string
-  email: string
+  /** `null` en las altas de puerta, donde el mail no se pide. */
+  email: string | null
   telefono: string | null
   edad: number
   congregacionId: string | null
@@ -121,7 +155,7 @@ export type AltaManualResult =
   | {
       ok: false
       message: string
-      fieldErrors?: Partial<Record<keyof CrearInscripcionDTO, string>>
+      fieldErrors?: Partial<Record<keyof CrearInscripcionManualDTO, string>>
       yaInscripto?: { id: string; nombre: string }
     }
 

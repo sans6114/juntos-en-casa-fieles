@@ -59,14 +59,20 @@ export async function crearInscripcion(
     // el envio se tragaba sus errores, asi que un fallo masivo era
     // indistinguible del exito y no habia forma de responder "a quien no le
     // llego" sin salir de la aplicacion.
-    after(() =>
-      enviarQrYRegistrar({
-        id: nuevaInscripcion.id,
-        email: nuevaInscripcion.email,
-        nombre: nuevaInscripcion.nombre,
-        qrToken: nuevaInscripcion.qrToken,
-      })
-    )
+    // `email` es nullable en la base para permitir las altas de puerta, pero acá
+    // `CrearInscripcionSchema` lo exige, asi que siempre viene. El guard existe
+    // para que el tipo lo refleje, no porque se espere el caso.
+    const emailDestino = nuevaInscripcion.email
+    if (emailDestino) {
+      after(() =>
+        enviarQrYRegistrar({
+          id: nuevaInscripcion.id,
+          email: emailDestino,
+          nombre: nuevaInscripcion.nombre,
+          qrToken: nuevaInscripcion.qrToken,
+        })
+      )
+    }
 
     // Revalidar las rutas del dashboard admin para que los datos nuevos aparezcan al instante
     revalidatePath("/admin/inscripciones", "layout")

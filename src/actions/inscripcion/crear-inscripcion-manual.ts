@@ -5,8 +5,8 @@ import { z } from "zod"
 
 import {
   type AltaManualResult,
-  type CrearInscripcionDTO,
-  CrearInscripcionSchema,
+  type CrearInscripcionManualDTO,
+  CrearInscripcionManualSchema,
 } from "@/interfaces/inscripcion"
 import { acreditarHoy } from "@/lib/asistencia/acreditar"
 import { resolverCongregacionDeInscripcion } from "@/lib/congregacion/resolver"
@@ -35,33 +35,43 @@ async function buscarPorEmail(email: string) {
  * envío menos es un punto de falla menos el día que más importa. Si después hace
  * falta, queda el reenvío manual.
  *
+ * El email es OPCIONAL acá y obligatorio en el formulario público. En la puerta
+ * no cumple ninguna función —no se manda nada y se acredita en el acto—, así que
+ * pedirlo solo lograba que se inventaran direcciones.
+ *
  * `requireSession()` y no `requireAdmin()`: el alta de puerta la hace el
  * colaborador. El admin supervisa.
  */
 export async function crearInscripcionManual(
-  data: CrearInscripcionDTO
+  data: CrearInscripcionManualDTO
 ): Promise<AltaManualResult> {
   await requireSession()
 
-  const parsed = CrearInscripcionSchema.safeParse(data)
+  const parsed = CrearInscripcionManualSchema.safeParse(data)
 
   if (!parsed.success) {
     const flattened = z.flattenError(parsed.error)
-    const fieldErrors: Partial<Record<keyof CrearInscripcionDTO, string>> = {}
-    for (const key of Object.keys(flattened.fieldErrors) as (keyof CrearInscripcionDTO)[]) {
-      const messages = flattened.fieldErrors[key]
-      if (messages?.[0]) fieldErrors[key] = messages[0]
+    const fieldErrors: Partial<Record<keyof CrearInscripcionManualDTO, string>> = {}
+    for (const campo of Object.keys(flattened.fieldErrors) as (keyof CrearInscripcionManualDTO)[]) {
+      const primero = flattened.fieldErrors[campo]?.[0]
+      if (primero) fieldErrors[campo] = primero
     }
     return { ok: false, message: "Revisá los datos ingresados.", fieldErrors }
   }
 
   try {
-    const existente = await buscarPorEmail(parsed.data.email)
-    if (existente) {
-      return {
-        ok: false,
-        message: `${existente.nombre} ya está inscripto con ese email.`,
-        yaInscripto: existente,
+    // Solo tiene sentido buscar duplicados si dieron un mail: es la única clave
+    // por la que se puede reconocer a alguien ya anotado. Sin mail se crea
+    // directamente, y si la persona ya estaba, el colaborador la encuentra
+    // buscándola por nombre en la grilla.
+    if (parsed.data.email) {
+      const existente = await buscarPorEmail(parsed.data.email)
+      if (existente) {
+        return {
+          ok: false,
+          message: `${existente.nombre} ya está inscripto con ese email.`,
+          yaInscripto: existente,
+        }
       }
     }
 
@@ -100,12 +110,14 @@ export async function crearInscripcionManual(
     // Se resuelve igual que el caso detectado arriba: con el id a mano para que
     // el diálogo pueda ofrecer acreditar, en vez de un error sin salida.
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      const existente = await buscarPorEmail(parsed.data.email)
-      if (existente) {
-        return {
-          ok: false,
-          message: `${existente.nombre} ya está inscripto con ese email.`,
-          yaInscripto: existente,
+      if (parsed.data.email) {
+        const existente = await buscarPorEmail(parsed.data.email)
+        if (existente) {
+          return {
+            ok: false,
+            message: `${existente.nombre} ya está inscripto con ese email.`,
+            yaInscripto: existente,
+          }
         }
       }
       return { ok: false, message: "Ya existe una inscripción con ese email." }
