@@ -6,6 +6,7 @@ import {
 } from 'react';
 
 import {
+  AlertTriangle,
   ChevronLeft,
   ChevronRight,
   Printer,
@@ -15,6 +16,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { AsistenciaCell } from '@/components/admin/asistencia-cell';
+import { QrEnvioCell } from '@/components/admin/qr-envio-cell';
+import { ReenviarPendientesButton } from '@/components/admin/reenviar-pendientes-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -66,20 +69,29 @@ export function InscripcionesTable({
   diaDeHoy = null,
 }: InscripcionesTableProps) {
   const [query, setQuery] = useState("")
+  const [soloQrPendiente, setSoloQrPendiente] = useState(false)
   const [page, setPage] = useState(1)
+
+  // "Pendiente" es NUNCA enviado con éxito, no "el último intento falló": quien
+  // ya recibió su QR no entra en la lista de trabajo aunque un reintento
+  // posterior haya fallado. Ya lo tiene.
+  const qrPendientes = useMemo(() => data.filter((item) => !item.emailEnviadoAt).length, [data])
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase()
-    if (!normalized) return data
 
-    return data.filter(
-      (item) =>
+    return data.filter((item) => {
+      if (soloQrPendiente && item.emailEnviadoAt) return false
+      if (!normalized) return true
+
+      return (
         item.nombre.toLowerCase().includes(normalized) ||
         item.email.toLowerCase().includes(normalized) ||
         (item.telefono?.toLowerCase().includes(normalized) ?? false) ||
         (item.congregacionNombre?.toLowerCase().includes(normalized) ?? false)
-    )
-  }, [data, query])
+      )
+    })
+  }, [data, query, soloQrPendiente])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -101,14 +113,30 @@ export function InscripcionesTable({
             className="pl-9"
           />
         </div>
-        <Button
-          variant="outline"
-          className="gap-2"
-          onClick={() => window.print()}
-        >
-          <Printer className="size-4" />
-          Imprimir PDF
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Convierte un problema invisible en una lista de trabajo. Solo
+              aparece cuando hay algo que hacer. */}
+          {qrPendientes > 0 ? (
+            <Button
+              variant={soloQrPendiente ? "default" : "outline"}
+              className="gap-2"
+              onClick={() => {
+                setSoloQrPendiente((previo) => !previo)
+                setPage(1)
+              }}
+            >
+              <AlertTriangle className="size-4" />
+              QR sin enviar ({qrPendientes})
+            </Button>
+          ) : null}
+
+          <ReenviarPendientesButton pendientes={qrPendientes} />
+
+          <Button variant="outline" className="gap-2" onClick={() => window.print()}>
+            <Printer className="size-4" />
+            Imprimir PDF
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-lg border bg-card print:hidden">
@@ -117,6 +145,7 @@ export function InscripcionesTable({
             <TableRow>
               <TableHead>Nombre</TableHead>
               <TableHead>Acreditación</TableHead>
+              <TableHead>QR</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Teléfono</TableHead>
               <TableHead>Edad</TableHead>
@@ -128,7 +157,7 @@ export function InscripcionesTable({
           <TableBody>
             {pageItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                   No se encontraron inscripciones.
                 </TableCell>
               </TableRow>
@@ -164,6 +193,14 @@ export function InscripcionesTable({
                         asistenciaDia1={item.asistenciaDia1}
                         asistenciaDia2={item.asistenciaDia2}
                         diaDeHoy={diaDeHoy}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <QrEnvioCell
+                        inscripcionId={item.id}
+                        email={item.email}
+                        emailEnviadoAt={item.emailEnviadoAt}
+                        emailError={item.emailError}
                       />
                     </TableCell>
                     <TableCell>{item.email}</TableCell>

@@ -11,7 +11,7 @@ import {
   type InscripcionActionState,
 } from '@/interfaces/inscripcion';
 import { resolverCongregacionDeInscripcion } from '@/lib/congregacion/resolver';
-import { sendQrEmail } from '@/lib/email/send-qr-email';
+import { enviarQrYRegistrar } from '@/lib/inscripcion/enviar-qr';
 import { prisma } from '@/lib/prisma';
 
 import { Prisma } from '../../../generated/client';
@@ -51,14 +51,20 @@ export async function crearInscripcion(
       },
     })
 
-    // El email con el QR sale DESPUES de la respuesta. `sendQrEmail` se traga sus
-    // propios errores y nunca lanza, asi que esperarlo no garantizaba nada: solo
-    // dejaba al visitante mirando el boton "Enviando…" mientras el SMTP respondia.
+    // El email con el QR sale DESPUES de la respuesta: esperarlo solo dejaria al
+    // visitante mirando el boton "Enviando…" mientras el SMTP responde, y la
+    // inscripcion ya esta guardada pase lo que pase con el mail.
+    //
+    // Lo que SI cambio: `enviarQrYRegistrar` deja constancia de como salio. Antes
+    // el envio se tragaba sus errores, asi que un fallo masivo era
+    // indistinguible del exito y no habia forma de responder "a quien no le
+    // llego" sin salir de la aplicacion.
     after(() =>
-      sendQrEmail({
-        to: nuevaInscripcion.email,
+      enviarQrYRegistrar({
+        id: nuevaInscripcion.id,
+        email: nuevaInscripcion.email,
         nombre: nuevaInscripcion.nombre,
-        uuid: nuevaInscripcion.id,
+        qrToken: nuevaInscripcion.qrToken,
       })
     )
 

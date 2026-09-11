@@ -97,6 +97,10 @@ export type InscripcionDTO = {
    */
   asistenciaDia1: string | null
   asistenciaDia2: string | null
+  /** Último envío exitoso del QR, en ISO. `null` = nunca llegó a destino. */
+  emailEnviadoAt: string | null
+  /** Último error de envío. Se limpia cuando un envío sale bien. */
+  emailError: string | null
 }
 
 /**
