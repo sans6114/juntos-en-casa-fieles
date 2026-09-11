@@ -40,6 +40,9 @@ export function formatearHoraArgentina(fecha: Date): string {
     timeZone: "America/Argentina/Buenos_Aires",
     hour: "2-digit",
     minute: "2-digit",
+    // 24 horas, igual que la grilla: "14:32" no se confunde con nada en la
+    // puerta, y mantiene un solo formato de hora en toda la aplicacion.
+    hour12: false,
   })
 }
 

@@ -19,6 +19,11 @@ function formatTime(isoString: string) {
   return new Intl.DateTimeFormat("es-AR", {
     hour: "2-digit",
     minute: "2-digit",
+    // `hour12` rompe la hidratacion (ver la nota en `qr-envio-cell.tsx`), y sin
+    // `timeZone` el server formatea en la zona del contenedor y el navegador en
+    // la del visitante: dos horas distintas para el mismo dato.
+    hour12: false,
+    timeZone: "America/Argentina/Buenos_Aires",
   }).format(new Date(isoString))
 }
 

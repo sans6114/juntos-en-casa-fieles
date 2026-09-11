@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -32,6 +33,9 @@ function formatHora(iso: string) {
   return new Intl.DateTimeFormat("es-AR", {
     hour: "2-digit",
     minute: "2-digit",
+    // Ver la nota en `qr-envio-cell.tsx`: con `hour12` el ICU del servidor y el
+    // del navegador usan espacios distintos y React tira error de hidratacion.
+    hour12: false,
     timeZone: "America/Argentina/Buenos_Aires",
   }).format(new Date(iso))
 }
@@ -131,16 +135,21 @@ export function AsistenciaCell({
           }
         />
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Corregir acreditación</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {([1, 2] as const).map((dia) => {
-            const presente = Boolean(porDia[dia])
-            return (
-              <DropdownMenuItem key={dia} onClick={() => corregir(dia, !presente)}>
-                {presente ? `Desmarcar día ${dia}` : `Marcar día ${dia}`}
-              </DropdownMenuItem>
-            )
-          })}
+          {/* `DropdownMenuLabel` envuelve `Menu.GroupLabel` de Base UI, que
+              EXIGE un `Menu.Group` padre: sin el grupo tira "MenuGroupContext is
+              missing" y revienta la página entera al abrir el menú. */}
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Corregir acreditación</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {([1, 2] as const).map((dia) => {
+              const presente = Boolean(porDia[dia])
+              return (
+                <DropdownMenuItem key={dia} onClick={() => corregir(dia, !presente)}>
+                  {presente ? `Desmarcar día ${dia}` : `Marcar día ${dia}`}
+                </DropdownMenuItem>
+              )
+            })}
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

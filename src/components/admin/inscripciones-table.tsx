@@ -59,6 +59,8 @@ function formatHoraCorta(iso: string | null) {
   return new Intl.DateTimeFormat("es-AR", {
     hour: "2-digit",
     minute: "2-digit",
+    // Ver la nota en `qr-envio-cell.tsx`: `hour12` rompe la hidratacion.
+    hour12: false,
     timeZone: "America/Argentina/Buenos_Aires",
   }).format(new Date(iso))
 }

@@ -22,6 +22,11 @@ function formatFechaHora(iso: string) {
     month: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
+    // 24 horas a proposito. Con `hour12`, el ICU de Node y el del navegador usan
+    // espacios distintos antes del "p. m." (U+202F vs U+00A0) y React tira un
+    // error de hidratacion por dos textos que se ven identicos. Ademas, en una
+    // puerta con apuro, "14:32" no se confunde con nada.
+    hour12: false,
     timeZone: "America/Argentina/Buenos_Aires",
   }).format(new Date(iso))
 }
