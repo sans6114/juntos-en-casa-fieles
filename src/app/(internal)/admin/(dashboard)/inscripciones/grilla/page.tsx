@@ -1,6 +1,7 @@
 import { AdminHeader } from "@/components/admin/admin-sidebar"
+import { AltaInscripcionDialog } from "@/components/admin/alta-inscripcion-dialog"
 import { InscripcionesTable } from "@/components/admin/inscripciones-table"
-import { obtenerInscripciones } from "@/actions"
+import { obtenerCongregaciones, obtenerInscripciones } from "@/actions"
 import {
   diaEventoDeHoy,
   FechasEventoNoConfiguradas,
@@ -10,7 +11,10 @@ import type { DiaEvento } from "@/interfaces/asistencia"
 
 export default async function InscripcionesGrillaPage() {
   const user = await requireSession()
-  const inscripciones = await obtenerInscripciones()
+  const [inscripciones, congregaciones] = await Promise.all([
+    obtenerInscripciones(),
+    obtenerCongregaciones(),
+  ])
   const isAdmin = user.rol === "ADMIN"
 
   // Si faltan las fechas, la página NO se cae: es la herramienta de búsqueda de
@@ -69,6 +73,13 @@ export default async function InscripcionesGrillaPage() {
             </p>
           </aside>
         ) : null}
+
+        <div className="flex justify-end print:hidden">
+          <AltaInscripcionDialog
+            congregaciones={congregaciones}
+            esDiaDeEvento={diaDeHoy !== null}
+          />
+        </div>
 
         <InscripcionesTable
           data={inscripciones}

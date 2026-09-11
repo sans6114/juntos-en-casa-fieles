@@ -1,4 +1,5 @@
 export * from "./inscripcion/crear-inscripcion"
+export * from "./inscripcion/crear-inscripcion-manual"
 export * from "./inscripcion/obtener-inscripciones"
 export * from "./inscripcion/obtener-inscripcion"
 export * from "./auth/login"

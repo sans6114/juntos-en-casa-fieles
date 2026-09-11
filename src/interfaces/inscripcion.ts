@@ -86,6 +86,28 @@ export type InscripcionDTO = {
   asistenciaDia2: string | null
 }
 
+/**
+ * Resultado del alta manual desde el admin. `yaInscripto` es el caso central:
+ * el colaborador apurado en la puerta va a cargar gente que ya se anotó, y
+ * devolverle un "email duplicado" a secas lo deja sin salida. Con el id a mano,
+ * el diálogo puede ofrecerle acreditar a esa persona en el acto.
+ */
+export type AltaManualResult =
+  | {
+      ok: true
+      inscripcionId: string
+      nombre: string
+      /** `true` si además quedó acreditada, porque hoy es día de evento. */
+      acreditada: boolean
+      horaLlegada?: string
+    }
+  | {
+      ok: false
+      message: string
+      fieldErrors?: Partial<Record<keyof CrearInscripcionDTO, string>>
+      yaInscripto?: { id: string; nombre: string }
+    }
+
 export type AsistenciaDTO = {
   id: string
   nombre: string
