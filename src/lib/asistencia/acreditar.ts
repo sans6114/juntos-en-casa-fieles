@@ -5,6 +5,10 @@ import {
   formatearHoraArgentina,
 } from "./dia-evento"
 import { revalidarVistasDeAsistencia } from "./revalidar-vistas"
+import {
+  etiquetaCongregacion,
+  type EtiquetaCongregacion,
+} from "@/lib/congregacion/etiqueta"
 import { prisma } from "@/lib/prisma"
 
 /**
@@ -17,12 +21,26 @@ import { prisma } from "@/lib/prisma"
  * No decide autorización: eso es responsabilidad de quien lo llama.
  */
 
+/** Lo que el colaborador necesita ver para verificar que el QR es de quien lo trae. */
+export type PersonaAcreditada = {
+  nombre: string
+  horaLlegada: string
+  congregacion: EtiquetaCongregacion
+}
+
 export type ResultadoAcreditacion =
-  | { estado: "acreditado"; nombre: string; horaLlegada: string }
-  | { estado: "ya-acreditado"; nombre: string; horaLlegada: string }
+  | ({ estado: "acreditado" } & PersonaAcreditada)
+  | ({ estado: "ya-acreditado" } & PersonaAcreditada)
   | { estado: "no-encontrado" }
   | { estado: "fuera-de-fecha" }
   | { estado: "sin-configurar" }
+
+/** Lo que hay que traer para armar el panel del escáner. */
+const DATOS_DE_PERSONA = {
+  nombre: true,
+  sinCongregacion: true,
+  congregacion: { select: { nombre: true, estado: true } },
+} as const
 
 export async function acreditarHoy(inscripcionId: string): Promise<ResultadoAcreditacion> {
   let dia
@@ -52,11 +70,14 @@ export async function acreditarHoy(inscripcionId: string): Promise<ResultadoAcre
 
   if (count === 0) {
     // count 0 significa "no existe la fila" O "ya estaba acreditada". Una sola
-    // consulta distingue los dos, y de paso trae el nombre que la puerta
+    // consulta distingue los dos, y de paso trae los datos que la puerta
     // necesita ver para resolver el caso en el momento.
+    // Se piden los dos días y se elige después, en vez de armar el `select` con
+    // la clave dinámica: con `[campo]: true` TypeScript pierde el nombre de la
+    // columna y el acceso de abajo queda sin tipo.
     const existente = await prisma.inscripcion.findUnique({
       where: { id: inscripcionId },
-      select: { nombre: true, [campo]: true },
+      select: { ...DATOS_DE_PERSONA, asistenciaDia1: true, asistenciaDia2: true },
     })
 
     if (!existente) return { estado: "no-encontrado" }
@@ -65,19 +86,21 @@ export async function acreditarHoy(inscripcionId: string): Promise<ResultadoAcre
       estado: "ya-acreditado",
       nombre: existente.nombre,
       horaLlegada: formatearHoraArgentina(existente[campo] as Date),
+      congregacion: etiquetaCongregacion(existente),
     }
   }
 
-  const inscripcion = await prisma.inscripcion.findUnique({
+  const inscripcion = await prisma.inscripcion.findUniqueOrThrow({
     where: { id: inscripcionId },
-    select: { nombre: true },
+    select: DATOS_DE_PERSONA,
   })
 
   revalidarVistasDeAsistencia()
 
   return {
     estado: "acreditado",
-    nombre: inscripcion?.nombre ?? "",
+    nombre: inscripcion.nombre,
     horaLlegada: formatearHoraArgentina(ahora),
+    congregacion: etiquetaCongregacion(inscripcion),
   }
 }
