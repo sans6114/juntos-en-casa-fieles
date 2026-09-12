@@ -141,6 +141,8 @@ export type InscripcionDTO = {
   emailEnviadoAt: string | null
   /** Último error de envío. Se limpia cuando un envío sale bien. */
   emailError: string | null
+  /** Cuándo se le mandó el recordatorio previo al evento, en ISO. */
+  recordatorioEnviadoAt: string | null
 }
 
 /**

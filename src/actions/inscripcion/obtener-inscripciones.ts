@@ -44,6 +44,7 @@ export async function obtenerInscripciones(): Promise<InscripcionDTO[]> {
       qrUrl: urlDelQr(ins.qrToken),
       emailEnviadoAt: ins.emailEnviadoAt?.toISOString() ?? null,
       emailError: ins.emailError,
+      recordatorioEnviadoAt: ins.recordatorioEnviadoAt?.toISOString() ?? null,
     }))
   } catch (error) {
     console.error("Error obteniendo inscripciones:", error)

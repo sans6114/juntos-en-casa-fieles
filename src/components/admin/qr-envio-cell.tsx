@@ -5,8 +5,9 @@ import { useTransition } from "react"
 import { AlertTriangle, Check, MessageCircle, Send } from "lucide-react"
 import { toast } from "sonner"
 
-import { reenviarQr } from "@/actions"
+import { marcarRecordatorio, reenviarQr } from "@/actions"
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { buildWhatsAppUrl } from "@/utils/whatsapp"
@@ -21,6 +22,8 @@ type QrEnvioCellProps = {
   qrUrl: string
   emailEnviadoAt: string | null
   emailError: string | null
+  /** Cuándo se le mandó el recordatorio previo al evento. */
+  recordatorioEnviadoAt: string | null
 }
 
 function formatFechaHora(iso: string) {
@@ -46,6 +49,7 @@ export function QrEnvioCell({
   qrUrl,
   emailEnviadoAt,
   emailError,
+  recordatorioEnviadoAt,
 }: QrEnvioCellProps) {
   const [isPending, startTransition] = useTransition()
 
@@ -63,6 +67,37 @@ export function QrEnvioCell({
       else toast.error(resultado.message)
     })
   }
+
+  function alternarRecordatorio(marcado: boolean) {
+    startTransition(async () => {
+      const resultado = await marcarRecordatorio(inscripcionId, marcado)
+      if (resultado.ok) toast.success(resultado.message)
+      else toast.error(resultado.message)
+    })
+  }
+
+  // El marcador de recordatorio va al lado del botón de WhatsApp porque se usan
+  // juntos: se manda y se tilda. Es lo único que permite que varios
+  // colaboradores trabajen la MISMA lista en paralelo sin repartírsela — quien
+  // queda tildado desaparece del filtro para todos.
+  const marcadorRecordatorio = (
+    <label
+      className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground"
+      title={
+        recordatorioEnviadoAt
+          ? `Recordatorio marcado el ${formatFechaHora(recordatorioEnviadoAt)}`
+          : "Marcar cuando le hayas mandado el recordatorio"
+      }
+    >
+      <Checkbox
+        checked={Boolean(recordatorioEnviadoAt)}
+        onCheckedChange={(marcado) => alternarRecordatorio(marcado === true)}
+        disabled={isPending}
+        aria-label={`Recordatorio enviado a ${nombre}`}
+      />
+      {recordatorioEnviadoAt ? "Recordado" : "Recordar"}
+    </label>
+  )
 
   // El botón de WhatsApp vale para todos y se arma aparte del bloque de mail:
   // justamente a quien se anotó en la puerta SIN mail, WhatsApp le queda como
@@ -93,6 +128,7 @@ export function QrEnvioCell({
           Sin email
         </span>
         {botonWhatsApp}
+        {marcadorRecordatorio}
       </div>
     )
   }
@@ -139,6 +175,7 @@ export function QrEnvioCell({
       </Button>
 
       {botonWhatsApp}
+      {marcadorRecordatorio}
     </div>
   )
 }

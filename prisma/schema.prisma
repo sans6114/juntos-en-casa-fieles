@@ -101,6 +101,10 @@ model Inscripcion {
   emailError      String?
   /// Total de intentos, contando el alta publica y cada reenvio manual.
   emailIntentos   Int           @default(0)
+  /// Cuando se le mando el recordatorio previo al evento. Lo marcan a mano los
+  /// colaboradores, que trabajan la misma lista en paralelo: sin este dato
+  /// compartido, cada uno no sabe por donde van los demas.
+  recordatorioEnviadoAt DateTime?
   /// Viernes y sabado. La resolucion de que dia es hoy vive en
   /// `src/lib/asistencia/dia-evento.ts`, fuente unica para el escaner de QR y
   /// para el check manual de la puerta.

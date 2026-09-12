@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
+  MessageCircle,
   Printer,
   Search,
 } from 'lucide-react';
@@ -72,6 +73,7 @@ export function InscripcionesTable({
 }: InscripcionesTableProps) {
   const [query, setQuery] = useState("")
   const [soloQrPendiente, setSoloQrPendiente] = useState(false)
+  const [soloSinRecordatorio, setSoloSinRecordatorio] = useState(false)
   const [page, setPage] = useState(1)
 
   // "Pendiente" es NUNCA enviado con éxito, no "el último intento falló": quien
@@ -85,11 +87,21 @@ export function InscripcionesTable({
     [data]
   )
 
+  // Los cuatro colaboradores mandan el recordatorio sobre ESTA lista, en
+  // paralelo y sin repartírsela: quien queda tildado desaparece del filtro para
+  // todos, así que no hay que coordinar tramos ni nadie queda huérfano si uno
+  // se atrasa. Cuando el contador llega a cero, terminaron.
+  const sinRecordatorio = useMemo(
+    () => data.filter((item) => !item.recordatorioEnviadoAt).length,
+    [data]
+  )
+
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase()
 
     return data.filter((item) => {
       if (soloQrPendiente && (item.emailEnviadoAt || !item.email)) return false
+      if (soloSinRecordatorio && item.recordatorioEnviadoAt) return false
       if (!normalized) return true
 
       return (
@@ -99,7 +111,7 @@ export function InscripcionesTable({
         (item.congregacionNombre?.toLowerCase().includes(normalized) ?? false)
       )
     })
-  }, [data, query, soloQrPendiente])
+  }, [data, query, soloQrPendiente, soloSinRecordatorio])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -135,6 +147,20 @@ export function InscripcionesTable({
             >
               <AlertTriangle className="size-4" />
               QR sin enviar ({qrPendientes})
+            </Button>
+          ) : null}
+
+          {sinRecordatorio > 0 ? (
+            <Button
+              variant={soloSinRecordatorio ? "default" : "outline"}
+              className="gap-2"
+              onClick={() => {
+                setSoloSinRecordatorio((previo) => !previo)
+                setPage(1)
+              }}
+            >
+              <MessageCircle className="size-4" />
+              Sin recordatorio ({sinRecordatorio})
             </Button>
           ) : null}
 
@@ -212,6 +238,7 @@ export function InscripcionesTable({
                         qrUrl={item.qrUrl}
                         emailEnviadoAt={item.emailEnviadoAt}
                         emailError={item.emailError}
+                        recordatorioEnviadoAt={item.recordatorioEnviadoAt}
                       />
                     </TableCell>
                     <TableCell>{item.email ?? "—"}</TableCell>
