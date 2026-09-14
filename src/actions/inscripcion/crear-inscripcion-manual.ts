@@ -31,13 +31,23 @@ async function buscarPorEmail(email: string) {
 
 /**
  * Alta de una inscripción desde el panel, para quien llega a la puerta sin
- * haberse anotado. NO envía el mail con el QR: la persona está parada ahí, y un
- * envío menos es un punto de falla menos el día que más importa. Si después hace
- * falta, queda el reenvío manual.
+ * haberse anotado. NO envía el mail con el QR, y son tres razones: la persona
+ * está parada ahí y se acredita en el acto, un envío menos es un punto de falla
+ * menos el día que más importa, y el email acá es opcional, así que la mayoría
+ * de las veces no hay a dónde mandar nada.
  *
  * El email es OPCIONAL acá y obligatorio en el formulario público. En la puerta
- * no cumple ninguna función —no se manda nada y se acredita en el acto—, así que
- * pedirlo solo lograba que se inventaran direcciones.
+ * no cumple ninguna función, así que pedirlo solo lograba que se inventaran
+ * direcciones.
+ *
+ * Cómo recibe su QR, entonces. Esta persona lo necesita para el día siguiente,
+ * no para hoy. El camino es el botón de WhatsApp de su fila en la grilla, que le
+ * manda el link permanente a `/mi-qr/<token>`: un toque y tiene el código. Y
+ * siempre está disponible, porque el teléfono SÍ es obligatorio acá.
+ *
+ * (Antes este comentario decía "queda el reenvío manual", refiriéndose al
+ * reenvío por mail. Eso se eliminó: reenviar por mail a quien no leyó el mail es
+ * reintentar el canal que ya falló.)
  *
  * `requireSession()` y no `requireAdmin()`: el alta de puerta la hace el
  * colaborador. El admin supervisa.
