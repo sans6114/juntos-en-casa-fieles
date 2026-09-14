@@ -60,28 +60,34 @@ export function QrEnvioCell({
     `Hola ${nombre}, te dejamos tu QR para Juntos en Casa. Mostralo en la puerta: ${qrUrl}`
   )
 
-  // El marcador de recordatorio va al lado del botón de WhatsApp porque se usan
-  // juntos: se manda y se tilda. Es lo único que permite que varios
-  // colaboradores trabajen la MISMA lista en paralelo sin repartírsela — quien
-  // queda tildado desaparece del filtro para todos.
+  const yaRecordado = Boolean(recordatorioEnviadoAt)
+
+  // El marcador va al lado del botón de WhatsApp porque se usan juntos: se manda
+  // y se tilda. Es lo único que permite que varios colaboradores trabajen la
+  // MISMA lista en paralelo sin repartírsela — quien queda tildado desaparece
+  // del filtro para todos.
+  //
+  // Con el tilde automático, esta casilla pasa a ser sobre todo el CORRECTOR:
+  // destildar a quien se marcó de más, o marcar a mano a quien se le avisó por
+  // otro lado.
   const marcadorRecordatorio = (
     <label
       className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground"
       title={
         recordatorioEnviadoAt
           ? `Recordatorio marcado el ${formatFechaHora(recordatorioEnviadoAt)}`
-          : "Marcar cuando le hayas mandado el recordatorio"
+          : "Se marca solo al mandar el WhatsApp. Tocá acá si le avisaste por otro lado."
       }
     >
       {/* Sin `disabled`: la tabla ya pinta el estado nuevo en el mismo frame
           del toque. Deshabilitarlo mientras vuelve el servidor es justamente lo
           que hacía que el tilde se sintiera trabado. */}
       <Checkbox
-        checked={Boolean(recordatorioEnviadoAt)}
+        checked={yaRecordado}
         onCheckedChange={(marcado) => onAlternarRecordatorio(marcado === true)}
         aria-label={`Recordatorio enviado a ${nombre}`}
       />
-      {recordatorioEnviadoAt ? "Recordado" : "Recordar"}
+      {yaRecordado ? "Recordado" : "Recordar"}
     </label>
   )
 
@@ -93,7 +99,23 @@ export function QrEnvioCell({
       href={urlWhatsApp}
       target="_blank"
       rel="noopener noreferrer"
-      title={`Mandarle el QR a ${nombre} por WhatsApp`}
+      onClick={() => {
+        // Tocar este botón YA significa "le estoy mandando". Marcarlo acá saca
+        // la segunda vuelta a la grilla por persona: sobre 360 filas, es la
+        // mitad de las interacciones.
+        //
+        // Sin `preventDefault`: el link tiene que abrir WhatsApp igual. La
+        // marca es un efecto de costado, no reemplaza la navegación.
+        //
+        // Y no se vuelve a marcar si ya estaba: seria un viaje al servidor para
+        // pisar la misma fecha con otra.
+        if (!yaRecordado) onAlternarRecordatorio(true)
+      }}
+      title={
+        yaRecordado
+          ? `Mandarle el QR a ${nombre} por WhatsApp`
+          : `Mandarle el QR a ${nombre} por WhatsApp y marcarlo como recordado`
+      }
       className={cn(
         buttonVariants({ variant: "ghost", size: "icon-sm" }),
         "text-[#128C7E] hover:text-[#0e7368]"
