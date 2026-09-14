@@ -137,6 +137,12 @@ export type InscripcionDTO = {
    * que conocer la base del sitio ni rearmarla.
    */
   qrUrl: string
+  /**
+   * Link de WhatsApp con el recordatorio ya escrito, o `null` si el teléfono no
+   * sirve. Se arma en el servidor por lo mismo que `qrUrl`: el cliente no tiene
+   * por qué conocer las fechas del evento ni la dirección.
+   */
+  whatsappUrl: string | null
   /** Último envío exitoso del QR, en ISO. `null` = nunca llegó a destino. */
   emailEnviadoAt: string | null
   /** Último error de envío. Se limpia cuando un envío sale bien. */

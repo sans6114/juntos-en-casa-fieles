@@ -6,15 +6,17 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { buildWhatsAppUrl } from "@/utils/whatsapp"
 
 type QrEnvioCellProps = {
   nombre: string
   /** `null` en las altas de puerta: no hay a dónde mandar el QR. */
   email: string | null
-  telefono: string | null
-  /** URL permanente del QR, armada en el servidor. */
-  qrUrl: string
+  /**
+   * Link de WhatsApp con el recordatorio ya escrito, o `null` si el teléfono no
+   * sirve. Llega armado del servidor: las fechas del evento y la dirección no
+   * tienen por qué viajar al cliente para rearmar una cadena acá.
+   */
+  whatsappUrl: string | null
   emailEnviadoAt: string | null
   emailError: string | null
   /** Cuándo se le mandó el recordatorio previo al evento. */
@@ -46,20 +48,12 @@ function formatFechaHora(iso: string) {
 export function QrEnvioCell({
   nombre,
   email,
-  telefono,
-  qrUrl,
+  whatsappUrl,
   emailEnviadoAt,
   emailError,
   recordatorioEnviadoAt,
   onAlternarRecordatorio,
 }: QrEnvioCellProps) {
-  // `wa.me` solo admite TEXTO: no se puede adjuntar el QR como imagen. Por eso
-  // el mensaje lleva el link permanente, que abre el código de un toque.
-  const urlWhatsApp = buildWhatsAppUrl(
-    telefono,
-    `Hola ${nombre}, te dejamos tu QR para Juntos en Casa. Mostralo en la puerta: ${qrUrl}`
-  )
-
   const yaRecordado = Boolean(recordatorioEnviadoAt)
 
   // El marcador va al lado del botón de WhatsApp porque se usan juntos: se manda
@@ -94,9 +88,9 @@ export function QrEnvioCell({
   // El botón de WhatsApp vale para todos y se arma aparte del bloque de mail:
   // justamente a quien se anotó en la puerta SIN mail, WhatsApp le queda como
   // único canal para hacerle llegar su QR.
-  const botonWhatsApp = urlWhatsApp ? (
+  const botonWhatsApp = whatsappUrl ? (
     <a
-      href={urlWhatsApp}
+      href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => {

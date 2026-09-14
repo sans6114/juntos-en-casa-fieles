@@ -288,8 +288,7 @@ export function InscripcionesTable({
                       <QrEnvioCell
                         nombre={item.nombre}
                         email={item.email}
-                        telefono={item.telefono}
-                        qrUrl={item.qrUrl}
+                        whatsappUrl={item.whatsappUrl}
                         emailEnviadoAt={item.emailEnviadoAt}
                         emailError={item.emailError}
                         recordatorioEnviadoAt={item.recordatorioEnviadoAt}
