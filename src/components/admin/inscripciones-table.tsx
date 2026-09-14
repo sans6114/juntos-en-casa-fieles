@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 
 import { marcarRecordatorio } from '@/actions';
+import { conAvisoDeRed } from '@/lib/acciones/con-aviso-de-red';
 import { AsistenciaCell } from '@/components/admin/asistencia-cell';
 import { QrEnvioCell } from '@/components/admin/qr-envio-cell';
 import { Badge } from '@/components/ui/badge';
@@ -113,19 +114,19 @@ export function InscripcionesTable({
       // solo al cerrarse la transicion y el toast explica por que.
       aplicarRecordatorioOptimista({ id: inscripcionId, enviado })
 
-      try {
-        const resultado = await marcarRecordatorio(inscripcionId, enviado)
-        // Sin toast de exito a proposito: cuatro colaboradores tildando de a uno
-        // sobre 315 filas convierten el aviso en ruido, y el tilde ya es la
-        // confirmacion. Solo se avisa cuando algo sale mal.
-        if (!resultado.ok) toast.error(resultado.message)
-      } catch {
-        // Con el 4G del salon saturado esto va a pasar. Sin el catch, la promesa
-        // rechazada sube al router de Next y se lleva la grilla entera por
-        // delante: pantalla de error y a recargar, en la puerta y con fila. Con
-        // el catch, React revierte el tilde solo y el aviso dice que repita.
-        toast.error("Sin conexión: no se pudo marcar el recordatorio. Probá de nuevo.")
-      }
+      // `conAvisoDeRed` cubre el caso en que la llamada no llega: sin eso, la
+      // promesa rechazada sube al router de Next y se lleva la grilla entera por
+      // delante. Cuando devuelve `null`, React revierte el tilde solo al
+      // cerrarse la transicion.
+      const resultado = await conAvisoDeRed(() =>
+        marcarRecordatorio(inscripcionId, enviado)
+      )
+      if (!resultado) return
+
+      // Sin toast de exito a proposito: cuatro colaboradores tildando de a uno
+      // sobre 360 filas convierten el aviso en ruido, y el tilde ya es la
+      // confirmacion. Solo se avisa cuando algo sale mal.
+      if (!resultado.ok) toast.error(resultado.message)
     })
   }
 

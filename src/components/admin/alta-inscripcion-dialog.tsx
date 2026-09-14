@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { CrearInscripcionManualDTO, TipoCongregacion } from "@/interfaces/inscripcion"
+import { conAvisoDeRed } from "@/lib/acciones/con-aviso-de-red"
 
 type Congregacion = { id: string; nombre: string }
 
@@ -77,15 +78,21 @@ export function AltaInscripcionDialog({
     setYaInscripto(null)
 
     startTransition(async () => {
-      const resultado = await crearInscripcionManual({
-        nombre: valores.nombre,
-        email: valores.email,
-        telefono: valores.telefono,
-        edad: Number(valores.edad),
-        tipoCongregacion: valores.tipoCongregacion as TipoCongregacion,
-        congregacionQuery: valores.congregacionQuery,
-        congregacionId: null,
-      })
+      const resultado = await conAvisoDeRed(() =>
+        crearInscripcionManual({
+          nombre: valores.nombre,
+          email: valores.email,
+          telefono: valores.telefono,
+          edad: Number(valores.edad),
+          tipoCongregacion: valores.tipoCongregacion as TipoCongregacion,
+          congregacionQuery: valores.congregacionQuery,
+          congregacionId: null,
+        })
+      )
+      // `null` = no llegó al servidor. Se vuelve SIN cerrar el diálogo: lo que
+      // la persona escribió sigue ahí y puede reintentar sin recargarlo todo,
+      // que es justo lo que no se puede pedir con gente esperando en la puerta.
+      if (!resultado) return
 
       if (resultado.ok) {
         toast.success(
@@ -109,7 +116,8 @@ export function AltaInscripcionDialog({
     if (!yaInscripto) return
 
     startTransition(async () => {
-      const resultado = await marcarAsistenciaHoy(yaInscripto.id)
+      const resultado = await conAvisoDeRed(() => marcarAsistenciaHoy(yaInscripto.id))
+      if (!resultado) return
 
       if (resultado.ok) {
         toast.success(`Acreditado: ${resultado.nombre} (${resultado.horaLlegada} hs)`)

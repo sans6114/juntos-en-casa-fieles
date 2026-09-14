@@ -6,6 +6,7 @@ import { Check, MoreHorizontal } from "lucide-react"
 import { toast } from "sonner"
 
 import { ajustarAsistencia, marcarAsistenciaHoy } from "@/actions"
+import { conAvisoDeRed } from "@/lib/acciones/con-aviso-de-red"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -61,7 +62,9 @@ export function AsistenciaCell({
 
   function acreditar() {
     startTransition(async () => {
-      const resultado = await marcarAsistenciaHoy(inscripcionId)
+      const resultado = await conAvisoDeRed(() => marcarAsistenciaHoy(inscripcionId))
+      // `null` = la llamada no llegó al servidor; `conAvisoDeRed` ya avisó.
+      if (!resultado) return
 
       if (resultado.ok) {
         toast.success(`Acreditado: ${resultado.nombre} (${resultado.horaLlegada} hs)`)
@@ -73,7 +76,10 @@ export function AsistenciaCell({
 
   function corregir(dia: DiaEvento, presente: boolean) {
     startTransition(async () => {
-      const resultado = await ajustarAsistencia({ inscripcionId, dia, presente })
+      const resultado = await conAvisoDeRed(() =>
+        ajustarAsistencia({ inscripcionId, dia, presente })
+      )
+      if (!resultado) return
 
       if (resultado.ok) {
         toast.success(
