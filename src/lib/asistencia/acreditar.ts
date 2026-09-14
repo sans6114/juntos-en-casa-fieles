@@ -21,14 +21,19 @@ import { prisma } from "@/lib/prisma"
  * No decide autorización: eso es responsabilidad de quien lo llama.
  */
 
-/** Lo que el colaborador necesita ver para verificar que el QR es de quien lo trae. */
-export type PersonaAcreditada = {
+/**
+ * Lo que el colaborador necesita ver para verificar que el QR es de quien lo
+ * trae. Local a propósito: las actions consumen el retorno estructuralmente y
+ * lo traducen a `AsistenciaActionResult` / `EscaneoResultado`, que SÍ viven en
+ * `interfaces/` porque son las que llegan a la pantalla.
+ */
+type PersonaAcreditada = {
   nombre: string
   horaLlegada: string
   congregacion: EtiquetaCongregacion
 }
 
-export type ResultadoAcreditacion =
+type ResultadoAcreditacion =
   | ({ estado: "acreditado" } & PersonaAcreditada)
   | ({ estado: "ya-acreditado" } & PersonaAcreditada)
   | { estado: "no-encontrado" }

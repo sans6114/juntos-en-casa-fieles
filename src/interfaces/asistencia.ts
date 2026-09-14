@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import type { EtiquetaCongregacion } from "@/lib/congregacion/etiqueta"
+import type { EtiquetaCongregacion } from "./congregacion"
 
 /**
  * Los dos días de acreditación. El enum vive acá y el resto del dominio lo

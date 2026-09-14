@@ -6,21 +6,19 @@
  * caso que no lo es, el cartel mentiría justo donde se toma una decisión.
  */
 
-export type EstadoCongregacion = "PENDIENTE" | "APROBADA"
+import type {
+  EstadoCongregacion,
+  EtiquetaCongregacion,
+} from "@/interfaces/congregacion"
+
+// Se re-exportan para que quien ya importaba desde acá no tenga que cambiar el
+// import, igual que `dia-evento.ts` con `DiaEvento`. La DEFINICIÓN vive en
+// `interfaces/`, que es lo que importa: la forma la pinta la UI.
+export type { EstadoCongregacion, EtiquetaCongregacion }
 
 type EntradaEtiqueta = {
   sinCongregacion: boolean
   congregacion: { nombre: string; estado: EstadoCongregacion } | null
-}
-
-export type EtiquetaCongregacion = {
-  texto: string
-  /**
-   * La congregación existe pero todavía no fue aprobada: alguien la escribió a
-   * mano al inscribirse. El colaborador lo ve y avisa al admin, que la aprueba o
-   * la rechaza desde /admin/congregaciones.
-   */
-  pendiente: boolean
 }
 
 export function etiquetaCongregacion(inscripcion: EntradaEtiqueta): EtiquetaCongregacion {
