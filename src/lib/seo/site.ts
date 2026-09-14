@@ -38,8 +38,15 @@ export const siteConfig = {
   city: "La Plata, Buenos Aires",
   ogImage: jecAssets.og.default,
   twitterHandle: undefined as string | undefined,
-  /** Inicio del evento: primer día de 3 (18, 19 y 20 de septiembre 2026). */
-  eventStartsAt: "2026-09-18T19:00:00-03:00",
+  /**
+   * Inicio del evento: primer día de 3 (18, 19 y 20 de septiembre 2026).
+   *
+   * Es la hora en que la gente tiene que ESTAR, o sea el comienzo de la
+   * acreditación, no el de la primera sesión. De acá salen el countdown del
+   * hero y la hora del recordatorio de WhatsApp, y las dos le hablan a quien
+   * viene, no a quien organiza.
+   */
+  eventStartsAt: "2026-09-18T18:30:00-03:00",
 } as const;
 
 type PageMetadataInput = {

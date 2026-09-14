@@ -9,7 +9,7 @@ const DATOS = [
   {
     dt: "Cuándo",
     dd: "18, 19 y 20 de septiembre 2026",
-    detalle: "Arranca viernes 19:00",
+    detalle: "Arranca viernes 18:30",
   },
   {
     dt: "Dónde",

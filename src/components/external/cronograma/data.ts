@@ -22,7 +22,7 @@ export const cronogramaDias: CronogramaDia[] = [
     dayLabel: "Viernes 18",
     title: "Fieles en la búsqueda",
     items: [
-      { time: "19:00", label: "Acreditación" },
+      { time: "18:30", label: "Acreditación" },
       { time: "19:30", label: "Sesión 1" },
     ],
   },
