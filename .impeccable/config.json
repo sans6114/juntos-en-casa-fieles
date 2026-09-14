@@ -10,28 +10,22 @@
         "reason": "pre-existing @media print fallback (body background), unrelated to landing-tokens-b field kit; not touched by this change"
       },
       {
-        "rule": "design-system-font",
-        "value": "arial",
-        "createdAt": "2026-09-11T20:21:56.131Z",
-        "reason": "email HTML: mail clients strip CSS variables and webfonts, so inline literals and a web-safe font stack are required. Domain constraint, not design drift."
-      },
-      {
-        "rule": "design-system-color",
-        "value": "#171717",
-        "createdAt": "2026-09-11T20:21:56.190Z",
-        "reason": "email HTML: mail clients strip CSS variables and webfonts, so inline literals and a web-safe font stack are required. Domain constraint, not design drift."
-      },
-      {
-        "rule": "design-system-color",
-        "value": "#e5e5e5",
-        "createdAt": "2026-09-11T20:21:56.241Z",
-        "reason": "email HTML: mail clients strip CSS variables and webfonts, so inline literals and a web-safe font stack are required. Domain constraint, not design drift."
-      },
-      {
         "rule": "overused-font",
-        "value": "arial",
-        "createdAt": "2026-09-11T20:25:44.246Z",
-        "reason": "email HTML: mail clients drop webfonts and fall back anyway, so a web-safe stack is the only one that renders. Domain constraint, not a design choice."
+        "value": "*",
+        "files": [
+          "src/lib/email/*.ts"
+        ],
+        "createdAt": "2026-09-14T18:32:28.813Z",
+        "reason": "Plantillas de email: los clientes de correo descartan webfonts y caen a una fuente del sistema igual, asi que un stack web-safe es el unico que renderiza. Restriccion del medio, no una eleccion de diseno."
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "src/lib/email/*.ts"
+        ],
+        "createdAt": "2026-09-14T18:32:28.870Z",
+        "reason": "Plantillas de email: los clientes de correo eliminan variables CSS y webfonts, asi que la tipografia de DESIGN.md no es aplicable aca. Restriccion del medio, no design drift."
       }
     ]
   }
