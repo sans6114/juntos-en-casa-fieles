@@ -29,7 +29,13 @@ export function urlDelQr(qrToken: string) {
  * tres columnas signifiquen siempre lo mismo:
  * - `emailEnviadoAt`: momento del último envío exitoso.
  * - `emailError`: último error; se limpia cuando un envío sale bien.
- * - `emailIntentos`: total de intentos, contando el alta y cada reenvío.
+ *
+ * Son DOS y no tres. La columna `emailIntentos` sigue en la base pero ya no se
+ * escribe: era un contador que no leía nadie. Entre "cuándo salió" y "qué falló"
+ * quedan expresados los cuatro estados que pinta la grilla, y un total de
+ * intentos no agrega un quinto: si un reenvío falla cinco veces, el colaborador
+ * lo ve fallar cinco veces. Se dropea después del evento; una migración
+ * destructiva a cuatro días no compra nada.
  *
  * Nunca lanza. Se lo llama desde `after()`, donde una excepción no tiene a quién
  * avisarle y solo ensucia los logs; y desde el reenvío del panel, que necesita
@@ -55,11 +61,8 @@ export async function enviarQrYRegistrar(inscripcion: InscripcionParaEnvio): Pro
     await prisma.inscripcion.update({
       where: { id: inscripcion.id },
       data: resultado.ok
-        ? { emailEnviadoAt: new Date(), emailError: null, emailIntentos: { increment: 1 } }
-        : {
-            emailError: resultado.error.slice(0, LARGO_MAXIMO_ERROR),
-            emailIntentos: { increment: 1 },
-          },
+        ? { emailEnviadoAt: new Date(), emailError: null }
+        : { emailError: resultado.error.slice(0, LARGO_MAXIMO_ERROR) },
     })
   } catch (error) {
     // La escritura dentro de `after()` es best-effort: si la función se congela
