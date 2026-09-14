@@ -22,6 +22,8 @@ const TAMANO_DE_DESCARGA = 1024
  */
 const MARGEN = 4
 
+const NOMBRE_ARCHIVO = "mi-qr-juntos-en-casa.png"
+
 type TarjetaQrProps = {
   /** El `id` de la inscripción: lo mismo que ya está en el QR del mail. */
   valor: string
@@ -42,8 +44,9 @@ type TarjetaQrProps = {
 export function TarjetaQr({ valor }: TarjetaQrProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [error, setError] = useState<string | null>(null)
+  const [guardando, setGuardando] = useState(false)
 
-  function descargar() {
+  async function guardar() {
     const canvas = canvasRef.current
 
     if (!canvas) {
@@ -51,19 +54,58 @@ export function TarjetaQr({ valor }: TarjetaQrProps) {
       return
     }
 
+    setGuardando(true)
+
     try {
+      // Blob y no `toDataURL`: el data URL de este QR pesa 124 KB, y cuando el
+      // navegador no honra `download` intenta NAVEGAR a esa URL — que Chrome
+      // bloquea para `data:` desde la versión 60. Falla en silencio, que es
+      // exactamente lo que pasaba en el celular.
+      const blob = await new Promise<Blob | null>((resolver) =>
+        canvas.toBlob(resolver, "image/png")
+      )
+      if (!blob) throw new Error("El canvas no devolvió imagen")
+
+      const archivo = new File([blob], NOMBRE_ARCHIVO, { type: "image/png" })
+
+      // En el celular la hoja nativa es el ÚNICO camino a la galería de fotos:
+      // un `<a download>` en iOS guarda en Archivos, no en Fotos, y el QR
+      // termina donde nadie lo busca cuando está haciendo la fila.
+      if (navigator.canShare?.({ files: [archivo] })) {
+        try {
+          await navigator.share({ files: [archivo] })
+          setError(null)
+          return
+        } catch (error) {
+          // Cerrar la hoja sin elegir nada NO es un fallo y no se avisa.
+          if (error instanceof DOMException && error.name === "AbortError") return
+          // Cualquier otra cosa sigue al camino de descarga de abajo.
+        }
+      }
+
+      const url = URL.createObjectURL(blob)
       const enlace = document.createElement("a")
-      enlace.href = canvas.toDataURL("image/png")
-      enlace.download = "mi-qr-juntos-en-casa.png"
+      enlace.href = url
+      enlace.download = NOMBRE_ARCHIVO
       document.body.append(enlace)
       enlace.click()
-      enlace.remove()
+
+      // El anchor NO se saca en el mismo tick que el click: varios navegadores
+      // móviles arrancan la descarga de forma asíncrona y quitarlo antes la
+      // cancela sin decir nada.
+      setTimeout(() => {
+        enlace.remove()
+        URL.revokeObjectURL(url)
+      }, 1000)
+
       setError(null)
     } catch {
       // La captura de pantalla SIEMPRE funciona, en cualquier teléfono y sin
       // permisos. Es el consejo correcto acá, no un "reintentá" que va a fallar
       // de nuevo por la misma razón.
-      setError("No pudimos descargar la imagen. Sacale una captura de pantalla al código.")
+      setError("No pudimos guardar la imagen. Sacale una captura de pantalla al código.")
+    } finally {
+      setGuardando(false)
     }
   }
 
@@ -83,8 +125,14 @@ export function TarjetaQr({ valor }: TarjetaQrProps) {
         Subí el brillo de la pantalla para que se escanee más rápido.
       </p>
 
-      <CtaButton as="button" variant="pill" onClick={descargar} className="mt-5">
-        Descargar mi QR
+      <CtaButton
+        as="button"
+        variant="pill"
+        onClick={guardar}
+        disabled={guardando}
+        className="mt-5"
+      >
+        {guardando ? "Preparando…" : "Guardar mi QR"}
       </CtaButton>
 
       <p className="mt-3 text-[13px] leading-relaxed text-[var(--suave)]">
@@ -101,8 +149,8 @@ export function TarjetaQr({ valor }: TarjetaQrProps) {
         El mismo código, dibujado en un canvas fuera de pantalla: es de donde
         sale el PNG. Se mantiene aparte del SVG visible porque cada uno hace lo
         suyo mejor — el SVG se ve nítido a cualquier tamaño, y el canvas es lo
-        único de lo que se puede sacar un `toDataURL`. Serializar el SVG a mano
-        sería más código y más formas de romperse.
+        único que da un `toBlob`. Serializar el SVG a mano sería más código y
+        más formas de romperse.
         El canvas dibuja igual con `display: none`: no depende del layout.
       */}
       <div className="hidden" aria-hidden="true">
