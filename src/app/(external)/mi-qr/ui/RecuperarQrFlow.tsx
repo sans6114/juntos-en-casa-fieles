@@ -2,12 +2,11 @@
 
 import { useRef, useState, useTransition } from "react"
 
-import { QRCodeSVG } from "qrcode.react"
-
 import { recuperarQr } from "@/actions"
 import { AlertIcon, CtaButton } from "@/components/external/shared"
 import { RecuperarQrSchema } from "@/interfaces/inscripcion"
 
+import { TarjetaQr } from "./TarjetaQr"
 import { InscripcionCard } from "../../inscripcion/ui/InscripcionCard"
 import type { Congregacion } from "../../inscripcion/ui/CongregacionCombobox"
 import { InscripcionForm } from "../../inscripcion/ui/InscripcionForm"
@@ -88,17 +87,7 @@ export function RecuperarQrFlow({ congregaciones }: RecuperarQrFlowProps) {
   // verificar—; acá sería texto que el visitante controla, que no verifica nada
   // y le roba superficie al código.
   if (estado.tipo === "encontrado") {
-    return (
-      <div className="text-center">
-        {/* Fondo blanco deliberado: el QR necesita el contraste máximo para escanear. */}
-        <div className="mx-auto flex max-w-sm flex-col items-center justify-center rounded-[6px] border border-[var(--regla)] bg-white p-6 shadow-[3px_3px_0_0_var(--regla)]">
-          <QRCodeSVG value={estado.qrValue} size={240} level="H" includeMargin />
-        </div>
-        <p className="mt-6 text-[15px] leading-relaxed text-[var(--suave)]">
-          Subí el brillo de la pantalla para que se escanee más rápido.
-        </p>
-      </div>
-    )
+    return <TarjetaQr valor={estado.qrValue} />
   }
 
   if (estado.tipo === "no-encontrado") {
