@@ -47,11 +47,27 @@ export function formatearHoraArgentina(fecha: Date): string {
 }
 
 export class FechasEventoNoConfiguradas extends Error {
-  constructor() {
-    super("Faltan las variables de entorno EVENT_DAY_1 y/o EVENT_DAY_2")
+  constructor(detalle?: string) {
+    super(detalle ?? "Faltan las variables de entorno EVENT_DAY_1 y/o EVENT_DAY_2")
     this.name = "FechasEventoNoConfiguradas"
   }
 }
+
+/**
+ * Formato exacto, y no "algo que parezca una fecha".
+ *
+ * Todo este módulo compara fechas como STRINGS, y eso solo ordena bien en
+ * `YYYY-MM-DD` con ceros a la izquierda. Una variable cargada como "18/09/2026"
+ * no rompe nada visible: hace que `diaEventoDeHoy` nunca coincida —el escáner
+ * rechaza todo el día del evento— mientras `diaYaOcurrio` la lee como pasada y
+ * habilita la corrección manual. El equipo ve "puedo marcar a mano pero no
+ * escanear" y se pone a buscar un bug en el escáner.
+ *
+ * Verificado: `"18/09/2026" <= "2026-09-14"` es `true`, porque compara "1"
+ * contra "2". Y `"2026-9-18"` sin cero tampoco coincide nunca con la fecha de
+ * hoy, así que el 18 la puerta no acreditaría a nadie.
+ */
+const FORMATO_FECHA = /^\d{4}-\d{2}-\d{2}$/
 
 /**
  * Tirar cuando falta una variable es deliberado. Antes esto tenía defaults
@@ -60,12 +76,30 @@ export class FechasEventoNoConfiguradas extends Error {
  * código y nadie se enteraba hasta tener gente parada en la puerta.
  */
 function fechasEvento(): Record<DiaEvento, string> {
-  const dia1 = process.env.EVENT_DAY_1
-  const dia2 = process.env.EVENT_DAY_2
-
-  if (!dia1 || !dia2) throw new FechasEventoNoConfiguradas()
+  const dia1 = leerFecha("EVENT_DAY_1")
+  const dia2 = leerFecha("EVENT_DAY_2")
 
   return { 1: dia1, 2: dia2 }
+}
+
+/**
+ * El valor va en el mensaje a propósito. Termina en `console.error` del
+ * servidor, no en la pantalla del colaborador, y sin él el administrador lee
+ * "configuración incompleta" y no sabe si la variable falta o está mal escrita.
+ * No es un dato sensible: es una fecha.
+ */
+function leerFecha(nombre: "EVENT_DAY_1" | "EVENT_DAY_2"): string {
+  const valor = process.env[nombre]
+
+  if (!valor) throw new FechasEventoNoConfiguradas(`Falta la variable de entorno ${nombre}`)
+
+  if (!FORMATO_FECHA.test(valor)) {
+    throw new FechasEventoNoConfiguradas(
+      `${nombre} tiene que ser YYYY-MM-DD y vino "${valor}"`
+    )
+  }
+
+  return valor
 }
 
 /** La fecha configurada para ese día, en YYYY-MM-DD. */
