@@ -4,6 +4,8 @@ import { InscripcionesTable } from "@/components/admin/inscripciones-table"
 import { obtenerCongregaciones, obtenerInscripciones } from "@/actions"
 import {
   diaEventoDeHoy,
+  diaYaOcurrio,
+  DIAS_EVENTO,
   FechasEventoNoConfiguradas,
 } from "@/lib/asistencia/dia-evento"
 import { requireSession } from "@/lib/auth-guards"
@@ -22,9 +24,16 @@ export default async function InscripcionesGrillaPage() {
   // el aviso, el botón de acreditar simplemente no aparecería y nadie sabría
   // por qué, que es exactamente el fallo silencioso que vinimos a eliminar.
   let diaDeHoy: DiaEvento | null = null
+  // Los días que ya empezaron son los únicos que se pueden marcar como
+  // presentes. Se resuelve acá, en el servidor, porque depende de variables de
+  // entorno; la celda solo recibe el resultado. Si faltan las fechas queda
+  // vacío y no se ofrece marcar nada, igual que no aparece el botón de
+  // acreditar.
+  let diasHabilitados: DiaEvento[] = []
   let fechasSinConfigurar = false
   try {
     diaDeHoy = diaEventoDeHoy()
+    diasHabilitados = DIAS_EVENTO.filter((dia) => diaYaOcurrio(dia))
   } catch (error) {
     if (error instanceof FechasEventoNoConfiguradas) {
       console.error(error)
@@ -85,6 +94,7 @@ export default async function InscripcionesGrillaPage() {
           data={inscripciones}
           isAdmin={isAdmin}
           diaDeHoy={diaDeHoy}
+          diasHabilitados={diasHabilitados}
         />
       </div>
     </>

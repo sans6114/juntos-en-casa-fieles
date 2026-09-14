@@ -68,6 +68,24 @@ function fechasEvento(): Record<DiaEvento, string> {
   return { 1: dia1, 2: dia2 }
 }
 
+/** La fecha configurada para ese día, en YYYY-MM-DD. */
+export function fechaDelDia(dia: DiaEvento): string {
+  return fechasEvento()[dia]
+}
+
+/**
+ * ¿Ese día ya empezó? Comparación de strings, igual que `diaEventoDeHoy`: los
+ * dos lados vienen en YYYY-MM-DD, así que `<=` ordena cronológicamente sin
+ * parsear fechas ni arrastrar zonas horarias.
+ *
+ * Existe porque el ajuste manual necesita distinguir "corregir" de "adivinar":
+ * un día que todavía no llegó no se puede corregir, no ocurrió nada que
+ * corregir.
+ */
+export function diaYaOcurrio(dia: DiaEvento, ahora: Date = new Date()): boolean {
+  return fechaDelDia(dia) <= fechaHoyArgentina(ahora)
+}
+
 /** `null` cuando hoy no es un día de acreditación. */
 export function diaEventoDeHoy(ahora: Date = new Date()): DiaEvento | null {
   const hoy = fechaHoyArgentina(ahora)

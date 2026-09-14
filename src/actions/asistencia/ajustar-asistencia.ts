@@ -1,6 +1,10 @@
 "use server"
 
-import { campoAsistencia } from "@/lib/asistencia/dia-evento"
+import {
+  campoAsistencia,
+  diaYaOcurrio,
+  FechasEventoNoConfiguradas,
+} from "@/lib/asistencia/dia-evento"
 import { revalidarVistasDeAsistencia } from "@/lib/asistencia/revalidar-vistas"
 import { requireSession } from "@/lib/auth-guards"
 import { prisma } from "@/lib/prisma"
@@ -31,6 +35,24 @@ export async function ajustarAsistencia(data: AjustarAsistenciaDTO) {
     }
 
     const { inscripcionId, dia, presente } = parsed.data
+
+    // Esta action comparte la fuente de fechas con el escáner, pero hasta acá
+    // no la CONSULTABA: escribía el día que le pidieran, incluido uno que
+    // todavía no había llegado. Marcar presente un día futuro no es corregir
+    // nada —no ocurrió nada que corregir—, infla el contador de asistencias y,
+    // cuando la persona aparece de verdad y escanea, el escáner le contesta "ya
+    // acreditado" y frena la fila.
+    //
+    // Desmarcar se permite SIEMPRE, incluso en un día futuro: es la única
+    // salida si una fila quedó mal cargada, y bloquearla dejaría el dato malo
+    // sin forma de arreglarse.
+    if (presente && !diaYaOcurrio(dia)) {
+      return {
+        ok: false as const,
+        message: `El día ${dia} todavía no empezó: solo se puede acreditar un día en curso o ya pasado.`,
+      }
+    }
+
     const campo = campoAsistencia(dia)
 
     const inscripcion = await prisma.inscripcion.findUnique({
@@ -51,6 +73,16 @@ export async function ajustarAsistencia(data: AjustarAsistenciaDTO) {
 
     return { ok: true as const }
   } catch (error) {
+    if (error instanceof FechasEventoNoConfiguradas) {
+      // Mismo criterio que el escáner: que falte una fecha se dice, no se
+      // disfraza de error genérico.
+      console.error(error)
+      return {
+        ok: false as const,
+        message: "Faltan las fechas del evento en la configuración. Avisale al administrador.",
+      }
+    }
+
     console.error("Error ajustando asistencia:", error)
     return { ok: false as const, message: "No se pudo actualizar la asistencia." }
   }

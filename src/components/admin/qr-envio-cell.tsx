@@ -1,19 +1,14 @@
 "use client"
 
-import { useTransition } from "react"
+import { AlertTriangle, Check, MessageCircle } from "lucide-react"
 
-import { AlertTriangle, Check, MessageCircle, Send } from "lucide-react"
-import { toast } from "sonner"
-
-import { reenviarQr } from "@/actions"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { buildWhatsAppUrl } from "@/utils/whatsapp"
 
 type QrEnvioCellProps = {
-  inscripcionId: string
   nombre: string
   /** `null` en las altas de puerta: no hay a dónde mandar el QR. */
   email: string | null
@@ -49,7 +44,6 @@ function formatFechaHora(iso: string) {
 }
 
 export function QrEnvioCell({
-  inscripcionId,
   nombre,
   email,
   telefono,
@@ -59,22 +53,12 @@ export function QrEnvioCell({
   recordatorioEnviadoAt,
   onAlternarRecordatorio,
 }: QrEnvioCellProps) {
-  const [isPending, startTransition] = useTransition()
-
   // `wa.me` solo admite TEXTO: no se puede adjuntar el QR como imagen. Por eso
   // el mensaje lleva el link permanente, que abre el código de un toque.
   const urlWhatsApp = buildWhatsAppUrl(
     telefono,
     `Hola ${nombre}, te dejamos tu QR para Juntos en Casa. Mostralo en la puerta: ${qrUrl}`
   )
-
-  function reenviar() {
-    startTransition(async () => {
-      const resultado = await reenviarQr(inscripcionId)
-      if (resultado.ok) toast.success(resultado.message)
-      else toast.error(resultado.message)
-    })
-  }
 
   // El marcador de recordatorio va al lado del botón de WhatsApp porque se usan
   // juntos: se manda y se tilda. Es lo único que permite que varios
@@ -164,17 +148,6 @@ export function QrEnvioCell({
           aria-label="El último reenvío falló, pero ya había recibido su QR"
         />
       ) : null}
-
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        onClick={reenviar}
-        disabled={isPending}
-        title={emailEnviadoAt ? "Volver a enviar el QR" : "Enviar el QR"}
-      >
-        <Send className="size-4" />
-        <span className="sr-only">Reenviar QR a {email}</span>
-      </Button>
 
       {botonWhatsApp}
       {marcadorRecordatorio}

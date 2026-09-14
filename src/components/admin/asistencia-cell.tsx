@@ -27,6 +27,8 @@ type AsistenciaCellProps = {
   asistenciaDia2: string | null
   /** Qué día de evento es hoy. `null` cuando hoy no se acredita. */
   diaDeHoy: DiaEvento | null
+  /** Días que ya empezaron. Solo esos se pueden marcar como presentes. */
+  diasHabilitados: DiaEvento[]
 }
 
 function formatHora(iso: string) {
@@ -46,6 +48,7 @@ export function AsistenciaCell({
   asistenciaDia1,
   asistenciaDia2,
   diaDeHoy,
+  diasHabilitados,
 }: AsistenciaCellProps) {
   const [isPending, startTransition] = useTransition()
 
@@ -143,9 +146,26 @@ export function AsistenciaCell({
             <DropdownMenuSeparator />
             {([1, 2] as const).map((dia) => {
               const presente = Boolean(porDia[dia])
+              // Desmarcar se ofrece siempre: es la salida de un dato mal
+              // cargado. Marcar, solo un día que ya empezó — acreditar a alguien
+              // en un día que no ocurrió no corrige nada, y el escáner después
+              // le contesta "ya acreditado" en la puerta.
+              const bloqueado = !presente && !diasHabilitados.includes(dia)
+
               return (
-                <DropdownMenuItem key={dia} onClick={() => corregir(dia, !presente)}>
+                <DropdownMenuItem
+                  key={dia}
+                  disabled={bloqueado}
+                  onClick={() => corregir(dia, !presente)}
+                >
                   {presente ? `Desmarcar día ${dia}` : `Marcar día ${dia}`}
+                  {/* Deshabilitado y visible, no escondido: una opción que
+                      desaparece deja al colaborador buscándola. */}
+                  {bloqueado ? (
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      todavía no empezó
+                    </span>
+                  ) : null}
                 </DropdownMenuItem>
               )
             })}

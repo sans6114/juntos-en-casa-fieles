@@ -22,7 +22,6 @@ import { toast } from 'sonner';
 import { marcarRecordatorio } from '@/actions';
 import { AsistenciaCell } from '@/components/admin/asistencia-cell';
 import { QrEnvioCell } from '@/components/admin/qr-envio-cell';
-import { ReenviarPendientesButton } from '@/components/admin/reenviar-pendientes-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,6 +44,8 @@ type InscripcionesTableProps = {
    * acredita. Llega como prop porque depende de variables de entorno.
    */
   diaDeHoy?: DiaEvento | null
+  /** Días de evento que ya empezaron: los únicos que se pueden marcar presentes. */
+  diasHabilitados?: DiaEvento[]
 }
 
 const PAGE_SIZE = 10
@@ -74,6 +75,7 @@ export function InscripcionesTable({
   data,
   isAdmin = false,
   diaDeHoy = null,
+  diasHabilitados = [],
 }: InscripcionesTableProps) {
   const [query, setQuery] = useState("")
   const [soloQrPendiente, setSoloQrPendiente] = useState(false)
@@ -185,8 +187,10 @@ export function InscripcionesTable({
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {/* Convierte un problema invisible en una lista de trabajo. Solo
-              aparece cuando hay algo que hacer. */}
+          {/* Convierte un problema invisible en una lista de trabajo. Ya no
+              dispara un reenvio por mail —reintentar el canal que fallo no
+              arregla nada—: hoy marca a quien seguro NO tiene su QR, para
+              mandarselo por WhatsApp primero. Solo aparece si hay alguien. */}
           {qrPendientes > 0 ? (
             <Button
               variant={soloQrPendiente ? "default" : "outline"}
@@ -214,8 +218,6 @@ export function InscripcionesTable({
               Sin recordatorio ({sinRecordatorio})
             </Button>
           ) : null}
-
-          <ReenviarPendientesButton pendientes={qrPendientes} />
 
           <Button variant="outline" className="gap-2" onClick={() => window.print()}>
             <Printer className="size-4" />
@@ -278,11 +280,11 @@ export function InscripcionesTable({
                         asistenciaDia1={item.asistenciaDia1}
                         asistenciaDia2={item.asistenciaDia2}
                         diaDeHoy={diaDeHoy}
+                        diasHabilitados={diasHabilitados}
                       />
                     </TableCell>
                     <TableCell>
                       <QrEnvioCell
-                        inscripcionId={item.id}
                         nombre={item.nombre}
                         email={item.email}
                         telefono={item.telefono}
