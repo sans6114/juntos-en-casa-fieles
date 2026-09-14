@@ -23,11 +23,11 @@ import { buildWhatsAppUrl } from "@/utils/whatsapp"
 /**
  * OJO: los días del EVENTO no son los días de ACREDITACIÓN.
  *
- * El evento es viernes, sábado y domingo. La acreditación —`EVENT_DAY_1` y
- * `EVENT_DAY_2`— es solo viernes y sábado, porque el domingo no se acredita.
- * Armar este mensaje con las variables de acreditación le diría a la gente que
- * el evento termina el sábado, que es falso y se descubre el domingo con la
- * gente que no vino.
+ * El evento es viernes, sábado y domingo. La acreditación —`FECHAS_ACREDITACION`
+ * en `lib/asistencia/dia-evento.ts`— es solo viernes y sábado, porque el domingo
+ * no se acredita. Armar este mensaje con las fechas de acreditación le diría a
+ * la gente que el evento termina el sábado, que es falso y se descubre el
+ * domingo con la gente que no vino.
  */
 function diasDelEvento(): string {
   const etiquetas = cronogramaDias.map((dia) => dia.dayLabel.toLowerCase())

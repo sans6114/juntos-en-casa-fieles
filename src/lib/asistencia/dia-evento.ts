@@ -7,6 +7,7 @@
  */
 
 import type { DiaEvento } from "@/interfaces/asistencia"
+import { siteConfig } from "@/lib/seo/site"
 
 export type { DiaEvento }
 
@@ -46,22 +47,45 @@ export function formatearHoraArgentina(fecha: Date): string {
   })
 }
 
-export class FechasEventoNoConfiguradas extends Error {
-  constructor(detalle?: string) {
-    super(detalle ?? "Faltan las variables de entorno EVENT_DAY_1 y/o EVENT_DAY_2")
-    this.name = "FechasEventoNoConfiguradas"
+export class FechasEventoInvalidas extends Error {
+  constructor(detalle: string) {
+    super(detalle)
+    this.name = "FechasEventoInvalidas"
   }
+}
+
+/**
+ * Las fechas en que se acredita. Literales, no variables de entorno.
+ *
+ * Estuvieron en `EVENT_DAY_1`/`EVENT_DAY_2` y se trajeron acá por una razón
+ * medida: NO son secretos —están publicadas en el sitio— y lo único que ganaba
+ * tenerlas en el entorno era la posibilidad de escribirlas mal sin que nadie las
+ * revise. Un "18/09/2026" cargado en el panel hacía que el escáner rechazara
+ * todo el día del evento mientras la corrección manual se habilitaba, y eso no
+ * se descubría hasta tener gente en la puerta. Acá pasan por el PR, por el
+ * typecheck y por la misma revisión que el resto del código, y valen lo mismo
+ * en todos los entornos sin que nadie tenga que acordarse de sincronizarlos.
+ *
+ * Además las fechas del evento YA eran literales: `siteConfig.eventStartsAt` y
+ * `cronogramaDias`. Las de acreditación eran la excepción rara.
+ *
+ * El evento dura TRES días. Acá van solo los dos que se acredita: el domingo no
+ * hay acreditación.
+ */
+const FECHAS_ACREDITACION: Record<DiaEvento, string> = {
+  1: "2026-09-18",
+  2: "2026-09-19",
 }
 
 /**
  * Formato exacto, y no "algo que parezca una fecha".
  *
  * Todo este módulo compara fechas como STRINGS, y eso solo ordena bien en
- * `YYYY-MM-DD` con ceros a la izquierda. Una variable cargada como "18/09/2026"
- * no rompe nada visible: hace que `diaEventoDeHoy` nunca coincida —el escáner
- * rechaza todo el día del evento— mientras `diaYaOcurrio` la lee como pasada y
- * habilita la corrección manual. El equipo ve "puedo marcar a mano pero no
- * escanear" y se pone a buscar un bug en el escáner.
+ * `YYYY-MM-DD` con ceros a la izquierda. Un "18/09/2026" no rompe nada visible:
+ * hace que `diaEventoDeHoy` nunca coincida —el escáner rechaza todo el día del
+ * evento— mientras `diaYaOcurrio` la lee como pasada y habilita la corrección
+ * manual. El equipo ve "puedo marcar a mano pero no escanear" y se pone a
+ * buscar un bug en el escáner. Pasó de verdad, con la variable de entorno.
  *
  * Verificado: `"18/09/2026" <= "2026-09-14"` es `true`, porque compara "1"
  * contra "2". Y `"2026-9-18"` sin cero tampoco coincide nunca con la fecha de
@@ -70,36 +94,40 @@ export class FechasEventoNoConfiguradas extends Error {
 const FORMATO_FECHA = /^\d{4}-\d{2}-\d{2}$/
 
 /**
- * Tirar cuando falta una variable es deliberado. Antes esto tenía defaults
- * hardcodeados (`process.env.EVENT_DAY_1 || "2026-09-18"`): si la variable no
- * estaba en producción, el sistema acreditaba contra una fecha escrita en el
- * código y nadie se enteraba hasta tener gente parada en la puerta.
+ * Valida y devuelve las fechas. Con literales la validación no protege de un
+ * panel mal cargado sino de un typo que entre por el código, que es el único
+ * camino que queda. Sigue siendo barata y los dos errores tienen tratamiento en
+ * pantalla: el escáner dice "configuración incompleta" y la grilla pinta el
+ * cartel rojo, en vez de portarse raro sin explicar por qué.
+ *
+ * El detalle va al `console.error` del servidor, no a la pantalla del
+ * colaborador. Una fecha no es dato sensible, y sin él quien mira los logs no
+ * sabe cuál de las dos está mal.
  */
 function fechasEvento(): Record<DiaEvento, string> {
-  const dia1 = leerFecha("EVENT_DAY_1")
-  const dia2 = leerFecha("EVENT_DAY_2")
+  for (const dia of DIAS_EVENTO) {
+    const valor = FECHAS_ACREDITACION[dia]
+    if (!FORMATO_FECHA.test(valor)) {
+      throw new FechasEventoInvalidas(
+        `La fecha del día ${dia} tiene que ser YYYY-MM-DD y es "${valor}"`
+      )
+    }
+  }
 
-  return { 1: dia1, 2: dia2 }
-}
-
-/**
- * El valor va en el mensaje a propósito. Termina en `console.error` del
- * servidor, no en la pantalla del colaborador, y sin él el administrador lee
- * "configuración incompleta" y no sabe si la variable falta o está mal escrita.
- * No es un dato sensible: es una fecha.
- */
-function leerFecha(nombre: "EVENT_DAY_1" | "EVENT_DAY_2"): string {
-  const valor = process.env[nombre]
-
-  if (!valor) throw new FechasEventoNoConfiguradas(`Falta la variable de entorno ${nombre}`)
-
-  if (!FORMATO_FECHA.test(valor)) {
-    throw new FechasEventoNoConfiguradas(
-      `${nombre} tiene que ser YYYY-MM-DD y vino "${valor}"`
+  // El día 1 de acreditación y el inicio publicado del evento son la MISMA
+  // fecha por definición: la acreditación es lo primero que pasa. Están en dos
+  // archivos porque cada uno sirve a algo distinto —uno al SEO y al countdown,
+  // otro a la puerta— y este chequeo existe para que mover uno sin el otro se
+  // note acá y no el 18 con el sitio anunciando un día y la puerta acreditando
+  // otro.
+  const inicioPublicado = siteConfig.eventStartsAt.slice(0, 10)
+  if (FECHAS_ACREDITACION[1] !== inicioPublicado) {
+    throw new FechasEventoInvalidas(
+      `El día 1 de acreditación (${FECHAS_ACREDITACION[1]}) no coincide con siteConfig.eventStartsAt (${inicioPublicado})`
     )
   }
 
-  return valor
+  return FECHAS_ACREDITACION
 }
 
 /** La fecha configurada para ese día, en YYYY-MM-DD. */

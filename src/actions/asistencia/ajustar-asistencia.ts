@@ -3,7 +3,7 @@
 import {
   campoAsistencia,
   diaYaOcurrio,
-  FechasEventoNoConfiguradas,
+  FechasEventoInvalidas,
 } from "@/lib/asistencia/dia-evento"
 import { revalidarVistasDeAsistencia } from "@/lib/asistencia/revalidar-vistas"
 import { requireSession } from "@/lib/auth-guards"
@@ -73,7 +73,7 @@ export async function ajustarAsistencia(data: AjustarAsistenciaDTO) {
 
     return { ok: true as const }
   } catch (error) {
-    if (error instanceof FechasEventoNoConfiguradas) {
+    if (error instanceof FechasEventoInvalidas) {
       // Mismo criterio que el escáner: que falte una fecha se dice, no se
       // disfraza de error genérico.
       console.error(error)

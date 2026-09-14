@@ -1,3 +1,6 @@
+import { NextResponse } from 'next/server';
+
+import { requireCatalogoApi } from '@/lib/auth-guards';
 /**
  * Excepción documentada a `nextjs-monolith-architecture/SKILL.md:92`
  * ("Add `app/api` routes only for protocol requirements (OAuth callbacks,
@@ -21,9 +24,10 @@
  * Vercel Blob no puede alcanzar `localhost`, así que un no-op no depende de
  * un callback que nunca va a llegar.
  */
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client"
-import { NextResponse } from "next/server"
-import { requireCatalogoApi } from "@/lib/auth-guards"
+import {
+  handleUpload,
+  type HandleUploadBody,
+} from '@vercel/blob/client';
 
 export async function POST(request: Request): Promise<NextResponse> {
   const body = (await request.json()) as HandleUploadBody
@@ -53,6 +57,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json(jsonResponse)
   } catch (error) {
+    console.error(error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Error desconocido" },
       { status: 400 }

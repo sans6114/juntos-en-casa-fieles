@@ -1,7 +1,7 @@
 import {
   campoAsistencia,
   diaEventoDeHoy,
-  FechasEventoNoConfiguradas,
+  FechasEventoInvalidas,
   formatearHoraArgentina,
 } from "./dia-evento"
 import { revalidarVistasDeAsistencia } from "./revalidar-vistas"
@@ -52,7 +52,7 @@ export async function acreditarHoy(inscripcionId: string): Promise<ResultadoAcre
   try {
     dia = diaEventoDeHoy()
   } catch (error) {
-    if (error instanceof FechasEventoNoConfiguradas) {
+    if (error instanceof FechasEventoInvalidas) {
       console.error(error)
       return { estado: "sin-configurar" }
     }

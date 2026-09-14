@@ -6,7 +6,7 @@ import {
   diaEventoDeHoy,
   diaYaOcurrio,
   DIAS_EVENTO,
-  FechasEventoNoConfiguradas,
+  FechasEventoInvalidas,
 } from "@/lib/asistencia/dia-evento"
 import { requireSession } from "@/lib/auth-guards"
 import type { DiaEvento } from "@/interfaces/asistencia"
@@ -35,7 +35,7 @@ export default async function InscripcionesGrillaPage() {
     diaDeHoy = diaEventoDeHoy()
     diasHabilitados = DIAS_EVENTO.filter((dia) => diaYaOcurrio(dia))
   } catch (error) {
-    if (error instanceof FechasEventoNoConfiguradas) {
+    if (error instanceof FechasEventoInvalidas) {
       console.error(error)
       fechasSinConfigurar = true
     } else {
@@ -57,10 +57,10 @@ export default async function InscripcionesGrillaPage() {
           >
             <p className="font-semibold">No se puede acreditar</p>
             <p className="mt-1">
-              Faltan las fechas del evento en la configuración del servidor
-              (<code>EVENT_DAY_1</code> y <code>EVENT_DAY_2</code>). Avisale al
-              administrador: hasta que estén cargadas, el botón de acreditar no
-              aparece.
+              Las fechas del evento están mal cargadas en el sistema. Avisale al
+              administrador: hasta que se corrijan, el botón de acreditar no
+              aparece y el escáner rechaza todo. El detalle de qué está mal queda
+              en los registros del servidor.
             </p>
           </aside>
         ) : null}
