@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { after } from "next/server"
 import { z } from "zod"
 
 import {
@@ -10,6 +11,7 @@ import {
 } from "@/interfaces/inscripcion"
 import { acreditarHoy } from "@/lib/asistencia/acreditar"
 import { resolverCongregacionDeInscripcion } from "@/lib/congregacion/resolver"
+import { enviarQrYRegistrar } from "@/lib/inscripcion/enviar-qr"
 import { requireSession } from "@/lib/auth-guards"
 import { prisma } from "@/lib/prisma"
 
@@ -31,23 +33,22 @@ async function buscarPorEmail(email: string) {
 
 /**
  * Alta de una inscripción desde el panel, para quien llega a la puerta sin
- * haberse anotado. NO envía el mail con el QR, y son tres razones: la persona
- * está parada ahí y se acredita en el acto, un envío menos es un punto de falla
- * menos el día que más importa, y el email acá es opcional, así que la mayoría
- * de las veces no hay a dónde mandar nada.
+ * haberse anotado.
  *
  * El email es OPCIONAL acá y obligatorio en el formulario público. En la puerta
- * no cumple ninguna función, así que pedirlo solo lograba que se inventaran
- * direcciones.
+ * pedirlo solo lograba que se inventaran direcciones, y la persona se acredita
+ * en el acto igual.
  *
- * Cómo recibe su QR, entonces. Esta persona lo necesita para el día siguiente,
- * no para hoy. El camino es el botón de WhatsApp de su fila en la grilla, que le
- * manda el link permanente a `/mi-qr/<token>`: un toque y tiene el código. Y
- * siempre está disponible, porque el teléfono SÍ es obligatorio acá.
+ * Si SÍ dio una dirección, se le manda el QR como a cualquiera. No le sirve para
+ * hoy —ya entró— pero sí para el día siguiente, y tenerlo en el mail es una vía
+ * más además del botón de WhatsApp de su fila, que manda el link permanente a
+ * `/mi-qr/<token>`. Ese botón siempre está: el teléfono SÍ es obligatorio acá.
  *
- * (Antes este comentario decía "queda el reenvío manual", refiriéndose al
- * reenvío por mail. Eso se eliminó: reenviar por mail a quien no leyó el mail es
- * reintentar el canal que ya falló.)
+ * El envío va en `after()` y nunca bloquea la respuesta. Eso importa más acá que
+ * en el formulario público: del otro lado del diálogo hay un colaborador con
+ * gente esperando, y el SMTP no puede hacerlo esperar. Si el mail falla, la
+ * inscripción y la acreditación ya están guardadas, y el fallo queda registrado
+ * en `emailError` para verlo en la grilla.
  *
  * `requireSession()` y no `requireAdmin()`: el alta de puerta la hace el
  * colaborador. El admin supervisa.
@@ -103,6 +104,20 @@ export async function crearInscripcionManual(
     // `acreditarHoy` devuelve `fuera-de-fecha` los demás días y no escribe nada,
     // así que esto tambien sirve para cargar gente antes del evento.
     const acreditacion = await acreditarHoy(nueva.id)
+
+    // Solo si dieron dirección: acá el email es opcional y la mayoría de las
+    // altas de puerta no traen ninguna.
+    const emailDestino = nueva.email
+    if (emailDestino) {
+      after(() =>
+        enviarQrYRegistrar({
+          id: nueva.id,
+          email: emailDestino,
+          nombre: nueva.nombre,
+          qrToken: nueva.qrToken,
+        })
+      )
+    }
 
     revalidatePath("/admin/inscripciones", "layout")
     revalidatePath("/admin/congregaciones")
