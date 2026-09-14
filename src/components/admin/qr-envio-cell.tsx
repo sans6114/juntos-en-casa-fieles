@@ -5,7 +5,7 @@ import { useTransition } from "react"
 import { AlertTriangle, Check, MessageCircle, Send } from "lucide-react"
 import { toast } from "sonner"
 
-import { marcarRecordatorio, reenviarQr } from "@/actions"
+import { reenviarQr } from "@/actions"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -24,6 +24,13 @@ type QrEnvioCellProps = {
   emailError: string | null
   /** Cuándo se le mandó el recordatorio previo al evento. */
   recordatorioEnviadoAt: string | null
+  /**
+   * Avisa que se tildó o destildó el recordatorio. La celda NO llama a la
+   * action: el tilde también mueve el contador y el filtro de la grilla, así
+   * que quien es dueño de esos tres datos —la tabla— es quien tiene que
+   * actualizarlos de una sola vez.
+   */
+  onAlternarRecordatorio: (enviado: boolean) => void
 }
 
 function formatFechaHora(iso: string) {
@@ -50,6 +57,7 @@ export function QrEnvioCell({
   emailEnviadoAt,
   emailError,
   recordatorioEnviadoAt,
+  onAlternarRecordatorio,
 }: QrEnvioCellProps) {
   const [isPending, startTransition] = useTransition()
 
@@ -68,14 +76,6 @@ export function QrEnvioCell({
     })
   }
 
-  function alternarRecordatorio(marcado: boolean) {
-    startTransition(async () => {
-      const resultado = await marcarRecordatorio(inscripcionId, marcado)
-      if (resultado.ok) toast.success(resultado.message)
-      else toast.error(resultado.message)
-    })
-  }
-
   // El marcador de recordatorio va al lado del botón de WhatsApp porque se usan
   // juntos: se manda y se tilda. Es lo único que permite que varios
   // colaboradores trabajen la MISMA lista en paralelo sin repartírsela — quien
@@ -89,10 +89,12 @@ export function QrEnvioCell({
           : "Marcar cuando le hayas mandado el recordatorio"
       }
     >
+      {/* Sin `disabled`: la tabla ya pinta el estado nuevo en el mismo frame
+          del toque. Deshabilitarlo mientras vuelve el servidor es justamente lo
+          que hacía que el tilde se sintiera trabado. */}
       <Checkbox
         checked={Boolean(recordatorioEnviadoAt)}
-        onCheckedChange={(marcado) => alternarRecordatorio(marcado === true)}
-        disabled={isPending}
+        onCheckedChange={(marcado) => onAlternarRecordatorio(marcado === true)}
         aria-label={`Recordatorio enviado a ${nombre}`}
       />
       {recordatorioEnviadoAt ? "Recordado" : "Recordar"}

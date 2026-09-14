@@ -2,7 +2,9 @@
 
 import {
   useMemo,
+  useOptimistic,
   useState,
+  useTransition,
 } from 'react';
 
 import {
@@ -15,7 +17,9 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
+import { marcarRecordatorio } from '@/actions';
 import { AsistenciaCell } from '@/components/admin/asistencia-cell';
 import { QrEnvioCell } from '@/components/admin/qr-envio-cell';
 import { ReenviarPendientesButton } from '@/components/admin/reenviar-pendientes-button';
@@ -76,6 +80,53 @@ export function InscripcionesTable({
   const [soloSinRecordatorio, setSoloSinRecordatorio] = useState(false)
   const [page, setPage] = useState(1)
 
+  // El tilde de recordatorio se resuelve ACA y no en la celda, porque no mueve
+  // una sola casilla: mueve el contador de "Sin recordatorio" y, con el filtro
+  // puesto, saca la fila de la lista. Si el estado optimista viviera en la
+  // celda, el tilde iria instantaneo y el contador seguiria esperando al
+  // servidor: dos verdades distintas en pantalla al mismo tiempo. Un solo
+  // lugar, un solo render.
+  const [datos, aplicarRecordatorioOptimista] = useOptimistic(
+    data,
+    (actuales: InscripcionDTO[], cambio: { id: string; enviado: boolean }) =>
+      actuales.map((item) =>
+        item.id === cambio.id
+          ? {
+              ...item,
+              // Hora provisoria: solo alimenta el `title` hasta que llegue la
+              // del servidor. Lo que se VE es marcado/no marcado, y eso si es
+              // exacto desde el primer frame.
+              recordatorioEnviadoAt: cambio.enviado ? new Date().toISOString() : null,
+            }
+          : item
+      )
+  )
+
+  const [, startTransition] = useTransition()
+
+  function alternarRecordatorio(inscripcionId: string, enviado: boolean) {
+    startTransition(async () => {
+      // El optimista va ANTES del await: es lo unico que hace que el tilde
+      // responda al toque y no al round-trip. Si la action falla, React revierte
+      // solo al cerrarse la transicion y el toast explica por que.
+      aplicarRecordatorioOptimista({ id: inscripcionId, enviado })
+
+      try {
+        const resultado = await marcarRecordatorio(inscripcionId, enviado)
+        // Sin toast de exito a proposito: cuatro colaboradores tildando de a uno
+        // sobre 315 filas convierten el aviso en ruido, y el tilde ya es la
+        // confirmacion. Solo se avisa cuando algo sale mal.
+        if (!resultado.ok) toast.error(resultado.message)
+      } catch {
+        // Con el 4G del salon saturado esto va a pasar. Sin el catch, la promesa
+        // rechazada sube al router de Next y se lleva la grilla entera por
+        // delante: pantalla de error y a recargar, en la puerta y con fila. Con
+        // el catch, React revierte el tilde solo y el aviso dice que repita.
+        toast.error("Sin conexión: no se pudo marcar el recordatorio. Probá de nuevo.")
+      }
+    })
+  }
+
   // "Pendiente" es NUNCA enviado con éxito, no "el último intento falló": quien
   // ya recibió su QR no entra en la lista de trabajo aunque un reintento
   // posterior haya fallado. Ya lo tiene.
@@ -83,8 +134,8 @@ export function InscripcionesTable({
   // así que nunca van a tener `emailEnviadoAt` y se acumularían para siempre
   // inflando un contador que tiene que servir para decidir.
   const qrPendientes = useMemo(
-    () => data.filter((item) => item.email && !item.emailEnviadoAt).length,
-    [data]
+    () => datos.filter((item) => item.email && !item.emailEnviadoAt).length,
+    [datos]
   )
 
   // Los cuatro colaboradores mandan el recordatorio sobre ESTA lista, en
@@ -92,14 +143,14 @@ export function InscripcionesTable({
   // todos, así que no hay que coordinar tramos ni nadie queda huérfano si uno
   // se atrasa. Cuando el contador llega a cero, terminaron.
   const sinRecordatorio = useMemo(
-    () => data.filter((item) => !item.recordatorioEnviadoAt).length,
-    [data]
+    () => datos.filter((item) => !item.recordatorioEnviadoAt).length,
+    [datos]
   )
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase()
 
-    return data.filter((item) => {
+    return datos.filter((item) => {
       if (soloQrPendiente && (item.emailEnviadoAt || !item.email)) return false
       if (soloSinRecordatorio && item.recordatorioEnviadoAt) return false
       if (!normalized) return true
@@ -111,7 +162,7 @@ export function InscripcionesTable({
         (item.congregacionNombre?.toLowerCase().includes(normalized) ?? false)
       )
     })
-  }, [data, query, soloQrPendiente, soloSinRecordatorio])
+  }, [datos, query, soloQrPendiente, soloSinRecordatorio])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -239,6 +290,9 @@ export function InscripcionesTable({
                         emailEnviadoAt={item.emailEnviadoAt}
                         emailError={item.emailError}
                         recordatorioEnviadoAt={item.recordatorioEnviadoAt}
+                        onAlternarRecordatorio={(enviado) =>
+                          alternarRecordatorio(item.id, enviado)
+                        }
                       />
                     </TableCell>
                     <TableCell>{item.email ?? "—"}</TableCell>
