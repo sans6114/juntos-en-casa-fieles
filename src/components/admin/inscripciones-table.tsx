@@ -2,18 +2,27 @@
 
 import {
   useMemo,
+  useOptimistic,
   useState,
+  useTransition,
 } from 'react';
 
 import {
+  AlertTriangle,
   ChevronLeft,
   ChevronRight,
+  MessageCircle,
   Printer,
   Search,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
+import { marcarRecordatorio } from '@/actions';
+import { conAvisoDeRed } from '@/lib/acciones/con-aviso-de-red';
+import { AsistenciaCell } from '@/components/admin/asistencia-cell';
+import { QrEnvioCell } from '@/components/admin/qr-envio-cell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,11 +34,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import type { DiaEvento } from '@/interfaces/asistencia';
 import type { InscripcionDTO } from '@/interfaces/inscripcion';
 
 type InscripcionesTableProps = {
   data: InscripcionDTO[]
   isAdmin?: boolean
+  /**
+   * Qué día de evento es hoy, resuelto en el servidor. `null` cuando hoy no se
+   * acredita. Llega como prop porque depende de variables de entorno.
+   */
+  diaDeHoy?: DiaEvento | null
+  /** Días de evento que ya empezaron: los únicos que se pueden marcar presentes. */
+  diasHabilitados?: DiaEvento[]
 }
 
 const PAGE_SIZE = 10
@@ -42,22 +59,113 @@ function formatDate(date: string) {
   }).format(new Date(date))
 }
 
-export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTableProps) {
+/** Hora de acreditación para la lista impresa, o una casilla para tildar a mano. */
+function formatHoraCorta(iso: string | null) {
+  if (!iso) return "☐"
+
+  return new Intl.DateTimeFormat("es-AR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    // Ver la nota en `qr-envio-cell.tsx`: `hour12` rompe la hidratacion.
+    hour12: false,
+    timeZone: "America/Argentina/Buenos_Aires",
+  }).format(new Date(iso))
+}
+
+export function InscripcionesTable({
+  data,
+  isAdmin = false,
+  diaDeHoy = null,
+  diasHabilitados = [],
+}: InscripcionesTableProps) {
   const [query, setQuery] = useState("")
+  const [soloQrPendiente, setSoloQrPendiente] = useState(false)
+  const [soloSinRecordatorio, setSoloSinRecordatorio] = useState(false)
   const [page, setPage] = useState(1)
+
+  // El tilde de recordatorio se resuelve ACA y no en la celda, porque no mueve
+  // una sola casilla: mueve el contador de "Sin recordatorio" y, con el filtro
+  // puesto, saca la fila de la lista. Si el estado optimista viviera en la
+  // celda, el tilde iria instantaneo y el contador seguiria esperando al
+  // servidor: dos verdades distintas en pantalla al mismo tiempo. Un solo
+  // lugar, un solo render.
+  const [datos, aplicarRecordatorioOptimista] = useOptimistic(
+    data,
+    (actuales: InscripcionDTO[], cambio: { id: string; enviado: boolean }) =>
+      actuales.map((item) =>
+        item.id === cambio.id
+          ? {
+              ...item,
+              // Hora provisoria: solo alimenta el `title` hasta que llegue la
+              // del servidor. Lo que se VE es marcado/no marcado, y eso si es
+              // exacto desde el primer frame.
+              recordatorioEnviadoAt: cambio.enviado ? new Date().toISOString() : null,
+            }
+          : item
+      )
+  )
+
+  const [, startTransition] = useTransition()
+
+  function alternarRecordatorio(inscripcionId: string, enviado: boolean) {
+    startTransition(async () => {
+      // El optimista va ANTES del await: es lo unico que hace que el tilde
+      // responda al toque y no al round-trip. Si la action falla, React revierte
+      // solo al cerrarse la transicion y el toast explica por que.
+      aplicarRecordatorioOptimista({ id: inscripcionId, enviado })
+
+      // `conAvisoDeRed` cubre el caso en que la llamada no llega: sin eso, la
+      // promesa rechazada sube al router de Next y se lleva la grilla entera por
+      // delante. Cuando devuelve `null`, React revierte el tilde solo al
+      // cerrarse la transicion.
+      const resultado = await conAvisoDeRed(() =>
+        marcarRecordatorio(inscripcionId, enviado)
+      )
+      if (!resultado) return
+
+      // Sin toast de exito a proposito: cuatro colaboradores tildando de a uno
+      // sobre 360 filas convierten el aviso en ruido, y el tilde ya es la
+      // confirmacion. Solo se avisa cuando algo sale mal.
+      if (!resultado.ok) toast.error(resultado.message)
+    })
+  }
+
+  // "Pendiente" es NUNCA enviado con éxito, no "el último intento falló": quien
+  // ya recibió su QR no entra en la lista de trabajo aunque un reintento
+  // posterior haya fallado. Ya lo tiene.
+  // Las altas de puerta sin email quedan fuera: no hay a dónde mandarles nada,
+  // así que nunca van a tener `emailEnviadoAt` y se acumularían para siempre
+  // inflando un contador que tiene que servir para decidir.
+  const qrPendientes = useMemo(
+    () => datos.filter((item) => item.email && !item.emailEnviadoAt).length,
+    [datos]
+  )
+
+  // Los cuatro colaboradores mandan el recordatorio sobre ESTA lista, en
+  // paralelo y sin repartírsela: quien queda tildado desaparece del filtro para
+  // todos, así que no hay que coordinar tramos ni nadie queda huérfano si uno
+  // se atrasa. Cuando el contador llega a cero, terminaron.
+  const sinRecordatorio = useMemo(
+    () => datos.filter((item) => !item.recordatorioEnviadoAt).length,
+    [datos]
+  )
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase()
-    if (!normalized) return data
 
-    return data.filter(
-      (item) =>
+    return datos.filter((item) => {
+      if (soloQrPendiente && (item.emailEnviadoAt || !item.email)) return false
+      if (soloSinRecordatorio && item.recordatorioEnviadoAt) return false
+      if (!normalized) return true
+
+      return (
         item.nombre.toLowerCase().includes(normalized) ||
-        item.email.toLowerCase().includes(normalized) ||
+        (item.email?.toLowerCase().includes(normalized) ?? false) ||
         (item.telefono?.toLowerCase().includes(normalized) ?? false) ||
         (item.congregacionNombre?.toLowerCase().includes(normalized) ?? false)
-    )
-  }, [data, query])
+      )
+    })
+  }, [datos, query, soloQrPendiente, soloSinRecordatorio])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -79,14 +187,44 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
             className="pl-9"
           />
         </div>
-        <Button
-          variant="outline"
-          className="gap-2"
-          onClick={() => window.print()}
-        >
-          <Printer className="size-4" />
-          Imprimir PDF
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Convierte un problema invisible en una lista de trabajo. Ya no
+              dispara un reenvio por mail —reintentar el canal que fallo no
+              arregla nada—: hoy marca a quien seguro NO tiene su QR, para
+              mandarselo por WhatsApp primero. Solo aparece si hay alguien. */}
+          {qrPendientes > 0 ? (
+            <Button
+              variant={soloQrPendiente ? "default" : "outline"}
+              className="gap-2"
+              onClick={() => {
+                setSoloQrPendiente((previo) => !previo)
+                setPage(1)
+              }}
+            >
+              <AlertTriangle className="size-4" />
+              QR sin enviar ({qrPendientes})
+            </Button>
+          ) : null}
+
+          {sinRecordatorio > 0 ? (
+            <Button
+              variant={soloSinRecordatorio ? "default" : "outline"}
+              className="gap-2"
+              onClick={() => {
+                setSoloSinRecordatorio((previo) => !previo)
+                setPage(1)
+              }}
+            >
+              <MessageCircle className="size-4" />
+              Sin recordatorio ({sinRecordatorio})
+            </Button>
+          ) : null}
+
+          <Button variant="outline" className="gap-2" onClick={() => window.print()}>
+            <Printer className="size-4" />
+            Imprimir PDF
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-lg border bg-card print:hidden">
@@ -94,6 +232,8 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>
+              <TableHead>Acreditación</TableHead>
+              <TableHead>QR</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Teléfono</TableHead>
               <TableHead>Edad</TableHead>
@@ -105,7 +245,7 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
           <TableBody>
             {pageItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                   No se encontraron inscripciones.
                 </TableCell>
               </TableRow>
@@ -131,7 +271,33 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
                         item.nombre
                       )}
                     </TableCell>
-                    <TableCell>{item.email}</TableCell>
+                    {/* Inline en la fila, NO detrás de la ficha: un COLABORADOR
+                        solo puede abrir el detalle de candidatos pastorales, asi
+                        que desde la ficha no podria acreditar a casi nadie. */}
+                    <TableCell>
+                      <AsistenciaCell
+                        inscripcionId={item.id}
+                        nombre={item.nombre}
+                        asistenciaDia1={item.asistenciaDia1}
+                        asistenciaDia2={item.asistenciaDia2}
+                        diaDeHoy={diaDeHoy}
+                        diasHabilitados={diasHabilitados}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <QrEnvioCell
+                        nombre={item.nombre}
+                        email={item.email}
+                        whatsappUrl={item.whatsappUrl}
+                        emailEnviadoAt={item.emailEnviadoAt}
+                        emailError={item.emailError}
+                        recordatorioEnviadoAt={item.recordatorioEnviadoAt}
+                        onAlternarRecordatorio={(enviado) =>
+                          alternarRecordatorio(item.id, enviado)
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>{item.email ?? "—"}</TableCell>
                     <TableCell>{item.telefono ?? "—"}</TableCell>
                     <TableCell>{item.edad}</TableCell>
                     <TableCell>
@@ -218,6 +384,10 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
           <thead>
             <tr className="border-b border-black">
               <th className="py-1.5 pr-2 font-semibold">Nombre</th>
+              {/* La lista impresa es el ultimo recurso si el dia del evento se
+                  cae internet o la app: las casillas vacias se tildan a mano. */}
+              <th className="py-1.5 pr-2 font-semibold">Día 1</th>
+              <th className="py-1.5 pr-2 font-semibold">Día 2</th>
               <th className="py-1.5 pr-2 font-semibold">Email</th>
               <th className="py-1.5 pr-2 font-semibold">Teléfono</th>
               <th className="py-1.5 pr-2 font-semibold">Edad</th>
@@ -230,7 +400,9 @@ export function InscripcionesTable({ data, isAdmin = false }: InscripcionesTable
             {filtered.map((item) => (
               <tr key={item.id} className="border-b border-gray-300">
                 <td className="py-1.5 pr-2">{item.nombre}</td>
-                <td className="py-1.5 pr-2">{item.email}</td>
+                <td className="py-1.5 pr-2">{formatHoraCorta(item.asistenciaDia1)}</td>
+                <td className="py-1.5 pr-2">{formatHoraCorta(item.asistenciaDia2)}</td>
+                <td className="py-1.5 pr-2">{item.email ?? "—"}</td>
                 <td className="py-1.5 pr-2">{item.telefono ?? "—"}</td>
                 <td className="py-1.5 pr-2">{item.edad}</td>
                 <td className="py-1.5 pr-2">

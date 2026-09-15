@@ -1,68 +1,65 @@
 "use server"
 
+import { acreditarHoy } from "@/lib/asistencia/acreditar"
 import { requireSession } from "@/lib/auth-guards"
-import { prisma } from "@/lib/prisma"
+import type { EscaneoResultado } from "@/interfaces/asistencia"
 
-export async function processQrScan(uuid: string) {
-  // 1. Verificar sesión (admin o colaborador)
+/**
+ * Acreditación por escaneo de QR. Comparte el núcleo con el check manual de la
+ * puerta (`marcarAsistenciaHoy`): misma escritura, misma resolución de día.
+ * Acá solo cambian la redacción y la forma del resultado, porque esta pantalla
+ * la mira el colaborador mientras tiene a la persona enfrente.
+ */
+export async function processQrScan(uuid: string): Promise<EscaneoResultado> {
+  // Admin o colaborador. El trabajo de puerta lo hace el colaborador.
   await requireSession()
 
-  if (!uuid) return { ok: false, message: "Error QR inválido" }
+  if (!uuid) return { ok: false, message: "Código QR inválido" }
 
-  // 2. Buscar inscripción
-  const inscripcion = await prisma.inscripcion.findUnique({
-    where: { id: uuid }
-  })
+  try {
+    const resultado = await acreditarHoy(uuid)
 
-  if (!inscripcion) {
-    return { ok: false, message: "Error QR inválido" }
-  }
+    switch (resultado.estado) {
+      case "acreditado":
+        return {
+          ok: true,
+          message: "Asistencia confirmada",
+          persona: {
+            nombre: resultado.nombre,
+            horaLlegada: resultado.horaLlegada,
+            congregacion: resultado.congregacion,
+          },
+        }
 
-  // 3. Obtener fecha actual en Argentina
-  const now = new Date()
-  const argDateString = now.toLocaleDateString("es-AR", {
-    timeZone: "America/Argentina/Buenos_Aires",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }) 
-  // Formato: DD/MM/YYYY
-  const [day, month, year] = argDateString.split("/")
-  const todayStr = `${year}-${month}-${day}` // YYYY-MM-DD
+      case "ya-acreditado":
+        // No es un error del operador: esta persona ya pasó. Viaja con los
+        // mismos datos que el caso exitoso para que el colaborador vea de quién
+        // se trata y lo resuelva en el momento.
+        return {
+          ok: false,
+          yaAcreditado: true,
+          message: `Ya había pasado a las ${resultado.horaLlegada} hs`,
+          persona: {
+            nombre: resultado.nombre,
+            horaLlegada: resultado.horaLlegada,
+            congregacion: resultado.congregacion,
+          },
+        }
 
-  const eventDay1 = process.env.EVENT_DAY_1 || "2026-09-18"
-  const eventDay2 = process.env.EVENT_DAY_2 || "2026-09-19"
-  const eventDay3 = process.env.EVENT_DAY_3 || "2026-09-20"
+      case "no-encontrado":
+        return { ok: false, message: "Código QR inválido" }
 
-  let asistenciaField: "asistenciaDia1" | "asistenciaDia2" | "asistenciaDia3" | null = null
+      case "fuera-de-fecha":
+        return {
+          ok: false,
+          message: "Hoy no es un día oficial del evento. No se permiten acreditaciones.",
+        }
 
-  if (todayStr === eventDay1) asistenciaField = "asistenciaDia1"
-  else if (todayStr === eventDay2) asistenciaField = "asistenciaDia2"
-  else if (todayStr === eventDay3) asistenciaField = "asistenciaDia3"
-
-  if (!asistenciaField) {
-    return { ok: false, message: "Hoy no es un día oficial del evento. No se permiten acreditaciones. " }
-  }
-
-  // 4. Verificar si ya asistió
-  const asistenciaActual = inscripcion[asistenciaField]
-  if (asistenciaActual) {
-    const timeFormatted = asistenciaActual.toLocaleTimeString("es-AR", {
-      timeZone: "America/Argentina/Buenos_Aires",
-      hour: "2-digit",
-      minute: "2-digit"
-    })
-    return { 
-      ok: false, 
-      message: `QR ya escaneado, "${inscripcion.nombre}" paso a las ${timeFormatted}hs` 
+      case "sin-configurar":
+        return { ok: false, message: "Configuración del evento incompleta. Avisá al administrador." }
     }
+  } catch (error) {
+    console.error("Error procesando escaneo de QR:", error)
+    return { ok: false, message: "No se pudo registrar la asistencia." }
   }
-
-  // 5. Registrar asistencia
-  await prisma.inscripcion.update({
-    where: { id: uuid },
-    data: { [asistenciaField]: now }
-  })
-
-  return { ok: true, message: "Asistencia Confirmada" }
 }

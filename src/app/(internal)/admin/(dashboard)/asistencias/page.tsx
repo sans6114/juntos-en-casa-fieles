@@ -11,11 +11,7 @@ export default async function AsistenciasPage() {
   await requireSession()
 
   // Execute in parallel to avoid waterfalls
-  const [dia1, dia2, dia3] = await Promise.all([
-    obtenerAsistencias(1),
-    obtenerAsistencias(2),
-    obtenerAsistencias(3),
-  ])
+  const [dia1, dia2] = await Promise.all([obtenerAsistencias(1), obtenerAsistencias(2)])
 
   return (
     <>
@@ -24,7 +20,7 @@ export default async function AsistenciasPage() {
         description="Listado de asistentes que confirmaron su llegada por día."
       />
       <div className="flex-1 p-4 md:p-6 lg:p-8">
-        <AsistenciasClient dia1={dia1} dia2={dia2} dia3={dia3} />
+        <AsistenciasClient dia1={dia1} dia2={dia2} />
       </div>
     </>
   )

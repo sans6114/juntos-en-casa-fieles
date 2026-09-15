@@ -104,12 +104,18 @@ export function ContactoForm({
                 Escribir a {nombre}
               </a>
             ) : (
+              // Distingue los dos motivos: desde que el normalizador exige un
+              // número argentino completo, "sin WhatsApp" ya no significa solo
+              // "no cargó teléfono", sino también "el que cargó está incompleto".
+              // Con un solo mensaje, quien lo lee busca un dato que sí está.
               <div className="rounded-xl border border-dashed border-stone-300 bg-white px-4 py-3">
                 <p className="text-base font-medium text-stone-800">
-                  No hay teléfono cargado
+                  {telefono ? "El teléfono cargado no sirve para WhatsApp" : "No hay teléfono cargado"}
                 </p>
                 <p className="mt-1 text-base text-stone-600">
-                  Podés contactar por email ({nombre}) o pedir el número al admin.
+                  {telefono
+                    ? `Figura ${telefono}, pero le faltan dígitos para ser un número argentino completo.`
+                    : `Podés contactar por email (${nombre}) o pedir el número al admin.`}
                 </p>
               </div>
             )}

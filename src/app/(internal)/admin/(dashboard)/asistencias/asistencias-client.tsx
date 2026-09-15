@@ -19,16 +19,20 @@ function formatTime(isoString: string) {
   return new Intl.DateTimeFormat("es-AR", {
     hour: "2-digit",
     minute: "2-digit",
+    // `hour12` rompe la hidratacion (ver la nota en `qr-envio-cell.tsx`), y sin
+    // `timeZone` el server formatea en la zona del contenedor y el navegador en
+    // la del visitante: dos horas distintas para el mismo dato.
+    hour12: false,
+    timeZone: "America/Argentina/Buenos_Aires",
   }).format(new Date(isoString))
 }
 
 type AsistenciasClientProps = {
   dia1: AsistenciaDTO[]
   dia2: AsistenciaDTO[]
-  dia3: AsistenciaDTO[]
 }
 
-export function AsistenciasClient({ dia1, dia2, dia3 }: AsistenciasClientProps) {
+export function AsistenciasClient({ dia1, dia2 }: AsistenciasClientProps) {
   const [query, setQuery] = useState("")
 
   const filterData = (data: AsistenciaDTO[]) => {
@@ -44,7 +48,6 @@ export function AsistenciasClient({ dia1, dia2, dia3 }: AsistenciasClientProps) 
 
   const filteredDia1 = useMemo(() => filterData(dia1), [dia1, query])
   const filteredDia2 = useMemo(() => filterData(dia2), [dia2, query])
-  const filteredDia3 = useMemo(() => filterData(dia3), [dia3, query])
 
   const renderTable = (data: AsistenciaDTO[]) => (
     <div className="rounded-lg border bg-card">
@@ -95,12 +98,10 @@ export function AsistenciasClient({ dia1, dia2, dia3 }: AsistenciasClientProps) 
         <TabsList>
           <TabsTrigger value="dia1">Día 1 ({dia1.length})</TabsTrigger>
           <TabsTrigger value="dia2">Día 2 ({dia2.length})</TabsTrigger>
-          <TabsTrigger value="dia3">Día 3 ({dia3.length})</TabsTrigger>
         </TabsList>
         <div className="mt-4">
           <TabsContent value="dia1">{renderTable(filteredDia1)}</TabsContent>
           <TabsContent value="dia2">{renderTable(filteredDia2)}</TabsContent>
-          <TabsContent value="dia3">{renderTable(filteredDia3)}</TabsContent>
         </div>
       </Tabs>
     </div>

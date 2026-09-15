@@ -1,5 +1,6 @@
 import { Building2, UserRound, Users } from "lucide-react"
 import { AdminHeader } from "@/components/admin/admin-sidebar"
+import { AsistenciaStatCard } from "@/components/admin/asistencia-stat-card"
 import { CongregationsChart } from "@/components/admin/congregations-chart"
 import { GrowthStatCard } from "@/components/admin/growth-stat-card"
 import { StatCard } from "@/components/admin/stat-card"
@@ -45,6 +46,15 @@ export default async function InscripcionesGeneralPage() {
             icon={Building2}
           />
         </div>
+
+        {/* Fila propia y a lo ancho: durante el evento este es EL numero, y
+            meterlo como quinta tarjeta en una grilla de cuatro lo dejaba
+            huerfano en pantallas grandes. */}
+        <AsistenciaStatCard
+          dia1={metrics.asistencia.dia1}
+          dia2={metrics.asistencia.dia2}
+          totalInscriptos={metrics.total}
+        />
 
         <div className="grid gap-4 sm:grid-cols-3">
           <StatCard

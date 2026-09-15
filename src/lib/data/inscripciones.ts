@@ -4,6 +4,9 @@ export type InscripcionMetricRow = {
   congregacionNombre: string | null
   congregacionEstado: "PENDIENTE" | "APROBADA" | null
   sinCongregacion: boolean
+  /** Hora de acreditación de cada día, o `null` si esa persona no vino. */
+  asistenciaDia1: string | null
+  asistenciaDia2: string | null
 }
 
 /** Total de inscriptos del evento anterior (dato histórico real). */
@@ -76,6 +79,25 @@ export function getInscripcionesMetrics(data: InscripcionMetricRow[]) {
     (a, b) => b.total - a.total
   )
 
+  /**
+   * Cuánta de la gente que se anotó efectivamente vino, por día.
+   *
+   * El denominador es el TOTAL de inscriptos —no los que vinieron el día 1—
+   * porque esa es la pregunta que se hace quien supervisa: de los que se
+   * anotaron, cuántos aparecieron. Comparar el día 2 contra el día 1 responde
+   * otra cosa (cuántos volvieron), y para eso están los dos porcentajes juntos:
+   * la diferencia entre ambos se lee sola.
+   */
+  const vinieronDia1 = data.filter((item) => item.asistenciaDia1).length
+  const vinieronDia2 = data.filter((item) => item.asistenciaDia2).length
+  const porcentajeSobreTotal = (cantidad: number) =>
+    total === 0 ? 0 : Math.round((cantidad / total) * 100)
+
+  const asistencia = {
+    dia1: { total: vinieronDia1, porcentaje: porcentajeSobreTotal(vinieronDia1) },
+    dia2: { total: vinieronDia2, porcentaje: porcentajeSobreTotal(vinieronDia2) },
+  }
+
   const crecimiento =
     inscripcionesEventoAnterior === 0
       ? 0
@@ -94,6 +116,7 @@ export function getInscripcionesMetrics(data: InscripcionMetricRow[]) {
     porCongregacion,
     sinCongregacion,
     crecimiento,
+    asistencia,
     congregacionesActivas,
     eventoAnterior: inscripcionesEventoAnterior,
   }

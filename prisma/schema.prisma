@@ -59,7 +59,12 @@ model Congregacion {
 model Inscripcion {
   id              String        @id @default(cuid())
   nombre          String
-  email           String        @unique
+  /// Opcional SOLO para el alta de puerta: quien carga a alguien que esta
+  /// entrando no tiene por que pedirle un mail que en ese flujo no se usa.
+  /// El formulario publico lo sigue exigiendo desde `CrearInscripcionSchema`,
+  /// porque ahi es el unico canal por el que llega el QR.
+  /// El unique sigue valiendo: Postgres trata cada NULL como distinto.
+  email           String?       @unique
   telefono        String?
   edad            Int
   congregacionId  String?
@@ -73,8 +78,42 @@ model Inscripcion {
   contacto        Contacto?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+  /// Secreto de la URL publica `/mi-qr/<token>`. NO es el contenido del QR: el
+  /// QR sigue codificando `id`, porque las inscripciones existentes ya tienen
+  /// ese QR en su mail y cambiar el payload romperia la puerta.
+  ///
+  /// Lo genera POSTGRES y no la aplicacion. `vercel-build` corre
+  /// `prisma migrate deploy && next build`: entre los dos hay minutos con
+  /// esquema nuevo y codigo viejo sirviendo trafico, y ese codigo viejo hace
+  /// INSERT sin mencionar esta columna. Sin default de base, cada inscripcion
+  /// de esa ventana violaria el NOT NULL y se perderia.
+  ///
+  /// TEXT y no `@db.Uuid` a proposito: con columna uuid nativa, un token con
+  /// typo en la URL hace que Prisma tire por sintaxis invalida en vez de
+  /// devolver null, y `/mi-qr/<typo>` seria un 500 en vez de un 404.
+  qrToken         String        @unique @default(dbgenerated("replace(gen_random_uuid()::text, '-', '')"))
+  /// Estado del envio del mail con el QR. Antes no existia: `sendQrEmail` se
+  /// tragaba todo error, asi que no habia forma de responder "a quien no le
+  /// llego" sin salir de la aplicacion y cruzar la base con los logs.
+  /// `emailEnviadoAt`: ultimo envio exitoso.
+  emailEnviadoAt  DateTime?
+  /// Ultimo error de envio. Vuelve a `null` cuando un envio sale bien.
+  emailError      String?
+  /// Total de intentos, contando el alta publica y cada reenvio manual.
+  emailIntentos   Int           @default(0)
+  /// Cuando se le mando el recordatorio previo al evento. Lo marcan a mano los
+  /// colaboradores, que trabajan la misma lista en paralelo: sin este dato
+  /// compartido, cada uno no sabe por donde van los demas.
+  recordatorioEnviadoAt DateTime?
+  /// Viernes y sabado. La resolucion de que dia es hoy vive en
+  /// `src/lib/asistencia/dia-evento.ts`, fuente unica para el escaner de QR y
+  /// para el check manual de la puerta.
   asistenciaDia1  DateTime?
   asistenciaDia2  DateTime?
+  /// FUERA DE ALCANCE: el domingo no hay acreditacion. La columna se conserva
+  /// —nullable, sin escritores, 0 filas— porque dropearla no aporta nada y
+  /// habria que recrearla si el domingo vuelve al cronograma. No agregar
+  /// lectores: `DiaEvento` es `1 | 2`.
   asistenciaDia3  DateTime?
 
   @@index([congregacionId])
