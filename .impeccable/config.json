@@ -8,6 +8,33 @@
         "value": "#fff",
         "createdAt": "2026-08-21T00:19:37.862Z",
         "reason": "pre-existing @media print fallback (body background), unrelated to landing-tokens-b field kit; not touched by this change"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          "src/lib/email/*.ts"
+        ],
+        "createdAt": "2026-09-14T18:32:28.813Z",
+        "reason": "Plantillas de email: los clientes de correo descartan webfonts y caen a una fuente del sistema igual, asi que un stack web-safe es el unico que renderiza. Restriccion del medio, no una eleccion de diseno."
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "src/lib/email/*.ts"
+        ],
+        "createdAt": "2026-09-14T18:32:28.870Z",
+        "reason": "Plantillas de email: los clientes de correo eliminan variables CSS y webfonts, asi que la tipografia de DESIGN.md no es aplicable aca. Restriccion del medio, no design drift."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "src/lib/email/*.ts"
+        ],
+        "createdAt": "2026-09-14T18:33:20.584Z",
+        "reason": "Plantillas de email: los clientes de correo eliminan variables CSS, asi que la paleta de DESIGN.md no es aplicable y los literales son obligatorios. Acotado al directorio de mails: fuera de ahi la regla sigue activa."
       }
     ]
   }

@@ -25,6 +25,17 @@ import {
 
 type InscripcionFormProps = {
   congregaciones: Congregacion[]
+  /**
+   * Precarga el email. Lo usa /mi-qr cuando la búsqueda no encontró a nadie: la
+   * persona ya lo escribió una vez y no tiene por qué volver a tipearlo.
+   */
+  emailInicial?: string
+  /**
+   * A dónde ir tras un alta exitosa. Lo fija el server component, NUNCA un
+   * parámetro de la URL: un `redirectTo` que venga de la query string es un
+   * redirect abierto.
+   */
+  redirectTo?: string
 }
 
 type SubmittedValues = {
@@ -39,22 +50,30 @@ type SubmittedValues = {
 
 const initialState: InscripcionActionState = { ok: false }
 
-const emptySubmitted: SubmittedValues = {
-  nombre: "",
-  email: "",
-  telefono: "",
-  edad: "",
-  congregacionId: "",
-  congregacionQuery: "",
-  tipoCongregacion: "",
+function valoresIniciales(email = ""): SubmittedValues {
+  return {
+    nombre: "",
+    email,
+    telefono: "",
+    edad: "",
+    congregacionId: "",
+    congregacionQuery: "",
+    tipoCongregacion: "",
+  }
 }
 
 const inputClassName =
   "min-h-12 w-full rounded-[6px] border border-[var(--regla)] bg-transparent px-4 py-3 text-base text-[var(--dato)] placeholder:text-[var(--suave)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--foco)] aria-invalid:border-2 aria-invalid:border-[var(--acento-texto)]"
 
-export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
+export function InscripcionForm({
+  congregaciones,
+  emailInicial = "",
+  redirectTo = "/inscripcion/confirmacion",
+}: InscripcionFormProps) {
   const router = useRouter()
-  const [submitted, setSubmitted] = useState<SubmittedValues>(emptySubmitted)
+  const [submitted, setSubmitted] = useState<SubmittedValues>(() =>
+    valoresIniciales(emailInicial)
+  )
 
   // La congregacion propia del evento se saca del listado de "otra" para no
   // ofrecerla dos veces. La FK NO se resuelve aca: la resuelve `crearInscripcion`
@@ -119,9 +138,9 @@ export function InscripcionForm({ congregaciones }: InscripcionFormProps) {
 
   useEffect(() => {
     if (state.ok) {
-      router.push("/inscripcion/confirmacion")
+      router.push(redirectTo)
     }
-  }, [state, router])
+  }, [state, router, redirectTo])
 
   useEffect(() => {
     // Solo tras un envio real, y nunca mientras la action sigue corriendo: los dos

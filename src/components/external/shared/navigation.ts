@@ -22,6 +22,11 @@ export const navItems: readonly NavItem[] = [
   { href: "/#ubicacion", label: "Ubicación" },
   { href: "/productos", label: "Productos" },
   { href: "/contenidos", label: "Contenidos" },
+  // Sin esta entrada, /mi-qr solo se alcanza escribiendo la URL a mano o desde
+  // el link del mail de inscripcion. Los inscriptos anteriores al enlace
+  // permanente no tienen ese mail, asi que la pagina que existe para rescatar a
+  // quien perdio su QR quedaba inalcanzable justo para ellos.
+  { href: "/mi-qr", label: "Mi QR" },
   { href: "/inscripcion", label: "Inscribirme", cta: true },
 ]
 
