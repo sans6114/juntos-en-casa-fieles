@@ -3,19 +3,38 @@ import type { Metadata } from 'next';
 import { jecAssets } from '@/lib/jec-assets';
 
 /**
+ * El dominio propio, literal.
+ *
+ * Con `www` y no el apex: `juntosencasaivs.com` responde 308 hacia
+ * `www.juntosencasaivs.com`, así que usar el apex hace que cada link se coma un
+ * redirect, y un canonical que apunta a una URL que redirige es peor que
+ * inútil.
+ */
+const DOMINIO_PROPIO = "https://www.juntosencasaivs.com";
+
+/**
  * Absolute origin used for canonicals, `metadataBase` and OG image URLs.
  *
- * Only ever read while rendering metadata on the server, so the Vercel system
- * env vars are readable here. They matter: without them a deploy that forgets
- * `NEXT_PUBLIC_SITE_URL` would publish `http://localhost:3000` canonicals and
- * OG images, which no crawler or social scraper can fetch.
+ * De acá salen tres cosas que se ven de afuera: el canonical de cada página, la
+ * URL de las imágenes de OG, y el link permanente `/mi-qr/<token>` que va en el
+ * mail y en el recordatorio de WhatsApp.
+ *
+ * En producción NO se consulta ninguna variable. Antes caía a
+ * `VERCEL_PROJECT_PRODUCTION_URL`, que devuelve el `.vercel.app` generado y no
+ * el dominio comprado: el sitio publicaba canonicals apuntando a
+ * `juntos-en-casa-fieles.vercel.app` —mandando a Google al dominio equivocado—
+ * y el WhatsApp mandaba a la gente a esa misma URL. El fallback tenía la
+ * intención correcta (no publicar `localhost`) y el destino equivocado.
+ *
+ * `NEXT_PUBLIC_SITE_URL` sigue primero para poder apuntar a otro lado desde el
+ * entorno local. Preview se referencia a sí mismo, que es lo que hace probables
+ * los links en un deploy de prueba.
  */
 function resolveSiteUrl() {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL;
   if (explicit) return explicit.replace(/\/$/, "");
 
-  const production = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  if (production) return `https://${production}`;
+  if (process.env.VERCEL_ENV === "production") return DOMINIO_PROPIO;
 
   const preview = process.env.VERCEL_URL;
   if (preview) return `https://${preview}`;
