@@ -31,10 +31,24 @@ function getTimeLeft(targetMs: number): TimeLeft {
   };
 }
 
+/**
+ * Snapshot de "el evento ya arrancó".
+ *
+ * Es un valor centinela y no `"0:0:0:0"` a propósito: en cero se llega por dos
+ * caminos distintos —el servidor, que no sabe qué hora es, y el cliente, que
+ * midió y ya pasó— y hay que poder distinguirlos. Ver `useCountdown`.
+ */
+const YA_EMPEZO = "fin";
+
+/** Lo que devuelve el servidor: "todavía no sé". Nunca significa "terminó". */
+const SNAPSHOT_SERVIDOR = "0:0:0:0";
+
 /* El snapshot es un string y no el objeto: `useSyncExternalStore` compara por
  * identidad, y devolver un objeto nuevo en cada lectura dispara un loop de
  * renders. */
 function timeLeftKey(targetMs: number) {
+  if (targetMs - Date.now() <= 0) return YA_EMPEZO;
+
   const { days, hours, minutes, seconds } = getTimeLeft(targetMs);
   return `${days}:${hours}:${minutes}:${seconds}`;
 }
@@ -54,16 +68,40 @@ export function padUnit(value: number) {
   return String(value).padStart(2, "0");
 }
 
+export type EstadoCuenta = {
+  units: TimeLeft;
+  /**
+   * `true` solo cuando el CLIENTE midió y la fecha ya pasó. En el servidor es
+   * siempre `false`, y eso no es una limitación: es la respuesta correcta.
+   */
+  yaEmpezo: boolean;
+};
+
 /**
- * Tiempo restante hasta `targetMs`, actualizado cada segundo. En el servidor
- * devuelve ceros para que el HTML de SSR sea estable y no haya mismatch de
- * hidratación.
+ * Tiempo restante hasta `targetMs`, actualizado cada segundo, y si el evento ya
+ * arrancó.
+ *
+ * En el servidor devuelve ceros para que el HTML de SSR sea estable y no haya
+ * mismatch de hidratación. Pero ese cero NO puede leerse como "ya empezó": el
+ * servidor no tiene forma de saberlo —y menos acá, donde `/` se prerenderiza en
+ * el build, así que su "ahora" es el día que se compiló—. Por eso `yaEmpezo`
+ * arranca en `false` y solo el cliente lo puede poner en `true`.
+ *
+ * La consecuencia práctica: antes del evento, el HTML servido trae la cuenta
+ * (en cero, como ya venía) y el cliente la completa. Después del evento, el
+ * servidor la sigue trayendo y el cliente la saca al hidratar. Nunca al revés,
+ * que sería mostrar una cuenta muerta a quien tenga JS lento.
  */
-export function useCountdown(targetMs: number): TimeLeft {
+export function useCountdown(targetMs: number): EstadoCuenta {
   const snapshot = useSyncExternalStore(
     subscribe,
     () => timeLeftKey(targetMs),
-    () => "0:0:0:0"
+    () => SNAPSHOT_SERVIDOR
   );
-  return parseTimeLeftKey(snapshot);
+
+  if (snapshot === YA_EMPEZO) {
+    return { units: { days: 0, hours: 0, minutes: 0, seconds: 0 }, yaEmpezo: true };
+  }
+
+  return { units: parseTimeLeftKey(snapshot), yaEmpezo: false };
 }

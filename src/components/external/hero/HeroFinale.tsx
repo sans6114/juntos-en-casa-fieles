@@ -86,7 +86,7 @@ function Countdown({ units }: { units: TimeLeft }) {
  * bajo y además repetía en ráster la fecha y las cuatro frases que el DOM ya
  * imprimía debajo.
  */
-function HeroComposition({ units }: { units: TimeLeft }) {
+function HeroComposition({ units, yaEmpezo }: { units: TimeLeft; yaEmpezo: boolean }) {
   return (
     <div className="hero-finale__stage relative flex h-full w-full flex-col">
       <div className="relative z-[2] flex-none">
@@ -194,12 +194,19 @@ function HeroComposition({ units }: { units: TimeLeft }) {
           * dos mitades de la misma decisión ("cuándo" y "anotarme"), y separarlas
           * 900px era el error de agrupación de la versión anterior. */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:gap-8">
-          <div className="flex flex-col gap-2">
-            <span className="jec-mono text-[0.6875rem] font-bold uppercase tracking-[0.26em] text-[var(--jec-bone)]/70">
-              Comienza en
-            </span>
-            <Countdown units={units} />
-          </div>
+          {/* Una vez que el evento arrancó, la cuenta se va entera: label
+            * incluido. Dejarla en `00 00 00 00` bajo un "Comienza en" es peor
+            * que no tenerla —dice algo falso mientras la gente está adentro— y
+            * el `Math.max(0, …)` del hook garantiza que se quedaría así para
+            * siempre. El CTA queda solo y pasa a ser lo único accionable. */}
+          {yaEmpezo ? null : (
+            <div className="flex flex-col gap-2">
+              <span className="jec-mono text-[0.6875rem] font-bold uppercase tracking-[0.26em] text-[var(--jec-bone)]/70">
+                Comienza en
+              </span>
+              <Countdown units={units} />
+            </div>
+          )}
 
           <CtaButton href="/inscripcion" style={CTA_COLORS} className="w-full lg:w-auto">
             Inscribirme
@@ -216,7 +223,7 @@ function HeroComposition({ units }: { units: TimeLeft }) {
  * regresiva y el CTA de inscripción.
  */
 export function HeroFinale() {
-  const units = useCountdown(new Date(siteConfig.eventStartsAt).getTime());
+  const { units, yaEmpezo } = useCountdown(new Date(siteConfig.eventStartsAt).getTime());
 
   return (
     <div className="bg-[var(--jec-ember)]">
@@ -253,7 +260,7 @@ export function HeroFinale() {
         }
         useWindowScroll
       >
-        <HeroComposition units={units} />
+        <HeroComposition units={units} yaEmpezo={yaEmpezo} />
       </ScrollExpand>
     </div>
   );
