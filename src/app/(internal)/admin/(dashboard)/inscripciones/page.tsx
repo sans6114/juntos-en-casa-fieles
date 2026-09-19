@@ -1,5 +1,6 @@
 import { Building2, UserRound, Users } from "lucide-react"
 import { AdminHeader } from "@/components/admin/admin-sidebar"
+import { AsistenciaPorGrupo } from "@/components/admin/asistencia-por-grupo"
 import { AsistenciaStatCard } from "@/components/admin/asistencia-stat-card"
 import { CongregationsChart } from "@/components/admin/congregations-chart"
 import { GrowthStatCard } from "@/components/admin/growth-stat-card"
@@ -54,6 +55,16 @@ export default async function InscripcionesGeneralPage() {
           dia1={metrics.asistencia.dia1}
           dia2={metrics.asistencia.dia2}
           totalInscriptos={metrics.total}
+        />
+
+        {/* Debajo y no en lugar de la general: la de arriba responde "cuanta
+            gente vino", estas tres "quienes". Los cuatro porcentajes tienen que
+            entrar en el mismo golpe de vista, o se intenta promediar tres bases
+            distintas. */}
+        <AsistenciaPorGrupo
+          grupos={metrics.asistenciaPorGrupo}
+          totalInscriptos={metrics.total}
+          sinDatoDeCongregacion={metrics.sinDatoDeCongregacion}
         />
 
         <div className="grid gap-4 sm:grid-cols-3">
