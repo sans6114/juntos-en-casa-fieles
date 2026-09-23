@@ -16,6 +16,7 @@ import {
   Shield,
   Table2,
   Users,
+  UserX,
   X,
   CalendarCheck,
 } from "lucide-react"
@@ -63,6 +64,9 @@ const inscripcionesItems = [
 ]
 
 const administracionItems = [
+  // Arriba de "Contacto" a propósito: las dos son seguimiento, pero esta es la
+  // que dice a QUIÉN hay que escribirle. Contacto es el registro de lo hecho.
+  { title: "No asistieron", href: ADMIN_PATHS.noAsistentes, icon: UserX, adminOnly: true },
   { title: "Contacto", href: ADMIN_PATHS.contacto, icon: MessageCircle, adminOnly: true },
   { title: "Usuarios", href: ADMIN_PATHS.usuarios, icon: Users, adminOnly: true },
   { title: "Congregaciones", href: ADMIN_PATHS.congregaciones, icon: Church, adminOnly: true },

@@ -7,6 +7,7 @@ export const ADMIN_PATHS = {
   adminHome: "/admin/inscripciones",
   colaboradorHome: "/admin/inscripciones/grilla",
   contacto: "/admin/contacto",
+  noAsistentes: "/admin/no-asistentes",
   usuarios: "/admin/usuarios",
   contenidos: "/admin/contenidos",
   congregaciones: "/admin/congregaciones",

@@ -205,3 +205,56 @@ export type AsistenciaDTO = {
   telefono: string | null
   horaLlegada: string
 }
+
+/**
+ * Alguien que se inscribió y faltó al menos un día.
+ *
+ * Los dos campos de asistencia viajan como `string | null` y no como un
+ * "vino/no vino" ya resuelto: de esas dos nulidades salen los TRES grupos que
+ * se muestran, y resolverlo en el servidor obligaría a mandar la misma persona
+ * dos veces —quien nunca vino falta a los dos días— o a pedir tres consultas
+ * para lo que es una sola.
+ */
+export type NoAsistenteDTO = {
+  id: string
+  nombre: string
+  email: string | null
+  telefono: string | null
+  edad: number
+  /** `null` cuando no vino ese día; la hora ISO cuando sí. */
+  asistenciaDia1: string | null
+  asistenciaDia2: string | null
+  congregacionNombre: string | null
+  /** Declaró "soy nuevo". Es el candidato pastoral: se anotó y no apareció. */
+  sinCongregacion: boolean
+  /**
+   * Link de WhatsApp al número, SIN texto prellenado. A diferencia del
+   * recordatorio previo al evento, acá cada mensaje lo escribe la persona que
+   * contacta: el seguimiento es una conversación, no un aviso.
+   *
+   * `null` cuando el teléfono no se puede normalizar.
+   */
+  whatsappUrl: string | null
+}
+
+/**
+ * El panorama completo de asistencia, en cuatro grupos que SÍ son excluyentes y
+ * SÍ suman el total.
+ *
+ * Existe aparte de la lista porque la lista no puede contarlo: quien vino los
+ * dos días no aparece en esta pantalla, y sin ese número no se puede decir qué
+ * parte del total representa cada grupo.
+ */
+export type ResumenAsistencia = {
+  totalInscriptos: number
+  /** No vino ningún día. */
+  nunca: number
+  soloDia1: number
+  soloDia2: number
+  ambosDias: number
+}
+
+export type NoAsistentesResult = {
+  personas: NoAsistenteDTO[]
+  resumen: ResumenAsistencia
+}
