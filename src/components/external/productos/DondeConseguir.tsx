@@ -1,4 +1,9 @@
-import { BrandName, CtaButton, SectionHeading } from "@/components/external/shared"
+import {
+  ACCION_POST_EVENTO,
+  BrandName,
+  CtaButton,
+  SectionHeading,
+} from "@/components/external/shared"
 
 export function DondeConseguir() {
   return (
@@ -15,8 +20,8 @@ export function DondeConseguir() {
           </p>
         </div>
 
-        <CtaButton href="/inscripcion" className="shrink-0">
-          Inscribirme
+        <CtaButton href={ACCION_POST_EVENTO.href} className="shrink-0">
+          {ACCION_POST_EVENTO.label}
         </CtaButton>
       </div>
     </section>

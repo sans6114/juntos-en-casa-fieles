@@ -3,17 +3,18 @@
 import { useRef, useState, useTransition } from "react"
 
 import { recuperarQr } from "@/actions"
-import { AlertIcon, CtaButton } from "@/components/external/shared"
+import { ACCION_POST_EVENTO, AlertIcon, CtaButton } from "@/components/external/shared"
 import { RecuperarQrSchema } from "@/interfaces/inscripcion"
 
 import { TarjetaQr } from "./TarjetaQr"
 import { InscripcionCard } from "../../inscripcion/ui/InscripcionCard"
-import type { Congregacion } from "../../inscripcion/ui/CongregacionCombobox"
-import { InscripcionForm } from "../../inscripcion/ui/InscripcionForm"
 
-type RecuperarQrFlowProps = {
-  congregaciones: Congregacion[]
-}
+/**
+ * Sin props: `congregaciones` existía solo para alimentar el formulario de
+ * inscripción que se mostraba cuando el email no aparecía. Ese camino se cerró
+ * al terminar el evento, así que la consulta que lo alimentaba tampoco hace
+ * falta — ver la nota en el estado `no-encontrado`.
+ */
 
 /**
  * Los cinco estados de la pantalla. Se modelan explícitos porque cada uno pide
@@ -29,7 +30,7 @@ type Estado =
 const inputClassName =
   "min-h-12 w-full rounded-[6px] border border-[var(--regla)] bg-transparent px-4 py-3 text-base text-[var(--dato)] placeholder:text-[var(--suave)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--foco)] aria-invalid:border-2 aria-invalid:border-[var(--acento-texto)]"
 
-export function RecuperarQrFlow({ congregaciones }: RecuperarQrFlowProps) {
+export function RecuperarQrFlow() {
   const [email, setEmail] = useState("")
   const [estado, setEstado] = useState<Estado>({ tipo: "idle" })
   const [isPending, startTransition] = useTransition()
@@ -90,17 +91,36 @@ export function RecuperarQrFlow({ congregaciones }: RecuperarQrFlowProps) {
     return <TarjetaQr valor={estado.qrValue} />
   }
 
+  // Antes acá se mostraba el formulario de inscripción completo: "Completá tus
+  // datos y te anotamos ahora". Tenía todo el sentido mientras faltaban días
+  // para el evento —quien llegaba buscando su QR sin estar anotado se anotaba
+  // en el acto, sin rebotar—.
+  //
+  // Terminado el evento ese camino pasó a ser un problema: el link a
+  // `/mi-qr/<token>` viajó en 546 WhatsApps y mails, así que seguía siendo una
+  // puerta abierta para inscribirse a algo que ya pasó. Esa fila entraba en el
+  // total de inscriptos y aparecía como "no asistió" en el panel, ensuciando
+  // justo los números que se usan para el seguimiento.
+  //
+  // Para reabrir: volver a montar `InscripcionForm` con `emailInicial` y
+  // `redirectTo="/inscripcion/confirmacion"`, que es lo que había acá.
   if (estado.tipo === "no-encontrado") {
     return (
       <InscripcionCard
-        titulo="No te encontramos"
-        subtitulo={`No hay ninguna inscripción con ${estado.email}. Completá tus datos y te anotamos ahora.`}
+        titulo="No encontramos esa inscripción"
+        subtitulo={`No hay ninguna inscripción registrada con ${estado.email}.`}
       >
-        <InscripcionForm
-          congregaciones={congregaciones}
-          emailInicial={estado.email}
-          redirectTo="/inscripcion/confirmacion"
-        />
+        <div className="flex flex-col gap-5">
+          <p className="text-pretty text-base leading-relaxed text-[var(--dato)]">
+            Fieles 2026 fue el 18, 19 y 20 de septiembre, así que ya no se puede
+            anotar nadie. Si creés que te inscribiste con otra dirección, probá
+            de nuevo con esa.
+          </p>
+
+          <CtaButton href={ACCION_POST_EVENTO.href} className="self-start">
+            {ACCION_POST_EVENTO.label}
+          </CtaButton>
+        </div>
       </InscripcionCard>
     )
   }
