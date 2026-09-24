@@ -9,6 +9,7 @@ import {
 } from "@/actions"
 import { ProductoCard, ProductoFoto, ProductoVisor } from "@/components/external/productos"
 import {
+  ACCION_POST_EVENTO,
   ArrowLeftIcon,
   BrandName,
   CtaButton,
@@ -123,8 +124,11 @@ export default async function ProductoPage({ params }: ProductoPageProps) {
               <p className="mt-3 text-[15px] font-medium leading-relaxed">
                 18, 19 y 20 de septiembre · La Plata
               </p>
-              <CtaButton href="/inscripcion" className="mt-5 w-full px-6 py-3.5 text-sm">
-                Inscribirme
+              <CtaButton
+                href={ACCION_POST_EVENTO.href}
+                className="mt-5 w-full px-6 py-3.5 text-sm"
+              >
+                {ACCION_POST_EVENTO.label}
               </CtaButton>
             </div>
           </aside>

@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 
 import Image from "next/image";
 
-import { CtaButton, jecTaglines } from "@/components/external/shared";
+import { ACCION_POST_EVENTO, CtaButton, jecTaglines } from "@/components/external/shared";
 import { jecAssets } from "@/lib/jec-assets";
 import { siteConfig } from "@/lib/seo/site";
 import { ChevronsDown } from "lucide-react";
@@ -208,8 +208,15 @@ function HeroComposition({ units, yaEmpezo }: { units: TimeLeft; yaEmpezo: boole
             </div>
           )}
 
-          <CtaButton href="/inscripcion" style={CTA_COLORS} className="w-full lg:w-auto">
-            Inscribirme
+          {/* Post-evento: el hero ya no pide inscribirse, invita a ver lo que
+            * pasó. El destino y la etiqueta salen de `ACCION_POST_EVENTO` para
+            * que los cuatro CTA del sitio no puedan decir cosas distintas. */}
+          <CtaButton
+            href={ACCION_POST_EVENTO.href}
+            style={CTA_COLORS}
+            className="w-full lg:w-auto"
+          >
+            {ACCION_POST_EVENTO.label}
           </CtaButton>
         </div>
       </div>
