@@ -13,7 +13,7 @@ export {
   MenuIcon,
   PlayIcon,
 } from "./icons"
-export { navItems, socialLinks } from "./navigation"
+export { ACCION_POST_EVENTO, navItems, socialLinks } from "./navigation"
 export type { NavItem, SocialLink } from "./navigation"
 export { PlaceholderTag } from "./PlaceholderTag"
 export { SectionHeading } from "./SectionHeading"

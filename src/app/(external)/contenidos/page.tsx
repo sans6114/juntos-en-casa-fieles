@@ -8,7 +8,7 @@ import {
   ContenidosIntro,
 } from "@/components/external/contenidos"
 import { Galeria } from "@/components/external/galeria"
-import { BrandName, CtaButton, SiteFooter, SiteHeader } from "@/components/external/shared"
+import { SiteFooter, SiteHeader } from "@/components/external/shared"
 import { createPageMetadata } from "@/lib/seo/site"
 
 export const metadata: Metadata = createPageMetadata({
@@ -46,22 +46,12 @@ export default async function ContenidosPage() {
         </Suspense>
         <Galeria />
 
-        <section className="campo-fuego px-6 py-20 md:px-10 md:py-24 lg:px-16">
-          <div className="mx-auto flex max-w-6xl flex-col gap-8 md:flex-row md:items-center md:justify-between md:gap-12">
-            <div className="max-w-2xl">
-              <h2 className="jec-display text-4xl leading-[0.95] tracking-tight md:text-6xl">
-                ¿Te lo perdiste?
-              </h2>
-              <p className="mt-5 text-pretty text-base font-medium leading-relaxed md:text-lg">
-                <BrandName className="!text-white">Juntos En Casa</BrandName> 2026 ya tiene fecha: 18, 19 y 20 de
-                septiembre en Iglesia cristiana Vida Sobrenatural, La Plata.
-              </p>
-            </div>
-            <CtaButton href="/inscripcion" className="shrink-0">
-              Inscribirme
-            </CtaButton>
-          </div>
-        </section>
+        {/* Acá vivía el bloque "¿Te lo perdiste?" con el CTA de inscripción.
+          * Se fue entero el 24/09 y no solo el botón: existía para convertir a
+          * inscripción, y anunciaba "2026 ya tiene fecha: 18, 19 y 20 de
+          * septiembre" en futuro. Sin inscripción que ofrecer quedaba un titular
+          * sin acción, apuntando a un evento que ya pasó — y el CTA post-evento
+          * habría linkeado esta misma página contra sí misma. */}
       </main>
 
       <SiteFooter />

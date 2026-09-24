@@ -1,4 +1,5 @@
 import { CtaButton } from "./CtaButton"
+import { ACCION_POST_EVENTO } from "./navigation"
 
 /**
  * Barra CTA persistente solo móvil (D5/D6 de landing-home-secciones).
@@ -6,7 +7,7 @@ import { CtaButton } from "./CtaButton"
  * `sticky bottom-0`, no `fixed`: va como último hijo del contenedor post-hero
  * de `/`, así que mientras el hero está en pantalla la barra todavía no entró
  * en el viewport. Eso resuelve dos choques que `fixed` provocaba sobre el hero:
- * `HeroFinale` ya tiene su propio CTA "Inscribirme", y su fondo es
+ * `HeroFinale` ya tiene su propio CTA —el mismo `ACCION_POST_EVENTO`—, y su fondo es
  * `--jec-ember`, con lo cual una barra `campo-fuego` quedaba ember sobre ember.
  * Al final de la página la barra aterriza en su lugar de flujo, debajo del
  * footer, así que en reposo no tapa nada — sigue siendo CSS puro, cero
@@ -20,7 +21,7 @@ import { CtaButton } from "./CtaButton"
 export function StickyCta() {
   return (
     <div className="campo-fuego sticky bottom-0 z-40 flex min-h-[var(--jec-cta-h)] items-center justify-center border-t-[3px] border-[var(--regla)] px-6 pb-[env(safe-area-inset-bottom,0px)] md:hidden">
-      <CtaButton href="/inscripcion">Inscribirme</CtaButton>
+      <CtaButton href={ACCION_POST_EVENTO.href}>{ACCION_POST_EVENTO.label}</CtaButton>
     </div>
   )
 }
