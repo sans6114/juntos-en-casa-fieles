@@ -201,7 +201,16 @@ export type RecuperarQrResult =
 export type AsistenciaDTO = {
   id: string
   nombre: string
-  email: string
+  /**
+   * `null` en las altas de puerta: `Inscripcion.email` es opcional y hay gente
+   * anotada sin dirección.
+   *
+   * Esto decía `string` y era mentira. La columna siempre fue `String?`, pero
+   * la clave computada del `select` en `obtener-asistencias.ts` le arruinaba la
+   * inferencia a Prisma y TypeScript nunca lo vio. El buscador de
+   * `/admin/asistencias` hacía `email.toLowerCase()` y reventaba.
+   */
+  email: string | null
   telefono: string | null
   horaLlegada: string
 }
