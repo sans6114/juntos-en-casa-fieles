@@ -35,19 +35,34 @@ type AsistenciasClientProps = {
 export function AsistenciasClient({ dia1, dia2 }: AsistenciasClientProps) {
   const [query, setQuery] = useState("")
 
-  const filterData = (data: AsistenciaDTO[]) => {
+  /**
+   * `email` se lee con `?.` porque PUEDE ser null: quien se anota en la puerta
+   * no da dirección. Sin eso, buscar cualquier nombre reventaba con un
+   * "Cannot read properties of null" apenas el filtro llegaba a una de esas
+   * filas —y el `||` hace que llegue siempre que el nombre NO coincida, o sea
+   * en casi todas—.
+   *
+   * Va dentro del `useMemo` y no afuera: definida afuera se recreaba en cada
+   * render y quedaba como dependencia faltante del memo, que es lo que eslint
+   * venía marcando.
+   */
+  const filtrar = useMemo(() => {
     const normalized = query.trim().toLowerCase()
-    if (!normalized) return data
-    return data.filter(
-      (item) =>
-        item.nombre.toLowerCase().includes(normalized) ||
-        item.email.toLowerCase().includes(normalized) ||
-        (item.telefono?.toLowerCase().includes(normalized) ?? false)
-    )
-  }
 
-  const filteredDia1 = useMemo(() => filterData(dia1), [dia1, query])
-  const filteredDia2 = useMemo(() => filterData(dia2), [dia2, query])
+    return (data: AsistenciaDTO[]) => {
+      if (!normalized) return data
+
+      return data.filter(
+        (item) =>
+          item.nombre.toLowerCase().includes(normalized) ||
+          (item.email?.toLowerCase().includes(normalized) ?? false) ||
+          (item.telefono?.toLowerCase().includes(normalized) ?? false)
+      )
+    }
+  }, [query])
+
+  const filteredDia1 = useMemo(() => filtrar(dia1), [dia1, filtrar])
+  const filteredDia2 = useMemo(() => filtrar(dia2), [dia2, filtrar])
 
   const renderTable = (data: AsistenciaDTO[]) => (
     <div className="rounded-lg border bg-card">
@@ -72,7 +87,9 @@ export function AsistenciasClient({ dia1, dia2 }: AsistenciasClientProps) {
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{item.nombre}</TableCell>
                 <TableCell>{formatTime(item.horaLlegada)}</TableCell>
-                <TableCell>{item.email}</TableCell>
+                {/* Mismo guion que en la grilla para quien se anotó sin mail,
+                    en vez de una celda vacía que se lee como un dato perdido. */}
+                <TableCell>{item.email ?? "—"}</TableCell>
                 <TableCell>{item.telefono ?? "—"}</TableCell>
               </TableRow>
             ))
