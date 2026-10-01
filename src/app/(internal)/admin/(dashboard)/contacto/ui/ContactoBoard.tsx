@@ -10,6 +10,7 @@ import {
   UserRound,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ADMIN_PATHS } from "@/lib/admin-access"
 import { buttonVariants } from "@/components/ui/button"
 
 export type ContactoRow = {
@@ -60,12 +61,28 @@ export function ContactoBoard({ rows }: { rows: ContactoRow[] }) {
           Seguimiento de inscriptos
         </p>
         <h1 className="font-[family-name:var(--font-contacto-display)] text-4xl font-semibold tracking-tight text-[var(--contacto-ink)] sm:text-5xl">
-          Personas sin congregación
+          Personas sin congregación que vinieron
         </h1>
+        {/* El título y este texto nombran las DOS condiciones a propósito. La
+            versión anterior decía solo "sin congregación", y desde que el
+            seguimiento exige haber venido eso dejaba a quien mira la pantalla
+            preguntándose por qué falta gente que sí se inscribió. */}
         <p className="max-w-2xl text-lg leading-relaxed text-[var(--contacto-muted)] sm:text-xl">
-          Acá ves que persona se inscribió sin congregación, esto quiere decir que puede ser una persona nueva en la fé. Los colaboradores
-          tienen la tarea de contactarla desde la grilla; vos controlás el avance y quién habló
-          con ella.
+          Acá ves quién se inscribió sin congregación <strong>y además vino al
+          evento</strong>: puede ser una persona nueva en la fe, y ya hubo un
+          encuentro del que agarrarse. Los colaboradores tienen la tarea de
+          contactarla desde la grilla; vos controlás el avance y quién habló con
+          ella.
+        </p>
+        <p className="max-w-2xl text-base leading-relaxed text-[var(--contacto-muted)]">
+          A quien se anotó y no vino se le escribe otra cosa, y está en{" "}
+          <Link
+            href={ADMIN_PATHS.noAsistentes}
+            className="font-semibold underline underline-offset-4 hover:text-[var(--contacto-accent)]"
+          >
+            No asistieron
+          </Link>
+          , con el filtro “Solo los nuevos”.
         </p>
       </header>
 
@@ -81,7 +98,7 @@ export function ContactoBoard({ rows }: { rows: ContactoRow[] }) {
             {
               step: "1",
               title: "Abrir la ficha",
-              body: "En la grilla, tocá el nombre de alguien sin iglesia.",
+              body: "En la grilla, tocá el nombre de quien tenga el marcador “contactar”.",
             },
             {
               step: "2",
@@ -154,11 +171,15 @@ export function ContactoBoard({ rows }: { rows: ContactoRow[] }) {
               ? "No hay pendientes por contactar"
               : filter === "contactados"
                 ? "Todavía nadie fue marcado como contactado"
-                : "No hay inscripciones sin iglesia"}
+                : "Nadie para contactar todavía"}
           </p>
+          {/* El texto nombra las DOS condiciones. Decir solo "sin congregación"
+              era media verdad y dejaba a quien mira la pantalla vacía buscando
+              un bug: hay gente sin iglesia inscripta, pero la que no vino no
+              entra acá. */}
           <p className="mt-2 text-lg text-[var(--contacto-muted)]">
             {filter === "pendientes"
-              ? "Cuando aparezca alguien nuevo sin congregación, va a listarse acá."
+              ? "Acá aparece quien marcó “Soy nuevo” y además vino al evento."
               : "Los colaboradores marcan el contacto desde cada ficha."}
           </p>
         </div>
