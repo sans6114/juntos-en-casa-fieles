@@ -14,9 +14,13 @@ export function Cronograma() {
       <div className="mx-auto max-w-6xl">
         <SectionHeading eyebrow="Programa" title="Cronograma" className="mb-3" />
 
+        {/* En pasado desde que terminó el evento. Decía "lo que se va a vivir
+            será increíble", en futuro, en la home — que es el lugar más visible
+            del sitio para estar anunciando algo que ya pasó. */}
         <p className="mb-12 flex flex-wrap items-center gap-3 md:mb-16">
           <span className="text-md text-[var(--suave)]">
-            Los horarios de <BrandName>Juntos En Casa</BrandName>, sin detalles, pero con expectativas de que lo que se va a vivir será increíble.
+            Así fueron los horarios de <BrandName>Juntos En Casa</BrandName>, los
+            tres días que vivimos juntos.
           </span>
         </p>
         <div className="grid gap-4 md:grid-cols-3 md:gap-5">
