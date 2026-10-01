@@ -18,7 +18,7 @@ import {
   SiteHeader,
 } from "@/components/external/shared"
 import { kickerDeProducto } from "@/interfaces/producto"
-import { createPageMetadata } from "@/lib/seo/site"
+import { createPageMetadata, siteConfig } from "@/lib/seo/site"
 
 type ProductoPageProps = {
   params: Promise<{ slug: string }>
@@ -121,8 +121,10 @@ export default async function ProductoPage({ params }: ProductoPageProps) {
               <p className="jec-label text-3xl font-extrabold leading-[1.05] tracking-tight">
                 <BrandName>Juntos En Casa</BrandName> 2026
               </p>
+              {/* Con el año, igual que en `DondeConseguir`: la fecha sin año se
+                  lee como algo que todavía puede venir. */}
               <p className="mt-3 text-[15px] font-medium leading-relaxed">
-                18, 19 y 20 de septiembre · La Plata
+                18, 19 y 20 de septiembre de {siteConfig.year} · La Plata
               </p>
               <CtaButton
                 href={ACCION_POST_EVENTO.href}

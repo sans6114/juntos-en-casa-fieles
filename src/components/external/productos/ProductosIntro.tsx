@@ -13,8 +13,13 @@ export function ProductosIntro() {
           <h1 className="jec-display text-4xl leading-[0.92] tracking-tight sm:text-5xl md:text-7xl lg:text-8xl">
             Productos
           </h1>
+          {/* En pasado desde que terminó el evento: decía "lo que vas a poder
+              llevarte", y quedaba contradiciendo a `DondeConseguir`, que está
+              justo abajo en esta misma página y ya habla de cómo se vendieron.
+              El eyebrow "Llevate el fuego" se deja: es la bajada de marca, no
+              una afirmación sobre si todavía se consiguen. */}
           <p className="mt-6 text-pretty text-base leading-relaxed text-[var(--suave)] md:text-lg">
-            Lo que vas a poder llevarte de <BrandName>Juntos En Casa</BrandName>,
+            Lo que se pudo llevar de <BrandName>Juntos En Casa</BrandName>,
             disponible solo en el stand del evento.
           </p>
         </div>
